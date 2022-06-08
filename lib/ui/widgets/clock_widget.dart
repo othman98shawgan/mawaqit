@@ -42,21 +42,12 @@ class BeforeClockWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {
       var now = DateTime.now();
-      return Row(
-        children: [
-          Text("Time since ${prayer.label}:   ",
-              style: const TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 18,
-              )),
-          Text(
-            printDuration(DateTime.now().difference(prayer.time)),
-            style: const TextStyle(
-              fontWeight: FontWeight.w300,
-              fontSize: 32,
-            ),
-          )
-        ],
+      return Text(
+        printDuration(DateTime.now().difference(prayer.time)),
+        style: const TextStyle(
+          fontWeight: FontWeight.w300,
+          fontSize: 28,
+        ),
       );
     });
   }
@@ -80,21 +71,12 @@ class AfterClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {
-      return Row(
-        children: [
-          Text("Time until ${prayer.label}:   ",
-              style: const TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 18,
-              )),
-          Text(
-            printDuration(prayer.time.difference(DateTime.now())),
-            style: const TextStyle(
-              fontWeight: FontWeight.w300,
-              fontSize: 32,
-            ),
-          )
-        ],
+      return Text(
+        printDuration(prayer.time.difference(DateTime.now())),
+        style: const TextStyle(
+          fontWeight: FontWeight.w300,
+          fontSize: 28,
+        ),
       );
     });
   }

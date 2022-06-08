@@ -145,6 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _prayerList = json.decode(prayerTimes);
     PrayersModel prayersToday = PrayersModel.fromJson(_prayerList[dayInYear]);
 
+    var nextPrevPrayerStyle = const TextStyle(
+      fontWeight: FontWeight.w300,
+      fontSize: 18,
+    );
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -166,29 +171,48 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (buildContext, snapshot) {
           if (snapshot.hasData) {
             summerTime = snapshot.data!;
+            Prayer next = getNextPrayer(DateTime.now());
+            Prayer prev = getPrevPrayer(DateTime.now());
+
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 MyCard(
-                  widget: ListTile(
-                    title: Center(
-                      child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            children: [
-                              Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
-                              ClockWidget(),
-                              AfterClockWidget(
-                                prayer: getNextPrayer(DateTime.now()),
+                    widget: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                            const Padding(
+                                padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                child: ClockWidget()),
+                            ListTile(
+                              contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
+                              visualDensity: const VisualDensity(vertical: -4),
+                              leading:
+                                  Text("Time until ${next.label}:   ", style: nextPrevPrayerStyle),
+                              trailing: AfterClockWidget(
+                                prayer: next,
                               ),
-                              BeforeClockWidget(
-                                prayer: getPrevPrayer(DateTime.now()),
-                              )
-                            ],
-                          )),
+                            ),
+                            ListTile(
+                              contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
+                              visualDensity: const VisualDensity(vertical: -4),
+                              leading:
+                                  Text("Time since ${prev.label}:   ", style: nextPrevPrayerStyle),
+                              trailing: BeforeClockWidget(
+                                prayer: prev,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  ],
+                )),
                 PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
                 PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
                 PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
@@ -199,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           } else {
             // Return loading screen while reading preferences
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
