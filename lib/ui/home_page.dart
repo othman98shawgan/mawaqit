@@ -3,19 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import '../models/prayer.dart';
 import '../prayer_times.dart';
-import '../prayers.dart';
+import '../models/prayers.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class Prayer {
-  final String label;
-  final String time;
-
-  Prayer(this.label, this.time);
-}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -52,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return time;
   }
 
-  DateTime getNextPrayer(DateTime time) {
+  Prayer getNextPrayer(DateTime time) {
     PrayersModel today = PrayersModel.fromJson(_prayerList[dayInYear]);
 
     DateTime fajr =
@@ -68,30 +62,32 @@ class _MyHomePageState extends State<MyHomePage> {
     DateTime isha =
         DateTime(time.year, time.month, time.day, getHour(today.isha), getMinute(today.isha));
     if (summerTime) {
-      fajr.add(const Duration(hours: 1));
-      shuruq.add(const Duration(hours: 1));
-      duhr.add(const Duration(hours: 1));
-      asr.add(const Duration(hours: 1));
-      maghrib.add(const Duration(hours: 1));
-      isha.add(const Duration(hours: 1));
+      fajr = fajr.add(const Duration(hours: 1));
+      shuruq = shuruq.add(const Duration(hours: 1));
+      duhr = duhr.add(const Duration(hours: 1));
+      asr = asr.add(const Duration(hours: 1));
+      maghrib = maghrib.add(const Duration(hours: 1));
+      isha = isha.add(const Duration(hours: 1));
     }
 
-    if (time.isBefore(fajr)) return fajr;
-    if (time.isBefore(shuruq)) return shuruq;
-    if (time.isBefore(duhr)) return duhr;
-    if (time.isBefore(asr)) return asr;
-    if (time.isBefore(maghrib)) return maghrib;
-    if (time.isBefore(isha)) return isha;
+    if (time.isBefore(fajr)) return Prayer("Fajr", fajr);
+    if (time.isBefore(shuruq)) return Prayer("Shuruq", shuruq);
+    if (time.isBefore(duhr)) return Prayer("Duhr", duhr);
+    if (time.isBefore(asr)) return Prayer("Asr", asr);
+    if (time.isBefore(maghrib)) return Prayer("Maghrib", maghrib);
+    if (time.isBefore(isha)) return Prayer("Isha", isha);
 
     //after Isha
     PrayersModel tomorrowPrayers =
         PrayersModel.fromJson(_prayerList[dayInYear + 1]); //TODO: fix if last day of year.
     DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
-    return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, getHour(tomorrowPrayers.fajr),
-        getMinute(tomorrowPrayers.fajr));
+    DateTime fajrTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day,
+        getHour(tomorrowPrayers.fajr), getMinute(tomorrowPrayers.fajr));
+    fajrTomorrow = summerTime ? fajrTomorrow.add(const Duration(hours: 1)) : fajrTomorrow;
+    return Prayer("Fajr", fajrTomorrow);
   }
 
-  DateTime getPrevPrayer(DateTime time) {
+  Prayer getPrevPrayer(DateTime time) {
     PrayersModel today = PrayersModel.fromJson(_prayerList[dayInYear]);
 
     DateTime fajr =
@@ -108,29 +104,31 @@ class _MyHomePageState extends State<MyHomePage> {
         DateTime(time.year, time.month, time.day, getHour(today.isha), getMinute(today.isha));
 
     if (summerTime) {
-      fajr.add(const Duration(hours: 1));
-      shuruq.add(const Duration(hours: 1));
-      duhr.add(const Duration(hours: 1));
-      asr.add(const Duration(hours: 1));
-      maghrib.add(const Duration(hours: 1));
-      isha.add(const Duration(hours: 1));
+      fajr = fajr.add(const Duration(hours: 1));
+      shuruq = shuruq.add(const Duration(hours: 1));
+      duhr = duhr.add(const Duration(hours: 1));
+      asr = asr.add(const Duration(hours: 1));
+      maghrib = maghrib.add(const Duration(hours: 1));
+      isha = isha.add(const Duration(hours: 1));
     }
 
-    if (time.isAfter(isha)) return isha;
-    if (time.isAfter(maghrib)) return maghrib;
-    if (time.isAfter(asr)) return asr;
-    if (time.isAfter(duhr)) return duhr;
-    if (time.isAfter(shuruq)) return shuruq;
-    if (time.isAfter(fajr)) return fajr;
+    if (time.isAfter(isha)) return Prayer("Isha", isha);
+    if (time.isAfter(maghrib)) return Prayer("Maghrib", maghrib);
+    if (time.isAfter(asr)) return Prayer("Asr", asr);
+    if (time.isAfter(duhr)) return Prayer("Duhr", duhr);
+    if (time.isAfter(shuruq)) return Prayer("Shuruq", shuruq);
+    if (time.isAfter(fajr)) return Prayer("Fajr", fajr);
+    ;
 
     //before Isha
     PrayersModel yesterdayPrayers =
         PrayersModel.fromJson(_prayerList[dayInYear - 1]); //TODO: fix if first day of year.
 
-    DateTime yesterday = DateTime.now().add(const Duration(days: -1));
+    DateTime yesterday = DateTime.now().subtract(const Duration(days: 1));
     DateTime ishaYesterday = DateTime(yesterday.year, yesterday.month, yesterday.day,
         getHour(yesterdayPrayers.isha), getMinute(yesterdayPrayers.isha));
-    return summerTime ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
+    ishaYesterday = summerTime ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
+    return Prayer("Isha", ishaYesterday);
   }
 
   int getHour(String time) {
@@ -181,10 +179,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
                               ClockWidget(),
                               AfterClockWidget(
-                                time: getNextPrayer(DateTime.now()),
+                                prayer: getNextPrayer(DateTime.now()),
                               ),
                               BeforeClockWidget(
-                                time: getPrevPrayer(DateTime.now()),
+                                prayer: getPrevPrayer(DateTime.now()),
                               )
                             ],
                           )),
