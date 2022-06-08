@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:timer_builder/timer_builder.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:jiffy/jiffy.dart';
 import '../prayer_times.dart';
 import '../prayers.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Prayer {
   final String label;
@@ -31,6 +30,18 @@ class _MyHomePageState extends State<MyHomePage> {
   bool summerTime = false;
   List _prayerList = [];
   int dayInYear = 0;
+
+  Future<bool> getSummerTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isSummer = prefs.getBool('isSummer') ?? false;
+    return isSummer;
+  }
+
+  Future<void> setSummerTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isSummer = prefs.getBool('isSummer') ?? false;
+    prefs.setBool('isSummer', !isSummer);
+  }
 
   String toSummerTime(String time) {
     if (!summerTime) return time;
@@ -145,42 +156,54 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.access_time),
             onPressed: () {
               summerTime = !summerTime;
+              setSummerTime();
               setState(() {});
             },
             tooltip: 'Daylight saving',
           ),
         ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          MyCard(
-            widget: ListTile(
-              title: Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
-                        ClockWidget(),
-                        AfterClockWidget(
-                          time: getNextPrayer(DateTime.now()),
-                        ),
-                        BeforeClockWidget(
-                          time: getPrevPrayer(DateTime.now()),
-                        )
-                      ],
-                    )),
-              ),
-            ),
-          ),
-          PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
-          PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
-          PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
-          PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
-          PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
-          PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
-        ],
+      body: FutureBuilder<bool>(
+        future: getSummerTime(),
+        builder: (buildContext, snapshot) {
+          if (snapshot.hasData) {
+            summerTime = snapshot.data!;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                MyCard(
+                  widget: ListTile(
+                    title: Center(
+                      child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                              ClockWidget(),
+                              AfterClockWidget(
+                                time: getNextPrayer(DateTime.now()),
+                              ),
+                              BeforeClockWidget(
+                                time: getPrevPrayer(DateTime.now()),
+                              )
+                            ],
+                          )),
+                    ),
+                  ),
+                ),
+                PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
+                PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
+                PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
+                PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
+                PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
+                PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
+              ],
+            );
+          } else {
+            // Return loading screen while reading preferences
+            return Center(child: CircularProgressIndicator());
+          }
+        },
       ),
     );
   }
