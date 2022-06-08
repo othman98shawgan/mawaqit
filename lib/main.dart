@@ -19,8 +19,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Container(
         decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+            image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
         child: const MyHomePage(title: 'Alfajr'),
       ),
     );
