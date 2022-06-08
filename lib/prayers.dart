@@ -1,4 +1,4 @@
-class PrayerModel {
+class PrayersModel {
   final String date;
   final String fajr;
   final String shuruq;
@@ -7,10 +7,10 @@ class PrayerModel {
   final String maghrib;
   final String isha;
 
-  PrayerModel(this.date, this.fajr, this.shuruq, this.duhr, this.asr,
+  PrayersModel(this.date, this.fajr, this.shuruq, this.duhr, this.asr,
       this.maghrib, this.isha);
 
-  PrayerModel.fromJson(Map<String, dynamic> json)
+  PrayersModel.fromJson(Map<String, dynamic> json)
       : date = json['Date'],
         fajr = json['Fajr'],
         shuruq = json['Shuruq'],
