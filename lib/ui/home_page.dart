@@ -6,6 +6,7 @@ import 'package:jiffy/jiffy.dart';
 import '../models/prayer.dart';
 import '../prayer_times.dart';
 import '../models/prayers.dart';
+import '../services/notifications_service.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
@@ -140,11 +141,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    NotificationsService.init();
+    //  listenNotifications();
+  }
+
+  @override
   Widget build(BuildContext context) {
     dayInYear = Jiffy().dayOfYear;
     _prayerList = json.decode(prayerTimes);
     PrayersModel prayersToday = PrayersModel.fromJson(_prayerList[dayInYear]);
-
     var nextPrevPrayerStyle = const TextStyle(
       fontWeight: FontWeight.w300,
       fontSize: 18,
@@ -164,6 +171,15 @@ class _MyHomePageState extends State<MyHomePage> {
             },
             tooltip: 'Daylight saving',
           ),
+          IconButton(
+              onPressed: () {
+                NotificationsService.scheduleNotifications(
+                    title: 'Alfajr 1',
+                    body: 'prayer has arrived 1',
+                    payload: 'alfajr',
+                    sheduledDate: DateTime.now().add(Duration(seconds: 5)));
+              },
+              icon: const Icon(Icons.notifications))
         ],
       ),
       body: FutureBuilder<bool>(
