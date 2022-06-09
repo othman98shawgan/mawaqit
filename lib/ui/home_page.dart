@@ -61,10 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
     dayInYear = Jiffy().dayOfYear;
     _prayerList = json.decode(prayerTimes);
     prayersToday = PrayersModel.fromJson(_prayerList[dayInYear]);
-    var nextPrevPrayerStyle = const TextStyle(
-      fontWeight: FontWeight.w300,
-      fontSize: 18,
-    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -114,24 +110,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             const Padding(
                                 padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
                                 child: ClockWidget()),
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
-                              visualDensity: const VisualDensity(vertical: -4),
-                              leading:
-                                  Text("Time until ${next.label}:   ", style: nextPrevPrayerStyle),
-                              trailing: AfterClockWidget(
-                                prayer: next,
-                              ),
+                            PrayerClockWidget(
+                              prayersToday: prayersToday,
+                              summerTime: summerTime,
+                              prayerList: _prayerList,
                             ),
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
-                              visualDensity: const VisualDensity(vertical: -4),
-                              leading:
-                                  Text("Time since ${prev.label}:   ", style: nextPrevPrayerStyle),
-                              trailing: BeforeClockWidget(
-                                prayer: prev,
-                              ),
-                            )
                           ],
                         ),
                       ),
