@@ -13,6 +13,8 @@ import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// PrayersModel dummyDay = PrayersModel("06.09", "2:53", "10:55", "10:56", "11:48", "11:49", "11:50");
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -26,7 +28,51 @@ class _MyHomePageState extends State<MyHomePage> {
   bool summerTime = false;
   List _prayerList = [];
   int dayInYear = 0;
+  List<String> _scheduledPrayers = [];
   late PrayersModel prayersToday;
+
+  Future<void> scheduleNextPrayers(DateTime time) async {
+    //TODO: for testing.
+    // prayersToday = dummyDay;
+
+    // NotificationsService.cancelAll();
+    // final prefs = await SharedPreferences.getInstance();
+    // prefs.setStringList('scheduledPrayers', []);
+
+    _scheduledPrayers = await getScheduledPrayers();
+    removePassedPrayers(_scheduledPrayers);
+    if (_scheduledPrayers.length > 36) {
+      return;
+    }
+    List<Prayer> prayersToSchedule = [];
+    summerTime = await getSummerTime();
+
+    prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
+    prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime));
+    for (final prayer in prayersToSchedule) {
+      if (_scheduledPrayers.contains(getPrayerNotificationId(prayer.time))) continue;
+      var id = getPrayerNotificationId(prayer.time);
+      NotificationsService.scheduleNotifications(
+          id: int.parse(id.substring(6)),
+          channelId: id,
+          title: 'Time for ${prayer.label}',
+          payload: 'alfajr',
+          sheduledDate: prayer.time);
+      _scheduledPrayers.add(getPrayerNotificationId(prayer.time));
+    }
+    setScheduledPrayers();
+  }
+
+  Future<List<String>> getScheduledPrayers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final scheduledPrayers = prefs.getStringList('scheduledPrayers') ?? [];
+    return scheduledPrayers;
+  }
+
+  Future<void> setScheduledPrayers() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('scheduledPrayers', _scheduledPrayers);
+  }
 
   Future<bool> getSummerTime() async {
     final prefs = await SharedPreferences.getInstance();
@@ -43,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String toSummerTime(String time) {
     if (!summerTime) return time;
     int hour = int.parse(time.split(':')[0]);
-    int minute = int.parse(time.split(':')[1]);
+    String minute = (time.split(':')[1]);
     hour++;
     time = "$hour:$minute";
     return time;
@@ -76,25 +122,17 @@ class _MyHomePageState extends State<MyHomePage> {
             },
             tooltip: 'Daylight saving',
           ),
-          IconButton(
-              onPressed: () {
-                NotificationsService.scheduleNotifications(
-                    title: 'Alfajr 1',
-                    body: 'prayer has arrived 1',
-                    payload: 'alfajr',
-                    sheduledDate: DateTime.now().add(Duration(seconds: 5)));
-              },
-              icon: const Icon(Icons.notifications))
+          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications))
         ],
       ),
-      body: FutureBuilder<bool>(
-        future: getSummerTime(),
+      body: FutureBuilder<List>(
+        future: Future.wait([
+          getSummerTime(),
+          scheduleNextPrayers(DateTime.now()),
+        ]),
         builder: (buildContext, snapshot) {
           if (snapshot.hasData) {
-            summerTime = snapshot.data!;
-            Prayer next = getNextPrayer(DateTime.now(), prayersToday, summerTime, _prayerList);
-            Prayer prev = getPrevPrayer(DateTime.now(), prayersToday, summerTime, _prayerList);
-
+            summerTime = snapshot.data![0];
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[

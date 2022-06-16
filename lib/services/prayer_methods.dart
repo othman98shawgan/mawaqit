@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../models/prayer.dart';
@@ -93,4 +94,120 @@ int getHour(String time) {
 
 int getMinute(String time) {
   return int.parse(time.split(':')[1]);
+}
+
+DateTime getDateFromId(String prayerId) {
+  int year = int.parse(prayerId.substring(0, 4));
+  int month = int.parse(prayerId.substring(4, 6));
+  int day = int.parse(prayerId.substring(6, 8));
+  int hour = int.parse(prayerId.substring(8, 10));
+  int minute = int.parse(prayerId.substring(10, 12));
+  DateTime time = DateTime(year, month, day, hour, minute);
+  return time;
+}
+
+String getPrayerNotificationId(DateTime time) {
+  return DateFormat('yyyyMMddkkmm').format(time);
+}
+
+void removePassedPrayers(List<String> prayers) {
+  List<String> toDelete = [];
+  for (final prayer in prayers) {
+    var time = getDateFromId(prayer);
+    if (time.isBefore(DateTime.now())) {
+      toDelete.add(prayer);
+    }
+  }
+  for (final element in toDelete) {
+    prayers.remove(element);
+  }
+}
+
+List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime) {
+  var time = DateTime.now();
+  List<Prayer> today = [];
+  DateTime fajr = DateTime(
+      time.year, time.month, time.day, getHour(prayersToday.fajr), getMinute(prayersToday.fajr));
+  DateTime shuruq = DateTime(time.year, time.month, time.day, getHour(prayersToday.shuruq),
+      getMinute(prayersToday.shuruq));
+  DateTime duhr = DateTime(
+      time.year, time.month, time.day, getHour(prayersToday.duhr), getMinute(prayersToday.duhr));
+  DateTime asr = DateTime(
+      time.year, time.month, time.day, getHour(prayersToday.asr), getMinute(prayersToday.asr));
+  DateTime maghrib = DateTime(time.year, time.month, time.day, getHour(prayersToday.maghrib),
+      getMinute(prayersToday.maghrib));
+  DateTime isha = DateTime(
+      time.year, time.month, time.day, getHour(prayersToday.isha), getMinute(prayersToday.isha));
+
+  if (summerTime) {
+    fajr = fajr.add(const Duration(hours: 1));
+    shuruq = shuruq.add(const Duration(hours: 1));
+    duhr = duhr.add(const Duration(hours: 1));
+    asr = asr.add(const Duration(hours: 1));
+    maghrib = maghrib.add(const Duration(hours: 1));
+    isha = isha.add(const Duration(hours: 1));
+  }
+
+  if (fajr.isAfter(time)) today.add(Prayer('Fajr', fajr));
+  if (shuruq.isAfter(time)) today.add(Prayer('Shuruq', shuruq));
+  if (duhr.isAfter(time)) today.add(Prayer('Duhr', duhr));
+  if (asr.isAfter(time)) today.add(Prayer('Asr', asr));
+  if (maghrib.isAfter(time)) today.add(Prayer('Maghrib', maghrib));
+  if (isha.isAfter(time)) today.add(Prayer('Isha', isha));
+
+  return today;
+}
+
+List<Prayer> getNextWeekPrayers(
+    PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime) {
+  List<Prayer> prayersList = [];
+  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 1)),
+      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 1]), summerTime));
+  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 2)),
+      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 2]), summerTime));
+  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 3)),
+      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 3]), summerTime));
+  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 4)),
+      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 4]), summerTime));
+  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 5)),
+      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 5]), summerTime));
+  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 6)),
+      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 6]), summerTime));
+
+  return prayersList;
+}
+
+List<Prayer> getDayPrayers(DateTime day, PrayersModel prayers, bool summerTime) {
+  var time = day;
+  List<Prayer> prayersList = [];
+  DateTime fajr =
+      DateTime(time.year, time.month, time.day, getHour(prayers.fajr), getMinute(prayers.fajr));
+  DateTime shuruq =
+      DateTime(time.year, time.month, time.day, getHour(prayers.shuruq), getMinute(prayers.shuruq));
+  DateTime duhr =
+      DateTime(time.year, time.month, time.day, getHour(prayers.duhr), getMinute(prayers.duhr));
+  DateTime asr =
+      DateTime(time.year, time.month, time.day, getHour(prayers.asr), getMinute(prayers.asr));
+  DateTime maghrib = DateTime(
+      time.year, time.month, time.day, getHour(prayers.maghrib), getMinute(prayers.maghrib));
+  DateTime isha =
+      DateTime(time.year, time.month, time.day, getHour(prayers.isha), getMinute(prayers.isha));
+
+  if (summerTime) {
+    fajr = fajr.add(const Duration(hours: 1));
+    shuruq = shuruq.add(const Duration(hours: 1));
+    duhr = duhr.add(const Duration(hours: 1));
+    asr = asr.add(const Duration(hours: 1));
+    maghrib = maghrib.add(const Duration(hours: 1));
+    isha = isha.add(const Duration(hours: 1));
+  }
+
+  prayersList.add(Prayer('Fajr', fajr));
+  prayersList.add(Prayer('Shuruq', shuruq));
+  prayersList.add(Prayer('Duhr', duhr));
+  prayersList.add(Prayer('Asr', asr));
+  prayersList.add(Prayer('Maghrib', maghrib));
+  prayersList.add(Prayer('Isha', isha));
+
+  return prayersList;
 }
