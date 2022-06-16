@@ -15,7 +15,7 @@ class ClockWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {
       return Text(
-        DateFormat('kk:mm:ss').format(DateTime.now()),
+        DateFormat('HH:mm:ss').format(DateTime.now()),
         style: const TextStyle(
           fontWeight: FontWeight.w300,
           fontSize: 48,
