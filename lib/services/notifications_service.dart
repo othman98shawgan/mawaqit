@@ -7,10 +7,10 @@ class NotificationsService {
   static final _notifications = FlutterLocalNotificationsPlugin();
   static final onNotifications = BehaviorSubject<String?>();
 
-  static Future _notificationDetails() async {
-    return const NotificationDetails(
+  static Future _notificationDetails(String channelId) async {
+    return NotificationDetails(
       android: AndroidNotificationDetails(
-        'channel id',
+        channelId,
         'channel name',
         channelDescription: 'channel description',
         importance: Importance.max,
@@ -18,10 +18,13 @@ class NotificationsService {
     );
   }
 
+  static Future cancelAll() async {
+    await _notifications.cancelAll();
+  }
+
   static Future init({bool initSheduled = false}) async {
     tz.initializeTimeZones();
-
-    final android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    final android = AndroidInitializationSettings('@drawable/ic_stat_onesignal_default');
     final settings = InitializationSettings(android: android);
     await _notifications.initialize(settings, onSelectNotification: (payload) async {
       onNotifications.add(payload);
@@ -34,10 +37,12 @@ class NotificationsService {
     String? body,
     String? payload,
   }) async =>
-      _notifications.show(id, title, body, await _notificationDetails(), payload: payload);
+      _notifications.show(id, title, body, await _notificationDetails(id.toString()),
+          payload: payload);
 
   static void scheduleNotifications(
           {int id = 0,
+          required String channelId,
           String? title,
           String? body,
           String? payload,
@@ -47,7 +52,7 @@ class NotificationsService {
         title,
         body,
         tz.TZDateTime.from(sheduledDate, tz.local),
-        await _notificationDetails(),
+        await _notificationDetails(channelId),
         payload: payload,
         androidAllowWhileIdle: true,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
