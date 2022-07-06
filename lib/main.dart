@@ -1,3 +1,4 @@
+import 'package:alfajr/ui/counter_page.dart';
 import 'package:flutter/material.dart';
 
 import 'services/notifications_service.dart';
@@ -21,6 +22,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
       ),
+      initialRoute: '/home',
+      routes: {
+        '/home': (context) => const MyHomePage(
+              title: 'Alfajr',
+            ),
+      },
       home: Container(
         decoration: const BoxDecoration(
             image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
