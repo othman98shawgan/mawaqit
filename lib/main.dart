@@ -2,6 +2,7 @@ import 'package:alfajr/ui/counter_page.dart';
 import 'package:flutter/material.dart';
 
 import 'services/notifications_service.dart';
+import 'ui/counter_page.dart';
 import 'ui/home_page.dart';
 
 void main() {
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const MyHomePage(
               title: 'Alfajr',
             ),
+        '/counter': (context) => const CounterPage(),
       },
       home: Container(
         decoration: const BoxDecoration(
