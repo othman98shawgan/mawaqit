@@ -27,7 +27,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const MyHomePage(
               title: 'Alfajr',
             ),
-        '/counter': (context) => const CounterPage(),
       },
       home: Container(
         decoration: const BoxDecoration(
