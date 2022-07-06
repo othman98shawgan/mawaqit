@@ -30,11 +30,6 @@ class MyApp extends StatelessWidget {
             ),
         '/counter': (context) => const CounterPage(),
       },
-      home: Container(
-        decoration: const BoxDecoration(
-            image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
-        child: const MyHomePage(title: 'Alfajr'),
-      ),
     );
   }
 }
