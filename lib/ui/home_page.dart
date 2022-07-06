@@ -173,6 +173,60 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('ALFAJR'),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10),
+                    child: Image.asset(
+                      'images/logo.png',
+                      height: 96,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: Image.asset(
+                'images/salah.png',
+                height: 32,
+              ),
+              title: const Text('Missed Prayers'),
+              onTap: () {},
+            ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: Image.asset(
+                'images/pray-white.png',
+                height: 32,
+              ),
+              title: const Text('Al-Mathurat'),
+              onTap: () {},
+            ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: Image.asset(
+                'images/misbaha.png',
+                height: 32,
+              ),
+              title: const Text('Dhikr Counter'),
+              onTap: () {
+                Navigator.pushNamed(context, '/counter');
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
