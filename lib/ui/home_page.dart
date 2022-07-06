@@ -220,7 +220,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 32,
               ),
               title: const Text('Dhikr Counter'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, '/counter');
+              },
             ),
           ],
         ),
