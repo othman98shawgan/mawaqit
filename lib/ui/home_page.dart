@@ -133,39 +133,43 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (buildContext, snapshot) {
           if (snapshot.hasData) {
             summerTime = snapshot.data![0];
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                MyCard(
-                    widget: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
-                            const Padding(
-                                padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                child: ClockWidget()),
-                            PrayerClockWidget(
-                              prayersToday: prayersToday,
-                              summerTime: summerTime,
-                              prayerList: _prayerList,
-                            ),
-                          ],
+            return Container(
+              decoration: const BoxDecoration(
+                  image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  MyCard(
+                      widget: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                              const Padding(
+                                  padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                  child: ClockWidget()),
+                              PrayerClockWidget(
+                                prayersToday: prayersToday,
+                                summerTime: summerTime,
+                                prayerList: _prayerList,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                )),
-                PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
-                PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
-                PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
-                PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
-                PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
-                PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
-              ],
+                    ],
+                  )),
+                  PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
+                  PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
+                  PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
+                  PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
+                  PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
+                  PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
+                ],
+              ),
             );
           } else {
             // Return loading screen while reading preferences
@@ -221,6 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               title: const Text('Dhikr Counter'),
               onTap: () {
+                Navigator.pop(context);
                 Navigator.pushNamed(context, '/counter');
               },
             ),
