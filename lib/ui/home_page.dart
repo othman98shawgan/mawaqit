@@ -15,7 +15,8 @@ import 'widgets/daylight_saving.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// PrayersModel dummyDay = PrayersModel("07.07", "01:02", "01:01", "10:56", "11:48", "11:49", "11:50");
+// PrayersModel dummyDay =
+//     PrayersModel("27.11", "4:52", "6:15", "11:26", "14:16", "20:39", "21:40"); //TODO: FOR TESTING
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -33,13 +34,16 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _scheduledPrayers = [];
   late PrayersModel prayersToday;
 
-  Future<void> scheduleNextPrayers(DateTime time) async {
-    //TODO: for testing.
-    // prayersToday = dummyDay;
+  Future<void> cancelAllPrayers() async {
+    NotificationsService.cancelAll();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('scheduledPrayers', []);
+    setState(() {});
+  }
 
-    // NotificationsService.cancelAll();
-    // final prefs = await SharedPreferences.getInstance();
-    // prefs.setStringList('scheduledPrayers', []);
+  Future<void> scheduleNextPrayers(DateTime time) async {
+    // prayersToday = dummyDay; //TODO: FOR TESTING
+    // cancelAllPrayers();
 
     _scheduledPrayers = await getScheduledPrayers();
     removePassedPrayers(_scheduledPrayers);
@@ -226,7 +230,11 @@ class _MyHomePageState extends State<MyHomePage> {
               title: const Text('Daylight saving'),
               onTap: () async {
                 Navigator.pop(context);
-                await showAlertDialog(context);
+                var updatePrayers = (() {
+                  cancelAllPrayers();
+                  scheduleNextPrayers(DateTime.now());
+                });
+                await showAlertDialog(context, updatePrayers);
               },
             ),
           ],
