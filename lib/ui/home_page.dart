@@ -6,14 +6,16 @@ import 'package:jiffy/jiffy.dart';
 import '../models/prayer.dart';
 import '../prayer_times.dart';
 import '../models/prayers.dart';
+import '../services/daylight_time_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
+import 'widgets/daylight_saving.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// PrayersModel dummyDay = PrayersModel("06.09", "2:53", "10:55", "10:56", "11:48", "11:49", "11:50");
+// PrayersModel dummyDay = PrayersModel("07.07", "01:02", "01:01", "10:56", "11:48", "11:49", "11:50");
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -74,18 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
     prefs.setStringList('scheduledPrayers', _scheduledPrayers);
   }
 
-  Future<bool> getSummerTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isSummer = prefs.getBool('isSummer') ?? false;
-    return isSummer;
-  }
-
-  Future<void> setSummerTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isSummer = prefs.getBool('isSummer') ?? false;
-    prefs.setBool('isSummer', !isSummer);
-  }
-
   String toSummerTime(String time) {
     if (!summerTime) return time;
     int hour = int.parse(time.split(':')[0]);
@@ -107,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     dayInYear = Jiffy().dayOfYear;
     _prayerList = json.decode(prayerTimes);
     prayersToday = PrayersModel.fromJson(_prayerList[dayInYear]);
+    // prayersToday = dummyDay; //TODO: FOR TESTING
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -117,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.access_time),
             onPressed: () {
               summerTime = !summerTime;
-              setSummerTime();
+              switchSummerTime();
               setState(() {});
             },
             tooltip: 'Daylight saving',
@@ -188,9 +179,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ALFAJR'),
+                  const Text('ALFAJR'),
                   Padding(
-                    padding: EdgeInsets.only(top: 10),
+                    padding: const EdgeInsets.only(top: 10),
                     child: Image.asset(
                       'images/logo.png',
                       height: 96,
@@ -203,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
               minLeadingWidth: 0,
               leading: Image.asset(
                 'images/salah.png',
-                height: 32,
+                height: 24,
               ),
               title: const Text('Missed Prayers'),
               onTap: () {},
@@ -212,7 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
               minLeadingWidth: 0,
               leading: Image.asset(
                 'images/pray-white.png',
-                height: 32,
+                height: 24,
               ),
               title: const Text('Al-Mathurat'),
               onTap: () {},
@@ -221,12 +212,21 @@ class _MyHomePageState extends State<MyHomePage> {
               minLeadingWidth: 0,
               leading: Image.asset(
                 'images/misbaha.png',
-                height: 32,
+                height: 24,
               ),
               title: const Text('Dhikr Counter'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/counter');
+              },
+            ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: const Icon(Icons.access_time),
+              title: const Text('Daylight saving'),
+              onTap: () async {
+                Navigator.pop(context);
+                await showAlertDialog(context);
               },
             ),
           ],
