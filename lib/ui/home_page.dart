@@ -107,18 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.access_time),
-            onPressed: () {
-              summerTime = !summerTime;
-              switchSummerTime();
-              setState(() {});
-            },
-            tooltip: 'Daylight saving',
-          ),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications))
-        ],
+        actions: const [],
       ),
       body: FutureBuilder<List>(
         future: Future.wait([
