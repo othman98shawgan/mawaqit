@@ -1,4 +1,5 @@
 import 'package:alfajr/ui/counter_page.dart';
+import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
 
 import 'services/notifications_service.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Alfajr',
       theme: ThemeData(
         brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
       ),
       initialRoute: '/home',
       routes: {
@@ -29,6 +31,7 @@ class MyApp extends StatelessWidget {
               title: 'Alfajr',
             ),
         '/counter': (context) => const CounterPage(),
+        '/missed_prayer': (context) => const MissedPrayerPage(),
       },
     );
   }
