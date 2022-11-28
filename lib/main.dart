@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Alfajr',
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.deepPurple,
+        primarySwatch: Colors.blue,
       ),
       initialRoute: '/home',
       routes: {
