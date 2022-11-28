@@ -16,7 +16,7 @@ import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // PrayersModel dummyDay =
-//     PrayersModel("27.11", "4:52", "6:15", "11:26", "14:16", "20:39", "21:40"); //TODO: FOR TESTING
+//     PrayersModel("29.11", "00:11", "00:12", "00:13", "23:57", "23:58", "23:59"); //TODO: FOR TESTING
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _scheduledPrayers = await getScheduledPrayers();
     removePassedPrayers(_scheduledPrayers);
-    if (_scheduledPrayers.length > 36) {
+    if (_scheduledPrayers.length > 71) {
       return;
     }
     List<Prayer> prayersToSchedule = [];
@@ -56,15 +56,33 @@ class _MyHomePageState extends State<MyHomePage> {
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
     prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime));
     for (final prayer in prayersToSchedule) {
-      if (_scheduledPrayers.contains(getPrayerNotificationId(prayer.time))) continue;
       var id = getPrayerNotificationId(prayer.time);
+      if (_scheduledPrayers.contains(id)) {
+        continue;
+      }
+
       NotificationsService.scheduleNotifications(
           id: int.parse(id.substring(6)),
           channelId: id,
           title: 'Time for ${prayer.label}',
           payload: 'alfajr',
           sheduledDate: prayer.time);
-      _scheduledPrayers.add(getPrayerNotificationId(prayer.time));
+
+      _scheduledPrayers.add(id);
+      //Set reminder
+      var reminderTime = prayer.time.subtract(const Duration(minutes: 10));
+      if (reminderTime.isBefore(DateTime.now())) {
+        continue;
+      }
+      var reminderId = getPrayerNotificationId(reminderTime);
+      NotificationsService.scheduleNotifications(
+          id: int.parse(reminderId.substring(6)),
+          channelId: reminderId,
+          title: '${prayer.label} Time is in 10 minutes',
+          payload: 'alfajr',
+          sheduledDate: reminderTime);
+
+      _scheduledPrayers.add(reminderId);
     }
     setScheduledPrayers();
   }
@@ -93,6 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     NotificationsService.init();
+    // cancelAllPrayers(); //TODO: FOR TESTING
     //  listenNotifications();
   }
 
