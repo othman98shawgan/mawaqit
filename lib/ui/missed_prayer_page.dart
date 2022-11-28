@@ -1,5 +1,6 @@
 import 'package:alfajr/models/prayer.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/card_widget.dart';
 
 class MissedPrayerPage extends StatefulWidget {
@@ -11,26 +12,61 @@ class MissedPrayerPage extends StatefulWidget {
 
 class _MissedPrayerPageState extends State<MissedPrayerPage> {
   var prayers = List.filled(6, 0, growable: false);
+  var missedPrayersStringList = [
+    'missedFajr',
+    'missedDuhr',
+    'missedAsr',
+    'missedMaghrib',
+    'missedIsha',
+    'missedWitr'
+  ];
+
+  Future<List<int>> getAllMissed() async {
+    final prefs = await SharedPreferences.getInstance();
+    final fajr = prefs.getInt('missedFajr') ?? 0;
+    final duhr = prefs.getInt('missedDuhr') ?? 0;
+    final asr = prefs.getInt('missedAsr') ?? 0;
+    final maghrib = prefs.getInt('missedMaghrib') ?? 0;
+    final isha = prefs.getInt('missedIsha') ?? 0;
+    final witr = prefs.getInt('missedWitr') ?? 0;
+    prayers = [fajr, duhr, asr, maghrib, isha, witr];
+    return prayers;
+  }
+
+  Future<void> setMissedPrayer(int prayerIndex, int missedSum) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt(missedPrayersStringList[prayerIndex], missedSum);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: _fab(0),
       appBar: AppBar(
         title: const Text('Missed Prayers'),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            _missedPrayerWidget("Fajr", 0),
-            _missedPrayerWidget("Duhr", 1),
-            _missedPrayerWidget("Asr", 2),
-            _missedPrayerWidget("Maghrib", 3),
-            _missedPrayerWidget("Isha", 4),
-            // _missedPrayerWidget("Witr", 5),
-          ],
-        ),
+      body: FutureBuilder(
+        future: getAllMissed(),
+        builder: (buildContext, snapshot) {
+          if (snapshot.hasData) {
+            return Center(
+              child: Column(
+                children: [
+                  _missedPrayerWidget("Fajr", 0),
+                  _missedPrayerWidget("Duhr", 1),
+                  _missedPrayerWidget("Asr", 2),
+                  _missedPrayerWidget("Maghrib", 3),
+                  _missedPrayerWidget("Isha", 4),
+                  // _missedPrayerWidget("Witr", 5),
+                ],
+              ),
+            );
+          } else {
+            // Return loading screen while reading preferences
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
       ),
-      floatingActionButton: _fab(0),
     );
   }
 
@@ -95,6 +131,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
         setState(() {
           for (int i = 0; i < prayers.length; i++) {
             prayers[i]++;
+            setMissedPrayer(i, prayers[i]);
           }
         });
       },
@@ -107,6 +144,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
       onPressed: () {
         setState(() {
           prayers[index]++;
+          setMissedPrayer(index, prayers[index]);
         });
       },
       style: ElevatedButton.styleFrom(
@@ -124,6 +162,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
         setState(() {
           if (prayers[index] > 0) {
             prayers[index]--;
+            setMissedPrayer(index, prayers[index]);
           }
         });
       },
