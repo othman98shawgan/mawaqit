@@ -190,7 +190,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 24,
               ),
               title: const Text('Missed Prayers'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/missed_prayer');
+              },
             ),
             ListTile(
               minLeadingWidth: 0,
