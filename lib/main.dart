@@ -1,3 +1,4 @@
+import 'package:alfajr/ui/calendar_page.dart';
 import 'package:alfajr/ui/counter_page.dart';
 import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
             ),
         '/counter': (context) => const CounterPage(),
         '/missed_prayer': (context) => const MissedPrayerPage(),
+        '/calendar': (context) => const CalendarPage(),
       },
     );
   }

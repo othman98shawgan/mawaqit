@@ -248,6 +248,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 await showAlertDialog(context, updatePrayers);
               },
             ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: Image.asset(
+                'images/calendar.png',
+                height: 24,
+              ),
+              title: const Text('Calendar'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/calendar');
+              },
+            ),
           ],
         ),
       ),
