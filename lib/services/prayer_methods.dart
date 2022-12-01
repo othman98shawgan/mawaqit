@@ -1,8 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
+
+void printSnackBar(String message, BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(message),
+    duration: const Duration(seconds: 1),
+  ));
+}
 
 Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List prayerList) {
   DateTime fajr =
