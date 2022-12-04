@@ -221,7 +221,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 24,
               ),
               title: const Text('Al-Mathurat'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/mathurat');
+              },
             ),
             ListTile(
               minLeadingWidth: 0,
