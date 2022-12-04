@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:alfajr/ui/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../models/prayers.dart';
-import '../prayer_times.dart';
 import '../services/daylight_time_service.dart';
 import 'widgets/prayer_widget.dart';
 
@@ -42,13 +42,20 @@ class _CalendarPageState extends State<CalendarPage> {
         initialDatePickerMode: DatePickerMode.day,
       );
 
+  Future<void> readJson() async {
+    dayInYear = Jiffy(pickedDate).dayOfYear;
+
+    final String response = await rootBundle.loadString('lib/prayer-time.json');
+    final data = await json.decode(response);
+
+    setState(() {
+      prayersToday = PrayersModel.fromJson(data["prayers"][dayInYear]);
+    });
+  }
+
   @override
   @override
   Widget build(BuildContext context) {
-    dayInYear = Jiffy(pickedDate).dayOfYear;
-    _prayerList = json.decode(prayerTimes);
-    prayersToday = PrayersModel.fromJson(_prayerList[dayInYear]);
-
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy').format(pickedDate),
       style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 48, color: Colors.white),
@@ -73,11 +80,14 @@ class _CalendarPageState extends State<CalendarPage> {
       appBar: AppBar(
         title: const Text("Calendar"),
       ),
-      body: FutureBuilder<bool>(
-        future: getSummerTime(),
+      body: FutureBuilder<List>(
+        future: Future.wait([
+          getSummerTime(),
+          readJson(),
+        ]),
         builder: (buildContext, snapshot) {
           if (snapshot.hasData) {
-            summerTime = snapshot.data!;
+            summerTime = snapshot.data![0]!;
             return Container(
               decoration: const BoxDecoration(
                   image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),

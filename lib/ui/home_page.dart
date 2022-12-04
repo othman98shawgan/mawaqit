@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import '../models/prayer.dart';
-import '../prayer_times.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
 import '../services/notifications_service.dart';
@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List _prayerList = [];
   int dayInYear = 0;
   List<String> _scheduledPrayers = [];
-  late PrayersModel prayersToday;
+  PrayersModel prayersToday = PrayersModel.empty();
 
   Future<void> cancelAllPrayers() async {
     NotificationsService.cancelAll();
@@ -107,19 +107,28 @@ class _MyHomePageState extends State<MyHomePage> {
     return time;
   }
 
+  Future<void> readJson() async {
+    dayInYear = Jiffy().dayOfYear;
+
+    final String response = await rootBundle.loadString('lib/prayer-time.json');
+    final data = await json.decode(response);
+
+    setState(() {
+      prayersToday = PrayersModel.fromJson(data["prayers"][dayInYear]);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     NotificationsService.init();
+    readJson();
     // cancelAllPrayers(); //TODO: FOR TESTING
     //  listenNotifications();
   }
 
   @override
   Widget build(BuildContext context) {
-    dayInYear = Jiffy().dayOfYear;
-    _prayerList = json.decode(prayerTimes);
-    prayersToday = PrayersModel.fromJson(_prayerList[dayInYear]);
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
     return Scaffold(
@@ -132,6 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
         future: Future.wait([
           getSummerTime(),
           scheduleNextPrayers(DateTime.now()),
+          readJson(),
         ]),
         builder: (buildContext, snapshot) {
           if (snapshot.hasData) {

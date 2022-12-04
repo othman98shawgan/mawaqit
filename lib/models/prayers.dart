@@ -7,8 +7,16 @@ class PrayersModel {
   final String maghrib;
   final String isha;
 
-  PrayersModel(this.date, this.fajr, this.shuruq, this.duhr, this.asr,
-      this.maghrib, this.isha);
+  PrayersModel(this.date, this.fajr, this.shuruq, this.duhr, this.asr, this.maghrib, this.isha);
+
+  PrayersModel.empty()
+      : date = "0.0",
+        fajr = "00:00",
+        shuruq = "00:00",
+        duhr = "00:00",
+        asr = "00:00",
+        maghrib = "00:00",
+        isha = "00:00" {}
 
   PrayersModel.fromJson(Map<String, dynamic> json)
       : date = json['Date'],
