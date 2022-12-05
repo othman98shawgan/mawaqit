@@ -14,6 +14,7 @@ import 'widgets/clock_widget.dart';
 import 'widgets/daylight_saving.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // PrayersModel dummyDay =
 //     PrayersModel("29.11", "00:11", "00:12", "00:13", "23:57", "23:58", "23:59"); //TODO: FOR TESTING
@@ -274,9 +275,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(context, '/calendar');
               },
             ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: const Icon(Icons.mosque),
+              title: const Text('Qibla'),
+              onTap: () async {
+                Navigator.pop(context);
+                await _launchURL();
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  _launchURL() async {
+    Uri url = Uri.parse('https://qiblafinder.withgoogle.com/');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
   }
 }
