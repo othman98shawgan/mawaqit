@@ -112,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final String response = await rootBundle.loadString('lib/prayer-time.json');
     final data = await json.decode(response);
+    _prayerList = data["prayers"];
 
     setState(() {
       prayersToday = PrayersModel.fromJson(data["prayers"][dayInYear]);
