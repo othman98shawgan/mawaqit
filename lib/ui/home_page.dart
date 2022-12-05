@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> readJson() async {
     dayInYear = Jiffy().dayOfYear;
 
-    final String response = await rootBundle.loadString('lib/prayer-time.json');
+    final String response = await rootBundle.loadString('lib/data/prayer-time.json');
     final data = await json.decode(response);
     _prayerList = data["prayers"];
 
