@@ -159,7 +159,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     return FloatingActionButton(
       backgroundColor: Colors.white,
       onPressed: () {
-        showAlertDialog(context);
+        showAddMissedPrayersDialog(context);
       },
       child: const Icon(Icons.add, color: Colors.black87),
     );
@@ -219,7 +219,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     );
   }
 
-  showAlertDialog(BuildContext context) async {
+  showAddMissedPrayersDialog(BuildContext context) async {
     double height = MediaQuery.of(context).size.height;
 
     AlertDialog alert = AlertDialog(

@@ -260,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   cancelAllPrayers();
                   scheduleNextPrayers(DateTime.now());
                 });
-                await showAlertDialog(context, updatePrayers);
+                await showDaylightSavingDialog(context, updatePrayers);
               },
             ),
             ListTile(
