@@ -45,7 +45,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Future<void> readJson() async {
     dayInYear = Jiffy(pickedDate).dayOfYear;
 
-    final String response = await rootBundle.loadString('lib/prayer-time.json');
+    final String response = await rootBundle.loadString('lib/data/prayer-time.json');
     final data = await json.decode(response);
 
     setState(() {

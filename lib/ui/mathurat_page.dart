@@ -19,7 +19,7 @@ class _MathuratPageState extends State<MathuratPage> {
   List<MathuratModel> items = [];
 
   Future<void> readJson() async {
-    final String response = await rootBundle.loadString('lib/mathurat.json');
+    final String response = await rootBundle.loadString('lib/data/mathurat.json');
     final data = await json.decode(response);
     mathuratList = List<MathuratModel>.from(data.map((x) => MathuratModel.fromJson(x)));
     setState(() {
