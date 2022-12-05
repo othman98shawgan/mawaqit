@@ -1,7 +1,7 @@
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:flutter/material.dart';
 
-showAlertDialog(BuildContext context, Function updatePrayers) async {
+showDaylightSavingDialog(BuildContext context, Function updatePrayers) async {
   bool isSwitched = await getSummerTime();
   var confirmMethod = (() {
     updatePrayers();
