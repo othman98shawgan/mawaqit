@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:alfajr/ui/widgets/reminder_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,7 @@ import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
+import '../services/reminder_service.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/daylight_saving.dart';
@@ -17,7 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // PrayersModel dummyDay =
-//     PrayersModel("29.11", "00:11", "00:12", "00:13", "23:57", "23:58", "23:59"); //TODO: FOR TESTING
+//     PrayersModel("05.12", "00:11", "00:12", "00:13", "14:45", "14:50", "14:55"); //TODO: FOR TESTING
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -34,6 +36,14 @@ class _MyHomePageState extends State<MyHomePage> {
   int dayInYear = 0;
   List<String> _scheduledPrayers = [];
   PrayersModel prayersToday = PrayersModel.empty();
+  int reminderValue = 10;
+
+  Future<void> updateReminderValue(int val) async {
+    await setReminderTime(val);
+    setState(() {
+      reminderValue = val;
+    });
+  }
 
   Future<void> cancelAllPrayers() async {
     NotificationsService.cancelAll();
@@ -53,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     List<Prayer> prayersToSchedule = [];
     summerTime = await getSummerTime();
+    reminderValue = await getReminderTime();
 
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
     prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime));
@@ -71,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       _scheduledPrayers.add(id);
       //Set reminder
-      var reminderTime = prayer.time.subtract(const Duration(minutes: 10));
+      var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
       if (reminderTime.isBefore(DateTime.now())) {
         continue;
       }
@@ -79,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
       NotificationsService.scheduleNotifications(
           id: int.parse(reminderId.substring(6)),
           channelId: reminderId,
-          title: '${prayer.label} Time is in 10 minutes',
+          title: '${prayer.label} Azan is in $reminderValue minutes',
           payload: 'alfajr',
           sheduledDate: reminderTime);
 
@@ -113,9 +124,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final String response = await rootBundle.loadString('lib/data/prayer-time.json');
     final data = await json.decode(response);
-    _prayerList = data["prayers"];
 
     setState(() {
+      _prayerList = data["prayers"];
       prayersToday = PrayersModel.fromJson(data["prayers"][dayInYear]);
     });
   }
@@ -126,6 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
     NotificationsService.init();
     readJson();
     // cancelAllPrayers(); //TODO: FOR TESTING
+    // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
   }
 
@@ -144,10 +156,12 @@ class _MyHomePageState extends State<MyHomePage> {
           getSummerTime(),
           scheduleNextPrayers(DateTime.now()),
           readJson(),
+          getReminderTime(),
         ]),
         builder: (buildContext, snapshot) {
           if (snapshot.hasData) {
             summerTime = snapshot.data![0];
+            reminderValue = snapshot.data![3];
             return Container(
               decoration: const BoxDecoration(
                   image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
@@ -284,6 +298,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 await _launchURL();
               },
             ),
+            ListTile(
+              minLeadingWidth: 0,
+              leading: const Icon(Icons.notifications),
+              title: const Text('Reminders'),
+              onTap: () async {
+                Navigator.pop(context);
+                var updateReminder = ((int newReminderTime) {
+                  cancelAllPrayers();
+                  updateReminderValue(newReminderTime);
+                  scheduleNextPrayers(DateTime.now());
+                });
+
+                await showReminderDialog(context, reminderValue, updateReminder);
+              },
+            )
           ],
         ),
       ),
