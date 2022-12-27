@@ -169,18 +169,26 @@ List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime) {
 List<Prayer> getNextWeekPrayers(
     PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime) {
   List<Prayer> prayersList = [];
-  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 1)),
-      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 1]), summerTime));
-  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 2)),
-      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 2]), summerTime));
-  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 3)),
-      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 3]), summerTime));
-  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 4)),
-      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 4]), summerTime));
-  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 5)),
-      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 5]), summerTime));
-  prayersList.addAll(getDayPrayers(DateTime.now().add(const Duration(days: 6)),
-      prayersToday = PrayersModel.fromJson(prayerList[dayInYear + 6]), summerTime));
+
+  var day1 = DateTime.now().add(const Duration(days: 1));
+  var day2 = DateTime.now().add(const Duration(days: 2));
+  var day3 = DateTime.now().add(const Duration(days: 3));
+  var day4 = DateTime.now().add(const Duration(days: 4));
+  var day5 = DateTime.now().add(const Duration(days: 5));
+  var day6 = DateTime.now().add(const Duration(days: 6));
+
+  prayersList.addAll(getDayPrayers(
+      day1, prayersToday = PrayersModel.fromJson(prayerList[Jiffy(day1).dayOfYear]), summerTime));
+  prayersList.addAll(getDayPrayers(
+      day2, prayersToday = PrayersModel.fromJson(prayerList[Jiffy(day2).dayOfYear]), summerTime));
+  prayersList.addAll(getDayPrayers(
+      day3, prayersToday = PrayersModel.fromJson(prayerList[Jiffy(day3).dayOfYear]), summerTime));
+  prayersList.addAll(getDayPrayers(
+      day4, prayersToday = PrayersModel.fromJson(prayerList[Jiffy(day4).dayOfYear]), summerTime));
+  prayersList.addAll(getDayPrayers(
+      day5, prayersToday = PrayersModel.fromJson(prayerList[Jiffy(day5).dayOfYear]), summerTime));
+  prayersList.addAll(getDayPrayers(
+      day6, prayersToday = PrayersModel.fromJson(prayerList[Jiffy(day6).dayOfYear]), summerTime));
 
   return prayersList;
 }
