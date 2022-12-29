@@ -149,7 +149,15 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(widget.title),
-        actions: const [],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List>(
         future: Future.wait([
