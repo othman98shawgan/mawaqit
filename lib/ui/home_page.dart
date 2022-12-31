@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:alfajr/ui/settings_page.dart';
 import 'package:alfajr/ui/widgets/reminder_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // PrayersModel dummyDay =
-//     PrayersModel("05.12", "00:11", "00:12", "00:13", "14:45", "14:50", "14:55"); //TODO: FOR TESTING
+//     PrayersModel("31.12", "00:11", "00:12", "00:13", "14:45", "21:32", "22:33"); //TODO: FOR TESTING
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -46,11 +47,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  updatePrayers() {
+    cancelAllPrayers();
+    scheduleNextPrayers(DateTime.now());
+    setState(() {});
+  }
+
+  updateReminder(int newReminderTime) {
+    cancelAllPrayers();
+    updateReminderValue(newReminderTime);
+    scheduleNextPrayers(DateTime.now());
+    setState(() {});
+  }
+
   Future<void> cancelAllPrayers() async {
     NotificationsService.cancelAll();
     final prefs = await SharedPreferences.getInstance();
     prefs.setStringList('scheduledPrayers', []);
-    setState(() {});
   }
 
   Future<void> scheduleNextPrayers(DateTime time) async {
@@ -98,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       _scheduledPrayers.add(reminderId);
     }
-    setScheduledPrayers();
+    setScheduledPrayers(_scheduledPrayers);
   }
 
   Future<List<String>> getScheduledPrayers() async {
@@ -107,9 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return scheduledPrayers;
   }
 
-  Future<void> setScheduledPrayers() async {
+  Future<void> setScheduledPrayers(List<String> scheduledPrayers) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('scheduledPrayers', _scheduledPrayers);
+    prefs.setStringList('scheduledPrayers', scheduledPrayers);
   }
 
   String toSummerTime(String time) {
@@ -157,7 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
               onPressed: () {
-                Navigator.pushNamed(context, '/settings');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          SettingsPage(title: 'Settings Page', updateSummerTime: updatePrayers)),
+                );
               },
             ),
           ],
@@ -280,10 +298,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: const Text('Daylight saving'),
                 onTap: () async {
                   Navigator.pop(context);
-                  var updatePrayers = (() {
-                    cancelAllPrayers();
-                    scheduleNextPrayers(DateTime.now());
-                  });
                   await showDaylightSavingDialog(context, updatePrayers);
                 },
               ),
@@ -314,11 +328,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: const Text('Reminders'),
                 onTap: () async {
                   Navigator.pop(context);
-                  var updateReminder = ((int newReminderTime) {
-                    cancelAllPrayers();
-                    updateReminderValue(newReminderTime);
-                    scheduleNextPrayers(DateTime.now());
-                  });
 
                   await showReminderDialog(context, reminderValue, updateReminder);
                 },
