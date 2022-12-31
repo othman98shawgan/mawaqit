@@ -1,18 +1,37 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import '../resources/colors.dart';
+import 'store_manager.dart';
 
-Future<bool> getSummerTime() async {
-  final prefs = await SharedPreferences.getInstance();
-  final isSummer = prefs.getBool('isSummer') ?? false;
-  return isSummer;
-}
+class DaylightSavingNotifier with ChangeNotifier {
+  final summer = true;
 
-Future<void> switchSummerTime() async {
-  final prefs = await SharedPreferences.getInstance();
-  final isSummer = prefs.getBool('isSummer') ?? false;
-  prefs.setBool('isSummer', !isSummer);
-}
+  bool _summerTime = false;
+  bool getSummerTime() => _summerTime;
 
-Future<void> setSummerTime(bool isSummer) async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setBool('isSummer', isSummer);
+  DaylightSavingNotifier() {
+    StorageManager.readData('isSummer').then((value) {
+      _summerTime = value ?? false;
+      notifyListeners();
+    });
+  }
+
+  void setSummerTime() async {
+    _summerTime = true;
+    StorageManager.saveData('isSummer', true);
+    notifyListeners();
+  }
+
+  void setWinterTime() async {
+    _summerTime = false;
+    StorageManager.saveData('isSummer', false);
+    notifyListeners();
+  }
+
+  void switchSummerTime() async {
+    _summerTime = !_summerTime;
+    StorageManager.saveData('isSummer', _summerTime);
+    notifyListeners();
+  }
 }

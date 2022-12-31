@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:provider/provider.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
@@ -62,8 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     List<Prayer> prayersToSchedule = [];
-    summerTime = await getSummerTime();
     reminderValue = await getReminderTime();
+    if (!mounted) return; //Make sure widget is mounted
+    summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
 
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
     prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime));
@@ -145,183 +147,184 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<List>(
-        future: Future.wait([
-          getSummerTime(),
-          scheduleNextPrayers(DateTime.now()),
-          readJson(),
-          getReminderTime(),
-        ]),
-        builder: (buildContext, snapshot) {
-          if (snapshot.hasData) {
-            summerTime = snapshot.data![0];
-            reminderValue = snapshot.data![3];
-            return Container(
-              decoration: const BoxDecoration(
-                  image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  MyCard(
-                      widget: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
-                              const Padding(
-                                  padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                  child: ClockWidget()),
-                              PrayerClockWidget(
-                                prayersToday: prayersToday,
-                                summerTime: summerTime,
-                                prayerList: _prayerList,
-                              ),
-                            ],
+    return Consumer<DaylightSavingNotifier>(
+      builder: (context, daylightSaving, child) => Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Settings',
+              onPressed: () {
+                Navigator.pushNamed(context, '/settings');
+              },
+            ),
+          ],
+        ),
+        body: FutureBuilder<List>(
+          future: Future.wait([
+            scheduleNextPrayers(DateTime.now()),
+            readJson(),
+            getReminderTime(),
+          ]),
+          builder: (buildContext, snapshot) {
+            if (snapshot.hasData) {
+              summerTime = daylightSaving.getSummerTime();
+              reminderValue = snapshot.data![2];
+              return Container(
+                decoration: const BoxDecoration(
+                    image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    MyCard(
+                        widget: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                                const Padding(
+                                    padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                    child: ClockWidget()),
+                                PrayerClockWidget(
+                                  prayersToday: prayersToday,
+                                  summerTime: summerTime,
+                                  prayerList: _prayerList,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
+                      ],
+                    )),
+                    PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
+                    PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
+                    PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
+                    PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
+                    PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
+                    PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
+                  ],
+                ),
+              );
+            } else {
+              // Return loading screen while reading preferences
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('ALFAJR'),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Image.asset(
+                        'images/logo.png',
+                        height: 96,
                       ),
-                    ],
-                  )),
-                  PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
-                  PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
-                  PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
-                  PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
-                  PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
-                  PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
-                ],
+                    )
+                  ],
+                ),
               ),
-            );
-          } else {
-            // Return loading screen while reading preferences
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.black54,
+              ListTile(
+                minLeadingWidth: 0,
+                leading: Image.asset(
+                  'images/salah.png',
+                  height: 24,
+                ),
+                title: const Text('Missed Prayers'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/missed_prayer');
+                },
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('ALFAJR'),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Image.asset(
-                      'images/logo.png',
-                      height: 96,
-                    ),
-                  )
-                ],
+              ListTile(
+                minLeadingWidth: 0,
+                leading: Image.asset(
+                  'images/pray-white.png',
+                  height: 24,
+                ),
+                title: const Text('Al-Mathurat'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/mathurat');
+                },
               ),
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Image.asset(
-                'images/salah.png',
-                height: 24,
+              ListTile(
+                minLeadingWidth: 0,
+                leading: Image.asset(
+                  'images/misbaha.png',
+                  height: 24,
+                ),
+                title: const Text('Dhikr Counter'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/counter');
+                },
               ),
-              title: const Text('Missed Prayers'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/missed_prayer');
-              },
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Image.asset(
-                'images/pray-white.png',
-                height: 24,
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(Icons.access_time),
+                title: const Text('Daylight saving'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  var updatePrayers = (() {
+                    cancelAllPrayers();
+                    scheduleNextPrayers(DateTime.now());
+                  });
+                  await showDaylightSavingDialog(context, updatePrayers);
+                },
               ),
-              title: const Text('Al-Mathurat'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/mathurat');
-              },
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Image.asset(
-                'images/misbaha.png',
-                height: 24,
+              ListTile(
+                minLeadingWidth: 0,
+                leading: Image.asset(
+                  'images/calendar.png',
+                  height: 24,
+                ),
+                title: const Text('Calendar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/calendar');
+                },
               ),
-              title: const Text('Dhikr Counter'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/counter');
-              },
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: const Icon(Icons.access_time),
-              title: const Text('Daylight saving'),
-              onTap: () async {
-                Navigator.pop(context);
-                var updatePrayers = (() {
-                  cancelAllPrayers();
-                  scheduleNextPrayers(DateTime.now());
-                });
-                await showDaylightSavingDialog(context, updatePrayers);
-              },
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Image.asset(
-                'images/calendar.png',
-                height: 24,
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(Icons.mosque),
+                title: const Text('Qibla'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _launchURL();
+                },
               ),
-              title: const Text('Calendar'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/calendar');
-              },
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: const Icon(Icons.mosque),
-              title: const Text('Qibla'),
-              onTap: () async {
-                Navigator.pop(context);
-                await _launchURL();
-              },
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: const Icon(Icons.notifications),
-              title: const Text('Reminders'),
-              onTap: () async {
-                Navigator.pop(context);
-                var updateReminder = ((int newReminderTime) {
-                  cancelAllPrayers();
-                  updateReminderValue(newReminderTime);
-                  scheduleNextPrayers(DateTime.now());
-                });
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(Icons.notifications),
+                title: const Text('Reminders'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  var updateReminder = ((int newReminderTime) {
+                    cancelAllPrayers();
+                    updateReminderValue(newReminderTime);
+                    scheduleNextPrayers(DateTime.now());
+                  });
 
-                await showReminderDialog(context, reminderValue, updateReminder);
-              },
-            )
-          ],
+                  await showReminderDialog(context, reminderValue, updateReminder);
+                },
+              )
+            ],
+          ),
         ),
       ),
     );

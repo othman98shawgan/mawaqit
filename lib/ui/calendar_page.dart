@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:provider/provider.dart';
 
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
@@ -75,52 +76,53 @@ class _CalendarPageState extends State<CalendarPage> {
           child: dateTextWidget,
         ));
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text("Calendar"),
-      ),
-      body: FutureBuilder<List>(
-        future: Future.wait([
-          getSummerTime(),
-          readJson(),
-        ]),
-        builder: (buildContext, snapshot) {
-          if (snapshot.hasData) {
-            summerTime = snapshot.data![0]!;
-            return Container(
-              decoration: const BoxDecoration(
-                  image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  MyCard(
-                      widget: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Center(
-                          child: Column(
-                            children: [dateTextButtonWidget],
+    return Consumer<DaylightSavingNotifier>(
+      builder: (context, daylightSaving, child) => Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text("Calendar"),
+        ),
+        body: FutureBuilder<List>(
+          future: Future.wait([
+            readJson(),
+          ]),
+          builder: (buildContext, snapshot) {
+            if (snapshot.hasData) {
+              summerTime = daylightSaving.getSummerTime();
+              return Container(
+                decoration: const BoxDecoration(
+                    image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    MyCard(
+                        widget: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Center(
+                            child: Column(
+                              children: [dateTextButtonWidget],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  )),
-                  PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
-                  PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
-                  PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
-                  PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
-                  PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
-                  PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
-                ],
-              ),
-            );
-          } else {
-            // Return loading screen while reading preferences
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+                      ],
+                    )),
+                    PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
+                    PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
+                    PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
+                    PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
+                    PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
+                    PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
+                  ],
+                ),
+              );
+            } else {
+              // Return loading screen while reading preferences
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
       ),
     );
   }

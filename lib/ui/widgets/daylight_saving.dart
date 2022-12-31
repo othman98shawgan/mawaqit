@@ -1,9 +1,16 @@
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 showDaylightSavingDialog(BuildContext context, Function updatePrayers) async {
-  bool isSwitched = await getSummerTime();
+  bool isSwitched = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+
   var confirmMethod = (() {
+    if (isSwitched == true) {
+      Provider.of<DaylightSavingNotifier>(context, listen: false).setSummerTime();
+    } else {
+      Provider.of<DaylightSavingNotifier>(context, listen: false).setWinterTime();
+    }
     updatePrayers();
     Navigator.pop(context);
   });
@@ -18,18 +25,19 @@ showDaylightSavingDialog(BuildContext context, Function updatePrayers) async {
         ),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return Row(children: [
-          const Text("Daylight saving time is: "),
-          Switch(
-            value: isSwitched,
-            onChanged: (value) {
-              setState(() {
-                isSwitched = value;
-                setSummerTime(value);
-              });
-            },
-          ),
-        ]);
+        return Consumer<DaylightSavingNotifier>(
+          builder: (context, daylightSaving, child) => Row(children: [
+            const Text("Daylight saving time is: "),
+            Switch(
+              value: isSwitched,
+              onChanged: (value) {
+                setState(() {
+                  isSwitched = value;
+                });
+              },
+            ),
+          ]),
+        );
       }));
 
   showDialog(
