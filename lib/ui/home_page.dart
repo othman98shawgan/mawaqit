@@ -114,17 +114,6 @@ class _MyHomePageState extends State<MyHomePage> {
     setScheduledPrayers(_scheduledPrayers);
   }
 
-  Future<List<String>> getScheduledPrayers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final scheduledPrayers = prefs.getStringList('scheduledPrayers') ?? [];
-    return scheduledPrayers;
-  }
-
-  Future<void> setScheduledPrayers(List<String> scheduledPrayers) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('scheduledPrayers', scheduledPrayers);
-  }
-
   String toSummerTime(String time) {
     if (!summerTime) return time;
     int hour = int.parse(time.split(':')[0]);

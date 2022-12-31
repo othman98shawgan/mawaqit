@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -224,4 +225,15 @@ List<Prayer> getDayPrayers(DateTime day, PrayersModel prayers, bool summerTime) 
   prayersList.add(Prayer('Isha', isha));
 
   return prayersList;
+}
+
+Future<List<String>> getScheduledPrayers() async {
+  final prefs = await SharedPreferences.getInstance();
+  final scheduledPrayers = prefs.getStringList('scheduledPrayers') ?? [];
+  return scheduledPrayers;
+}
+
+Future<void> setScheduledPrayers(List<String> scheduledPrayers) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setStringList('scheduledPrayers', scheduledPrayers);
 }
