@@ -283,15 +283,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ListTile(
                 minLeadingWidth: 0,
-                leading: const Icon(Icons.access_time),
-                title: const Text('Daylight saving'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await showDaylightSavingDialog(context, updatePrayers);
-                },
-              ),
-              ListTile(
-                minLeadingWidth: 0,
                 leading: Image.asset(
                   'images/calendar.png',
                   height: 24,
