@@ -42,11 +42,10 @@ Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
   if (time.isBefore(isha)) return Prayer("Isha", isha);
 
   //after Isha
-  var dayInYear = Jiffy().dayOfYear;
-
-  PrayersModel tomorrowPrayers =
-      PrayersModel.fromJson(prayerList[dayInYear + 1]); //TODO: fix if last day of year.
   DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+  var dayInYear = Jiffy(tomorrow).dayOfYear;
+
+  PrayersModel tomorrowPrayers = PrayersModel.fromJson(prayerList[dayInYear + 1]);
   DateTime fajrTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day,
       getHour(tomorrowPrayers.fajr), getMinute(tomorrowPrayers.fajr));
   fajrTomorrow = summerTime ? fajrTomorrow.add(const Duration(hours: 1)) : fajrTomorrow;
@@ -84,12 +83,11 @@ Prayer getPrevPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
   if (time.isAfter(fajr)) return Prayer("Fajr", fajr);
 
   //before Fajr
-  var dayInYear = Jiffy().dayOfYear;
-
-  PrayersModel yesterdayPrayers =
-      PrayersModel.fromJson(prayerList[dayInYear - 1]); //TODO: fix if first day of year.
-
   DateTime yesterday = DateTime.now().subtract(const Duration(days: 1));
+  var dayInYear = Jiffy(yesterday).dayOfYear;
+
+  PrayersModel yesterdayPrayers = PrayersModel.fromJson(prayerList[dayInYear - 1]);
+
   DateTime ishaYesterday = DateTime(yesterday.year, yesterday.month, yesterday.day,
       getHour(yesterdayPrayers.isha), getMinute(yesterdayPrayers.isha));
   ishaYesterday = summerTime ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
