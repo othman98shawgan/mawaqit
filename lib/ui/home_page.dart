@@ -263,18 +263,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ListTile(
                 minLeadingWidth: 0,
                 leading: Image.asset(
-                  'images/pray-white.png',
-                  height: 24,
-                ),
-                title: const Text('Al-Mathurat'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/mathurat');
-                },
-              ),
-              ListTile(
-                minLeadingWidth: 0,
-                leading: Image.asset(
                   'images/misbaha.png',
                   height: 24,
                 ),
