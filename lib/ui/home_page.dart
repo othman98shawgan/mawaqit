@@ -162,8 +162,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          SettingsPage(title: 'Settings Page', updateSummerTime: updatePrayers)),
+                    builder: (context) => SettingsPage(
+                      title: 'Settings Page',
+                      updateSummerTime: updatePrayers,
+                      updateReminder: updateReminder,
+                    ),
+                  ),
                 );
               },
             ),
