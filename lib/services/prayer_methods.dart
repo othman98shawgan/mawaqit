@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -42,11 +43,10 @@ Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
   if (time.isBefore(isha)) return Prayer("Isha", isha);
 
   //after Isha
-  var dayInYear = Jiffy().dayOfYear;
-
-  PrayersModel tomorrowPrayers =
-      PrayersModel.fromJson(prayerList[dayInYear + 1]); //TODO: fix if last day of year.
   DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+  var dayInYear = Jiffy(tomorrow).dayOfYear;
+
+  PrayersModel tomorrowPrayers = PrayersModel.fromJson(prayerList[dayInYear + 1]);
   DateTime fajrTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day,
       getHour(tomorrowPrayers.fajr), getMinute(tomorrowPrayers.fajr));
   fajrTomorrow = summerTime ? fajrTomorrow.add(const Duration(hours: 1)) : fajrTomorrow;
@@ -84,12 +84,11 @@ Prayer getPrevPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
   if (time.isAfter(fajr)) return Prayer("Fajr", fajr);
 
   //before Fajr
-  var dayInYear = Jiffy().dayOfYear;
-
-  PrayersModel yesterdayPrayers =
-      PrayersModel.fromJson(prayerList[dayInYear - 1]); //TODO: fix if first day of year.
-
   DateTime yesterday = DateTime.now().subtract(const Duration(days: 1));
+  var dayInYear = Jiffy(yesterday).dayOfYear;
+
+  PrayersModel yesterdayPrayers = PrayersModel.fromJson(prayerList[dayInYear - 1]);
+
   DateTime ishaYesterday = DateTime(yesterday.year, yesterday.month, yesterday.day,
       getHour(yesterdayPrayers.isha), getMinute(yesterdayPrayers.isha));
   ishaYesterday = summerTime ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
@@ -226,4 +225,15 @@ List<Prayer> getDayPrayers(DateTime day, PrayersModel prayers, bool summerTime) 
   prayersList.add(Prayer('Isha', isha));
 
   return prayersList;
+}
+
+Future<List<String>> getScheduledPrayers() async {
+  final prefs = await SharedPreferences.getInstance();
+  final scheduledPrayers = prefs.getStringList('scheduledPrayers') ?? [];
+  return scheduledPrayers;
+}
+
+Future<void> setScheduledPrayers(List<String> scheduledPrayers) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setStringList('scheduledPrayers', scheduledPrayers);
 }
