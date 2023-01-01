@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'services/notifications_service.dart';
+import 'services/reminder_service.dart';
 import 'services/theme_service.dart';
 import 'ui/counter_page.dart';
 import 'ui/home_page.dart';
@@ -19,7 +20,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeNotifier()),
-        ChangeNotifierProvider(create: (context) => DaylightSavingNotifier())
+        ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
+        ChangeNotifierProvider(create: (context) => ReminderNotifier())
       ],
       child: const MyApp(),
     ),
