@@ -305,16 +305,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   await _launchURL();
                 },
               ),
-              ListTile(
-                minLeadingWidth: 0,
-                leading: const Icon(Icons.notifications),
-                title: const Text('Reminders'),
-                onTap: () async {
-                  Navigator.pop(context);
-
-                  await showReminderDialog(context, reminderValue, updateReminder);
-                },
-              )
             ],
           ),
         ),
