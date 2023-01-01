@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int reminderValue = 10;
 
   Future<void> updateReminderValue(int val) async {
-    await setReminderTime(val);
+    Provider.of<ReminderNotifier>(context, listen: false).setReminderTime(val);
     setState(() {
       reminderValue = val;
     });
@@ -76,8 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     List<Prayer> prayersToSchedule = [];
-    reminderValue = await getReminderTime();
     if (!mounted) return; //Make sure widget is mounted
+    reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
     summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
 
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
@@ -149,8 +149,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
-    return Consumer<DaylightSavingNotifier>(
-      builder: (context, daylightSaving, child) => Scaffold(
+    return Consumer2<DaylightSavingNotifier, ReminderNotifier>(
+      builder: (context, daylightSaving, reminder, child) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text(widget.title),
@@ -162,8 +162,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          SettingsPage(title: 'Settings Page', updateSummerTime: updatePrayers)),
+                    builder: (context) => SettingsPage(
+                      title: 'Settings Page',
+                      updateSummerTime: updatePrayers,
+                      updateReminder: updateReminder,
+                    ),
+                  ),
                 );
               },
             ),
@@ -173,12 +177,11 @@ class _MyHomePageState extends State<MyHomePage> {
           future: Future.wait([
             scheduleNextPrayers(DateTime.now()),
             readJson(),
-            getReminderTime(),
           ]),
           builder: (buildContext, snapshot) {
             if (snapshot.hasData) {
               summerTime = daylightSaving.getSummerTime();
-              reminderValue = snapshot.data![2];
+              reminderValue = reminder.getReminderTime();
               return Container(
                 decoration: const BoxDecoration(
                     image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
@@ -302,16 +305,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   await _launchURL();
                 },
               ),
-              ListTile(
-                minLeadingWidth: 0,
-                leading: const Icon(Icons.notifications),
-                title: const Text('Reminders'),
-                onTap: () async {
-                  Navigator.pop(context);
-
-                  await showReminderDialog(context, reminderValue, updateReminder);
-                },
-              )
             ],
           ),
         ),

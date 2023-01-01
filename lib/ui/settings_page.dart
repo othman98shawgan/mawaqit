@@ -1,4 +1,5 @@
 import 'package:alfajr/services/daylight_time_service.dart';
+import 'package:alfajr/services/reminder_service.dart';
 import 'package:alfajr/ui/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,12 +8,14 @@ import 'package:settings_ui/settings_ui.dart';
 import '../resources/colors.dart';
 import '../services/store_manager.dart';
 import '../services/theme_service.dart';
+import 'widgets/reminder_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, required this.title, this.updateSummerTime});
+  const SettingsPage({super.key, required this.title, this.updateSummerTime, this.updateReminder});
 
   final String title;
   final Function? updateSummerTime;
+  final Function? updateReminder;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -33,8 +36,8 @@ class _SettingsPageState extends State<SettingsPage> {
     var summerTimeDesc = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
         ? 'Summer Time'
         : 'Winter Time';
-    return Consumer2<ThemeNotifier, DaylightSavingNotifier>(
-      builder: (context, theme, daylightSaving, child) => Center(
+    return Consumer3<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier>(
+      builder: (context, theme, daylightSaving, reminder, child) => Center(
         child: Scaffold(
           appBar: AppBar(
             title: Text(widget.title),
@@ -72,6 +75,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         summerTimeDesc = 'Winter Time';
                         widget.updateSummerTime!();
                       }
+                    },
+                  ),
+                  SettingsTile.navigation(
+                    title: const Text('Prayer Reminder'),
+                    leading: const Icon(Icons.notifications),
+                    value: Text('${reminder.getReminderTime()} mins'),
+                    onPressed: (context) async {
+                      await showReminderDialog(
+                          context, reminder.getReminderTime(), widget.updateReminder!);
                     },
                   ),
                 ],
