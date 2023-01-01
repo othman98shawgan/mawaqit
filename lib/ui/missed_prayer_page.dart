@@ -17,7 +17,6 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     'missedAsr',
     'missedMaghrib',
     'missedIsha',
-    'missedWitr'
   ];
 
   Future<List<int>> getAllMissed() async {
@@ -28,8 +27,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     final asr = prefs.getInt(missedPrayersStringList[2]) ?? 0;
     final maghrib = prefs.getInt(missedPrayersStringList[3]) ?? 0;
     final isha = prefs.getInt(missedPrayersStringList[4]) ?? 0;
-    final witr = prefs.getInt(missedPrayersStringList[5]) ?? 0;
-    prayers = [fajr, duhr, asr, maghrib, isha, witr];
+    prayers = [fajr, duhr, asr, maghrib, isha];
     return prayers;
   }
 
@@ -73,7 +71,6 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
                 _missedPrayerWidget("Asr", 2),
                 _missedPrayerWidget("Maghrib", 3),
                 _missedPrayerWidget("Isha", 4),
-                _missedPrayerWidget("Witr", 5),
                 Row(
                   children: [
                     Padding(
