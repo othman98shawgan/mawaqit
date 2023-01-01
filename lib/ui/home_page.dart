@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:alfajr/ui/settings_page.dart';
-import 'package:alfajr/ui/widgets/reminder_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +14,6 @@ import '../services/prayer_methods.dart';
 import '../services/reminder_service.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
-import 'widgets/daylight_saving.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';

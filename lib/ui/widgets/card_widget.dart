@@ -1,4 +1,3 @@
-import 'package:alfajr/resources/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +20,7 @@ class _MyCardState extends State<MyCard> {
     if (theme == 'dark') {
       bgColor = const Color.fromARGB(180, 0, 0, 0);
     } else {
-      bgColor = Color.fromARGB(180, 255, 255, 255);
+      bgColor = const Color.fromARGB(180, 255, 255, 255);
     }
     return Consumer<ThemeNotifier>(
         builder: (context, theme, child) => Card(

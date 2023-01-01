@@ -24,8 +24,8 @@ class NotificationsService {
 
   static Future init({bool initSheduled = false}) async {
     tz.initializeTimeZones();
-    final android = AndroidInitializationSettings('@drawable/ic_stat_onesignal_default');
-    final settings = InitializationSettings(android: android);
+    const android = AndroidInitializationSettings('@drawable/ic_stat_onesignal_default');
+    const settings = InitializationSettings(android: android);
     await _notifications.initialize(settings, onSelectNotification: (payload) async {
       onNotifications.add(payload);
     });
