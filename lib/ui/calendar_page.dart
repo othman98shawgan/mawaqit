@@ -20,7 +20,6 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   bool summerTime = false;
-  List _prayerList = [];
   int dayInYear = 0;
   late PrayersModel prayersToday;
   var pickedDate = DateTime.now();

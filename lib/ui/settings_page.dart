@@ -1,12 +1,10 @@
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/reminder_service.dart';
-import 'package:alfajr/ui/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../resources/colors.dart';
-import '../services/store_manager.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 

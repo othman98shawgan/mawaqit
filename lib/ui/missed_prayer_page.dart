@@ -81,7 +81,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(10),
-                          primary: Colors.red,
+                          backgroundColor: Colors.red,
                         ),
                         child: const Text(
                           "Clear all",
@@ -172,8 +172,8 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
       },
       style: ElevatedButton.styleFrom(
         shape: const CircleBorder(),
+        backgroundColor: Colors.grey,
         padding: const EdgeInsets.all(10),
-        primary: Colors.grey,
       ),
       child: const Icon(Icons.add, color: Colors.white),
     );
@@ -191,8 +191,8 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
       },
       style: ElevatedButton.styleFrom(
         shape: const CircleBorder(),
+        backgroundColor: Colors.green,
         padding: const EdgeInsets.all(10),
-        primary: Colors.green,
       ),
       child: const Icon(Icons.done, color: Colors.white),
     );
