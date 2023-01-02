@@ -86,6 +86,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ],
               ),
+              SettingsSection(title: const Text('Help'), tiles: [
+                SettingsTile.navigation(
+                  title: const Text('Reset'),
+                  leading: const Icon(Icons.restart_alt),
+                  onPressed: (context) async {
+                    widget.updateSummerTime!();
+                    Navigator.pop(context);
+                  },
+                ),
+              ]),
             ],
           ),
         ),
