@@ -170,6 +170,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+              tooltip: 'Notifications',
+            ),
           ],
         ),
         body: FutureBuilder<List>(
