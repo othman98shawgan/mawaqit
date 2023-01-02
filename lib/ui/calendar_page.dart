@@ -8,6 +8,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 
 import '../models/prayers.dart';
+import '../services/day_of_year_service.dart';
 import '../services/daylight_time_service.dart';
 import 'widgets/prayer_widget.dart';
 
@@ -43,7 +44,7 @@ class _CalendarPageState extends State<CalendarPage> {
       );
 
   Future<void> readJson() async {
-    dayInYear = Jiffy(pickedDate).dayOfYear;
+    dayInYear = dayOfYear(pickedDate);
 
     final String response = await rootBundle.loadString('lib/data/prayer-time.json');
     final data = await json.decode(response);
