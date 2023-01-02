@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:alfajr/services/day_of_year_service.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> readJson() async {
-    dayInYear = Jiffy().dayOfYear;
+    dayInYear = dayOfYear(DateTime.now());
 
     final String response = await rootBundle.loadString('lib/data/prayer-time.json');
     final data = await json.decode(response);
