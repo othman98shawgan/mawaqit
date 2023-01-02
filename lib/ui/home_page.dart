@@ -155,6 +155,13 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
           actions: [
             IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+              tooltip: 'Notifications',
+            ),
+            IconButton(
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
               onPressed: () {
@@ -169,13 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 );
               },
-            ),
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
-              tooltip: 'Notifications',
             ),
           ],
         ),
