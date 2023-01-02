@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'services/reminder_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
+import 'ui/notifications_page.dart';
 import 'ui/settings_page.dart';
 
 void main() {
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
                 '/calendar': (context) => const CalendarPage(),
                 '/mathurat': (context) => const MathuratPage(),
                 '/settings': (context) => const SettingsPage(title: 'Settings'),
+                '/notifications': (context) => const NotificationsPage(),
               },
             ));
   }
