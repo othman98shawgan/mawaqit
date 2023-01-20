@@ -4,7 +4,6 @@ import 'package:alfajr/ui/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 
 import '../models/prayers.dart';
