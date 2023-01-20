@@ -159,6 +159,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // prayersToday = dummyDay; //TODO: FOR TESTING
+    
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
 
     return Consumer2<DaylightSavingNotifier, ReminderNotifier>(
       builder: (context, daylightSaving, reminder, child) => Scaffold(
