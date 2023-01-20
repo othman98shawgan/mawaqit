@@ -86,11 +86,15 @@ class _MyHomePageState extends State<MyHomePage> {
       if (_scheduledPrayers.contains(id)) {
         continue;
       }
-
+      var prayerBody = '';
+      if (prayer.label == 'Shuruq') {
+        prayerBody = 'You can pray Duha in around 20 minutes';
+      }
       NotificationsService.scheduleNotifications(
           id: int.parse(id.substring(6)),
           channelId: id,
           title: 'Time for ${prayer.label}',
+          body: prayerBody,
           payload: 'alfajr',
           sheduledDate: prayer.time);
 
@@ -101,15 +105,23 @@ class _MyHomePageState extends State<MyHomePage> {
         continue;
       }
       var reminderId = getPrayerNotificationId(reminderTime);
+      var reminderTitle = '';
+      if (prayer.label == 'Shuruq') {
+        reminderTitle = '${prayer.label} is in $reminderValue minutes';
+      } else {
+        reminderTitle = '${prayer.label} Azan is in $reminderValue minutes';
+      }
+
       NotificationsService.scheduleNotifications(
           id: int.parse(reminderId.substring(6)),
           channelId: reminderId,
-          title: '${prayer.label} Azan is in $reminderValue minutes',
+          title: reminderTitle,
           payload: 'alfajr',
           sheduledDate: reminderTime);
 
       _scheduledPrayers.add(reminderId);
     }
+
     setScheduledPrayers(_scheduledPrayers);
   }
 
