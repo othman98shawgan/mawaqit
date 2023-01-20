@@ -1,14 +1,7 @@
-import 'package:alfajr/services/daylight_time_service.dart';
-import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:settings_ui/settings_ui.dart';
 
-import '../resources/colors.dart';
 import '../services/prayer_methods.dart';
-import '../services/theme_service.dart';
-import 'widgets/reminder_dialog.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -20,16 +13,6 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
-    // Full screen width and height
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-
-    // Height (without SafeArea)
-    var padding = MediaQuery.of(context).viewPadding;
-
-    // Height (without status and toolbar)
-    double height3 = height - padding.top - kToolbarHeight;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),

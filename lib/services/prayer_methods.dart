@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/prayer.dart';

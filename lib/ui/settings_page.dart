@@ -22,15 +22,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    // Full screen width and height
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-
-    // Height (without SafeArea)
-    var padding = MediaQuery.of(context).viewPadding;
-
-    // Height (without status and toolbar)
-    double height3 = height - padding.top - kToolbarHeight;
     var summerTimeDesc = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
         ? 'Summer Time'
         : 'Winter Time';
