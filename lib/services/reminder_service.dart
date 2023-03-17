@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'store_manager.dart';
 
 class ReminderNotifier with ChangeNotifier {
-  final summer = true;
 
   late int _reminderTime;
   int getReminderTime() => _reminderTime;

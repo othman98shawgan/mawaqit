@@ -1,4 +1,5 @@
 import 'package:alfajr/services/daylight_time_service.dart';
+import 'package:alfajr/services/dhikr_service.dart';
 import 'package:alfajr/ui/calendar_page.dart';
 import 'package:alfajr/ui/counter_page.dart';
 import 'package:alfajr/ui/mathurat_page.dart';
@@ -20,7 +21,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeNotifier()),
         ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
-        ChangeNotifierProvider(create: (context) => ReminderNotifier())
+        ChangeNotifierProvider(create: (context) => ReminderNotifier()),
+        ChangeNotifierProvider(create: (context) => DhikrNotifier())
       ],
       child: const MyApp(),
     ),
