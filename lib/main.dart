@@ -7,7 +7,6 @@ import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'services/notifications_service.dart';
 import 'services/reminder_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';

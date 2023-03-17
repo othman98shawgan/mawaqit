@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import '../../services/theme_service.dart';
 
 class MyCard extends StatefulWidget {
-  const MyCard({Key? key, required this.widget}) : super(key: key);
+  const MyCard({Key? key, required this.widget, this.height = 0}) : super(key: key);
 
+  final double height;
   final Widget widget;
 
   @override
@@ -23,11 +24,15 @@ class _MyCardState extends State<MyCard> {
       bgColor = const Color.fromARGB(180, 255, 255, 255);
     }
     return Consumer<ThemeNotifier>(
-        builder: (context, theme, child) => Card(
-              color: bgColor,
-              child: Column(
-                children: <Widget>[widget.widget],
-              ),
-            ));
+      builder: (context, theme, child) => SizedBox(
+        height: widget.height > 0 ? widget.height : null,
+        child: Card(
+          color: bgColor,
+          child: Column(
+            children: <Widget>[widget.widget],
+          ),
+        ),
+      ),
+    );
   }
 }
