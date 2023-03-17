@@ -7,15 +7,22 @@ import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'services/notifications_service.dart';
 import 'services/reminder_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
 import 'ui/settings_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //NotificationsService.initNotification();
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+
   runApp(
     MultiProvider(
       providers: [
