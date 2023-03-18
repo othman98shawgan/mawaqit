@@ -29,6 +29,7 @@ class _MyCardState extends State<MyCard> {
         child: Card(
           color: bgColor,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[widget.widget],
           ),
         ),

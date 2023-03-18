@@ -54,11 +54,26 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+  }
+
+  @override
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    var padding = MediaQuery.of(context).viewPadding;
+    // Height (without status and toolbar)
+    double height3 = height - padding.top - kToolbarHeight;
+    double prayerCardHeight = height3 * 0.11;
+    double mainCardHeight = height3 * 0.20;
+    var sunIcon = const Icon(Icons.light_mode);
+    var moonIcon = const Icon(Icons.dark_mode);
+
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy').format(pickedDate),
-      style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 48, color: Colors.white),
+      style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 40, color: Colors.white),
     );
 
     var dateTextButtonWidget = Padding(
@@ -80,6 +95,26 @@ class _CalendarPageState extends State<CalendarPage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("Calendar"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.today),
+              onPressed: () {
+                setState(() {
+                  pickedDate = DateTime.now();
+                });
+              },
+              tooltip: 'Today',
+            ),
+            IconButton(
+              icon: summerTime ? sunIcon : moonIcon,
+              onPressed: () {
+                setState(() {
+                  summerTime = !summerTime;
+                });
+              },
+              tooltip: 'Daylight Saving Mode',
+            ),
+          ],
         ),
         body: FutureBuilder<List>(
           future: Future.wait([
@@ -87,7 +122,6 @@ class _CalendarPageState extends State<CalendarPage> {
           ]),
           builder: (buildContext, snapshot) {
             if (snapshot.hasData) {
-              summerTime = daylightSaving.getSummerTime();
               return Container(
                 decoration: const BoxDecoration(
                     image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
@@ -95,24 +129,70 @@ class _CalendarPageState extends State<CalendarPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     MyCard(
+                        height: mainCardHeight,
                         widget: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Center(
-                            child: Column(
-                              children: [dateTextButtonWidget],
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
-                    PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
-                    PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
-                    PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
-                    PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
-                    PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
-                    PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
+                          children: [
+                            Text(DateFormat('EEEE').format(pickedDate)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 36,
+                                  icon: const Icon(Icons.navigate_before),
+                                  onPressed: () {
+                                    setState(() {
+                                      pickedDate = pickedDate.subtract(const Duration(days: 1));
+                                    });
+                                  },
+                                  tooltip: 'Prevoius Day',
+                                ),
+                                dateTextButtonWidget,
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 36,
+                                  icon: const Icon(Icons.navigate_next),
+                                  onPressed: () {
+                                    setState(() {
+                                      pickedDate = pickedDate.add(const Duration(days: 1));
+                                    });
+                                  },
+                                  tooltip: 'Next Day',
+                                ),
+                              ],
+                            )
+                          ],
+                        )),
+                    PrayerWidget(
+                      label: "Fajr",
+                      time: toSummerTime(prayersToday.fajr),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Shuruq",
+                      time: toSummerTime(prayersToday.shuruq),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Duhr",
+                      time: toSummerTime(prayersToday.duhr),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Asr",
+                      time: toSummerTime(prayersToday.asr),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Maghrib",
+                      time: toSummerTime(prayersToday.maghrib),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Isha",
+                      time: toSummerTime(prayersToday.isha),
+                      height: prayerCardHeight,
+                    ),
                   ],
                 ),
               );
