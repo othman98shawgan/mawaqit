@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../data/prayer_times.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
@@ -133,15 +134,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return time;
   }
 
-  Future<void> readJson() async {
+  void readJson() {
     dayInYear = dayOfYear(DateTime.now());
 
-    final String response = await rootBundle.loadString('lib/data/prayer-time.json');
-    final data = await json.decode(response);
+    // final String response = await rootBundle.loadString('lib/data/prayer-time.json');
+    final data = json.decode(prayersJson);
 
     setState(() {
-      _prayerList = data["prayers"];
-      prayersToday = PrayersModel.fromJson(data["prayers"][dayInYear]);
+      _prayerList = data;
+      prayersToday = PrayersModel.fromJson(data[dayInYear]);
     });
   }
 
@@ -204,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
         body: FutureBuilder<List>(
           future: Future.wait([
             scheduleNextPrayers(DateTime.now()),
-            readJson(),
+            // readJson(),
           ]),
           builder: (buildContext, snapshot) {
             if (snapshot.hasData) {
@@ -213,27 +214,27 @@ class _MyHomePageState extends State<MyHomePage> {
               return Container(
                 decoration: const BoxDecoration(
                     image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
-                child: Column(                  
+                child: Column(
                   children: <Widget>[
                     MyCard(
                         height: mainCardHeight,
                         widget: Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 10.0),                              
-                                child: Column(  
-                                  children: [
-                                    Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
-                                    const Padding(
-                                        padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                        child: ClockWidget()),
-                                    PrayerClockWidget(
-                                      prayersToday: prayersToday,
-                                      summerTime: summerTime,
-                                      prayerList: _prayerList,
-                                    ),
-                                  ],
-                                ),                              
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Column(
+                                children: [
+                                  Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                                  const Padding(
+                                      padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                      child: ClockWidget()),
+                                  PrayerClockWidget(
+                                    prayersToday: prayersToday,
+                                    summerTime: summerTime,
+                                    prayerList: _prayerList,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         )),
@@ -272,7 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             } else {
               // Return loading screen while reading preferences
-              return const Center(child: CircularProgressIndicator());
+              return const SizedBox.shrink();
             }
           },
         ),
