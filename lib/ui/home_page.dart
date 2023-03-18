@@ -158,7 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // prayersToday = dummyDay; //TODO: FOR TESTING
-    
+
+    double height = MediaQuery.of(context).size.height;
+    var padding = MediaQuery.of(context).viewPadding;
+    // Height (without status and toolbar)
+    double height3 = height - padding.top - kToolbarHeight;
+    double prayerCardHeight = height3 * 0.11;
+    double mainCardHeight = height3 * 0.28;
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
@@ -206,38 +213,60 @@ class _MyHomePageState extends State<MyHomePage> {
               return Container(
                 decoration: const BoxDecoration(
                     image: DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                child: Column(                  
                   children: <Widget>[
                     MyCard(
+                        height: mainCardHeight,
                         widget: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
-                                const Padding(
-                                    padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                    child: ClockWidget()),
-                                PrayerClockWidget(
-                                  prayersToday: prayersToday,
-                                  summerTime: summerTime,
-                                  prayerList: _prayerList,
-                                ),
-                              ],
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),                              
+                                child: Column(  
+                                  children: [
+                                    Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                                    const Padding(
+                                        padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                        child: ClockWidget()),
+                                    PrayerClockWidget(
+                                      prayersToday: prayersToday,
+                                      summerTime: summerTime,
+                                      prayerList: _prayerList,
+                                    ),
+                                  ],
+                                ),                              
                             ),
-                          ),
-                        ),
-                      ],
-                    )),
-                    PrayerWidget(label: "Fajr", time: toSummerTime(prayersToday.fajr)),
-                    PrayerWidget(label: "Shuruq", time: toSummerTime(prayersToday.shuruq)),
-                    PrayerWidget(label: "Duhr", time: toSummerTime(prayersToday.duhr)),
-                    PrayerWidget(label: "Asr", time: toSummerTime(prayersToday.asr)),
-                    PrayerWidget(label: "Maghrib", time: toSummerTime(prayersToday.maghrib)),
-                    PrayerWidget(label: "Isha", time: toSummerTime(prayersToday.isha)),
+                          ],
+                        )),
+                    PrayerWidget(
+                      label: "Fajr",
+                      time: toSummerTime(prayersToday.fajr),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Shuruq",
+                      time: toSummerTime(prayersToday.shuruq),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Duhr",
+                      time: toSummerTime(prayersToday.duhr),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Asr",
+                      time: toSummerTime(prayersToday.asr),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Maghrib",
+                      time: toSummerTime(prayersToday.maghrib),
+                      height: prayerCardHeight,
+                    ),
+                    PrayerWidget(
+                      label: "Isha",
+                      time: toSummerTime(prayersToday.isha),
+                      height: prayerCardHeight,
+                    ),
                   ],
                 ),
               );
