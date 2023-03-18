@@ -4,7 +4,7 @@ import 'store_manager.dart';
 
 class ReminderNotifier with ChangeNotifier {
 
-  late int _reminderTime;
+  int _reminderTime = 10;
   int getReminderTime() => _reminderTime;
 
   ReminderNotifier() {

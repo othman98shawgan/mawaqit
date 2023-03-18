@@ -47,9 +47,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   updatePrayers() {
-    cancelAllPrayers();
-    scheduleNextPrayers(DateTime.now());
-    setState(() {});
+    cancelAllPrayers().whenComplete(
+        () => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
   }
 
   updateReminder(int newReminderTime) {
@@ -61,8 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> cancelAllPrayers() async {
     NotificationsService.cancelAll();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('scheduledPrayers', []);
+    setScheduledPrayers([]);
   }
 
   Future<void> scheduleNextPrayers(DateTime time) async {
@@ -151,6 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     NotificationsService.init();
     readJson();
+    scheduleNextPrayers(DateTime.now());
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
@@ -178,6 +177,13 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
           actions: [
             IconButton(
+              icon: const Icon(Icons.cancel),
+              onPressed: () {
+                cancelAllPrayers();
+              },
+              tooltip: 'Cancel Prayers',
+            ),
+            IconButton(
               icon: const Icon(Icons.notifications),
               onPressed: () {
                 Navigator.pushNamed(context, '/notifications');
@@ -204,7 +210,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: FutureBuilder<List>(
           future: Future.wait([
-            scheduleNextPrayers(DateTime.now()),
             // readJson(),
           ]),
           builder: (buildContext, snapshot) {
