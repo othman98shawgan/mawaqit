@@ -43,12 +43,12 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeNotifier>(
         builder: (context, theme, _) => MaterialApp(
               debugShowCheckedModeBanner: false,
-              title: 'Alfajr',
+              title: 'Mawaqit Al-Quds',
               theme: theme.getTheme(),
               initialRoute: '/home',
               routes: {
                 '/home': (context) => const MyHomePage(
-                      title: 'Alfajr',
+                      title: 'Mawaqit Al-Quds',
                     ),
                 '/counter': (context) => const CounterPage(),
                 '/missed_prayer': (context) => const MissedPrayerPage(),
