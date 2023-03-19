@@ -176,20 +176,20 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(widget.title),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.cancel),
-              onPressed: () {
-                cancelAllPrayers();
-              },
-              tooltip: 'Cancel Prayers',
-            ),
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
-              tooltip: 'Notifications',
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.cancel),
+            //   onPressed: () {
+            //     cancelAllPrayers();
+            //   },
+            //   tooltip: 'Cancel Prayers',
+            // ),
+            // IconButton(
+            //   icon: const Icon(Icons.notifications),
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, '/notifications');
+            //   },
+            //   tooltip: 'Notifications',
+            // ),
             IconButton(
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
@@ -293,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('ALFAJR'),
+                    const Text('Mawaqit Al-Quds'),
                     Padding(
                       padding: const EdgeInsets.only(top: 10),
                       child: Image.asset(
