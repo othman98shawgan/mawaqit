@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.alfajr">
+   <uses-permission android:name="android.permission.VIBRATE"/>
+     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
    <application
-        android:label="alfajr"
+        android:label="مواقيت بيت المقدس"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

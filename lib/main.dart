@@ -1,7 +1,38 @@
+import 'package:alfajr/services/daylight_time_service.dart';
+import 'package:alfajr/services/dhikr_service.dart';
+import 'package:alfajr/ui/calendar_page.dart';
+import 'package:alfajr/ui/counter_page.dart';
+import 'package:alfajr/ui/mathurat_page.dart';
+import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'services/reminder_service.dart';
+import 'services/theme_service.dart';
+import 'ui/home_page.dart';
+import 'ui/notifications_page.dart';
+import 'ui/settings_page.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeNotifier()),
+        ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
+        ChangeNotifierProvider(create: (context) => ReminderNotifier()),
+        ChangeNotifierProvider(create: (context) => DhikrNotifier())
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -9,59 +40,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+    return Consumer<ThemeNotifier>(
+        builder: (context, theme, _) => MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Mawaqit Al-Quds',
+              theme: theme.getTheme(),
+              initialRoute: '/home',
+              routes: {
+                '/home': (context) => const MyHomePage(
+                      title: 'Mawaqit Al-Quds',
+                    ),
+                '/counter': (context) => const CounterPage(),
+                '/missed_prayer': (context) => const MissedPrayerPage(),
+                '/calendar': (context) => const CalendarPage(),
+                '/mathurat': (context) => const MathuratPage(),
+                '/settings': (context) => const SettingsPage(title: 'Settings'),
+                '/notifications': (context) => const NotificationsPage(),
+              },
+            ));
   }
 }
