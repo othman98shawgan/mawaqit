@@ -33,7 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
             title: Text(widget.title),
           ),
           body: SettingsList(
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor),
+            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
             sections: [
               SettingsSection(
                 title: const Text('General'),

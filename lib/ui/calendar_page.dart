@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../models/prayers.dart';
 import '../services/day_of_year_service.dart';
 import '../services/daylight_time_service.dart';
+import '../services/theme_service.dart';
 import 'widgets/prayer_widget.dart';
 
 class CalendarPage extends StatefulWidget {
@@ -71,10 +72,14 @@ class _CalendarPageState extends State<CalendarPage> {
     double mainCardHeight = height3 * 0.20;
     var sunIcon = const Icon(Icons.light_mode);
     var moonIcon = const Icon(Icons.dark_mode);
+    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
 
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy').format(pickedDate),
-      style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 40, color: Colors.white),
+      style: TextStyle(
+          fontWeight: FontWeight.w300,
+          fontSize: 40,
+          color: theme == 'dark' ? Colors.white : Colors.black),
     );
 
     var dateTextButtonWidget = Padding(
@@ -91,8 +96,8 @@ class _CalendarPageState extends State<CalendarPage> {
           child: dateTextWidget,
         ));
 
-    return Consumer<DaylightSavingNotifier>(
-      builder: (context, daylightSaving, child) => Scaffold(
+    return Consumer2<DaylightSavingNotifier, ThemeNotifier>(
+      builder: (context, daylightSaving, theme, child) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("Calendar"),

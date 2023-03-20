@@ -22,8 +22,8 @@ class ThemeNotifier with ChangeNotifier {
     appBarTheme: const AppBarTheme(backgroundColor: appBarColor, foregroundColor: Colors.white),
     primaryColor: Colors.white,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: backgroudColor,
-    dialogBackgroundColor: backgroudColor,
+    scaffoldBackgroundColor: backgroudColor2,
+    dialogBackgroundColor: backgroudColor2,
     dividerColor: Colors.white54,
     focusColor: lightThemeSwatch,
     colorScheme: ColorScheme.fromSwatch(primarySwatch: lightThemeSwatch).copyWith(
