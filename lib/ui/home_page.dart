@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:alfajr/services/day_of_year_service.dart';
+import 'package:alfajr/services/theme_service.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -170,8 +171,8 @@ class _MyHomePageState extends State<MyHomePage> {
       DeviceOrientation.portraitUp,
     ]);
 
-    return Consumer2<DaylightSavingNotifier, ReminderNotifier>(
-      builder: (context, daylightSaving, reminder, child) => Scaffold(
+    return Consumer3<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier>(
+      builder: (context, theme, daylightSaving, reminder, child) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text(widget.title),
@@ -236,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       const Text("  -  "),
                                       Text((HijriCalendar.now().toFormat('dd MMMM yyyy'))),
                                     ],
-                                  ),                                  
+                                  ),
                                   const Padding(
                                       padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
                                       child: ClockWidget()),
