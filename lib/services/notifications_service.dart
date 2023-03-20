@@ -10,21 +10,18 @@ class NotificationsService {
   static final onNotifications = BehaviorSubject<String?>();
 
   static Future _notificationDetails(String channelId) async {
-        var vibrationPattern = Int64List(4);
+    var vibrationPattern = Int64List(4);
     vibrationPattern[0] = 0;
     vibrationPattern[1] = 1000;
     vibrationPattern[2] = 500;
     vibrationPattern[3] = 1000;
 
     return NotificationDetails(
-      android: AndroidNotificationDetails(
-        channelId,
-        'channel name',
-        channelDescription: 'channel description',
-        importance: Importance.max,
-        priority: Priority.high,
-        vibrationPattern: vibrationPattern
-      ),
+      android: AndroidNotificationDetails(channelId, 'channel name',
+          channelDescription: 'channel description',
+          importance: Importance.max,
+          priority: Priority.high,
+          vibrationPattern: vibrationPattern),
     );
   }
 
@@ -34,7 +31,7 @@ class NotificationsService {
 
   static Future init({bool initSheduled = false}) async {
     tz.initializeTimeZones();
-    const android = AndroidInitializationSettings('@drawable/ic_stat_onesignal_default');
+    const android = AndroidInitializationSettings('@drawable/launcher_icon');
     const settings = InitializationSettings(android: android);
     await _notifications.initialize(settings, onSelectNotification: (payload) async {
       onNotifications.add(payload);
