@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:alfajr/ui/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -132,7 +133,14 @@ class _CalendarPageState extends State<CalendarPage> {
                         height: mainCardHeight,
                         widget: Column(
                           children: [
-                            Text(DateFormat('EEEE').format(pickedDate)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(DateFormat('EEEE').format(pickedDate)),
+                                const Text('  -  '),
+                                Text((HijriCalendar.fromDate(pickedDate).toFormat('dd MMMM yyyy'))),
+                              ],
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
