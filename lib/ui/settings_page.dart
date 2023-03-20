@@ -33,7 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
             title: Text(widget.title),
           ),
           body: SettingsList(
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor),
+            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
             sections: [
               SettingsSection(
                 title: const Text('General'),
@@ -119,7 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
               SettingsSection(title: const Text('Help'), tiles: [
                 SettingsTile.navigation(
-                  title: const Text('Reset'),
+                  title: const Text('Reset Notifications'),
                   leading: const Icon(Icons.restart_alt),
                   onPressed: (context) async {
                     widget.updateSummerTime!();

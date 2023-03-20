@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:alfajr/services/day_of_year_service.dart';
+import 'package:alfajr/services/theme_service.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../data/prayer_times.dart';
@@ -16,7 +18,6 @@ import '../services/reminder_service.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // PrayersModel dummyDay =
@@ -170,8 +171,8 @@ class _MyHomePageState extends State<MyHomePage> {
       DeviceOrientation.portraitUp,
     ]);
 
-    return Consumer2<DaylightSavingNotifier, ReminderNotifier>(
-      builder: (context, daylightSaving, reminder, child) => Scaffold(
+    return Consumer3<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier>(
+      builder: (context, theme, daylightSaving, reminder, child) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text(widget.title),
@@ -229,7 +230,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               padding: const EdgeInsets.only(top: 10.0),
                               child: Column(
                                 children: [
-                                  Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                                      const Text("  -  "),
+                                      Text((HijriCalendar.now().toFormat('dd MMMM yyyy'))),
+                                    ],
+                                  ),
                                   const Padding(
                                       padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
                                       child: ClockWidget()),
