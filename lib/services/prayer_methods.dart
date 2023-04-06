@@ -237,14 +237,3 @@ Future<void> setScheduledPrayers(List<String> scheduledPrayers) async {
   final prefs = await SharedPreferences.getInstance();
   prefs.setStringList('scheduledPrayers', scheduledPrayers);
 }
-
-Future<List<String>> getReminderScheduledPrayers() async {
-  final prefs = await SharedPreferences.getInstance();
-  final scheduledPrayers = prefs.getStringList('reminderScheduledPrayers') ?? [];
-  return scheduledPrayers;
-}
-
-Future<void> setReminderScheduledPrayers(List<String> scheduledPrayers) async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setStringList('reminderScheduledPrayers', scheduledPrayers);
-}
