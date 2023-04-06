@@ -6,25 +6,15 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
-import '../services/notifications_service.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({
-    super.key,
-    required this.title,
-    this.updatePrayers,
-    this.updateReminder,
-    this.cancelNotifications,
-    this.updateAppBar,
-  });
+  const SettingsPage({super.key, required this.title, this.updateSummerTime, this.updateReminder});
 
   final String title;
-  final Function? updatePrayers;
+  final Function? updateSummerTime;
   final Function? updateReminder;
-  final Function? cancelNotifications;
-  final Function? updateAppBar;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -33,14 +23,11 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    var summerTimeDescription =
-        Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
-            ? 'Summer Time'
-            : 'Winter Time';
-
-    return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
-        NotificationsStatusNotifier>(
-      builder: (context, theme, daylightSaving, reminder, dhikr, notifications, child) => Center(
+    var summerTimeDesc = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
+        ? 'Summer Time'
+        : 'Winter Time';
+    return Consumer4<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier,DhikrNotifier>(
+      builder: (context, theme, daylightSaving, reminder,dhikr, child) => Center(
         child: Scaffold(
           appBar: AppBar(
             title: Text(widget.title),
@@ -65,61 +52,33 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SettingsTile.switchTile(
                     title: const Text('Daylight Saving'),
-                    description: Text(summerTimeDescription),
+                    description: Text(summerTimeDesc),
                     leading: const Icon(Icons.access_time),
                     initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
                     onToggle: (value) {
                       if (value) {
                         daylightSaving.setSummerTime();
-                        summerTimeDescription = 'Summer Time';
-                        widget.updatePrayers!();
+                        summerTimeDesc = 'Summer Time';
+                        widget.updateSummerTime!();
                       } else {
                         daylightSaving.setWinterTime();
-                        summerTimeDescription = 'Winter Time';
-                        widget.updatePrayers!();
-                      }
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: const Text('Notifications'),
-                tiles: [
-                  SettingsTile.switchTile(
-                    title: const Text('Send Prayer Notifications'),
-                    leading: const Icon(Icons.notifications),
-                    initialValue: notifications.getNotificationsStatus() == true,
-                    onToggle: (value) {
-                      if (value) {
-                        notifications.setNotificationsOn();
-                        notifications.requestNotification();
-                        widget.updatePrayers!();
-                      } else {
-                        notifications.setNotificationsOff();
-                        reminder.setReminderStatus(false);
-                        widget.cancelNotifications!();
+                        summerTimeDesc = 'Winter Time';
+                        widget.updateSummerTime!();
                       }
                     },
                   ),
                   SettingsTile.navigation(
                     title: const Text('Prayer Reminder'),
-                    leading: const Icon(Icons.notification_important_sharp),
-                    value: reminder.getReminderStatus()
-                        ? Text('${reminder.getReminderTime()} mins')
-                        : const Text('Off'),
+                    leading: const Icon(Icons.notifications),
+                    value: Text('${reminder.getReminderTime()} mins'),
                     onPressed: (context) async {
                       await showReminderDialog(
-                        context,
-                        reminder.getReminderStatus(),
-                        reminder.getReminderTime(),
-                        widget.updateReminder!,
-                        widget.updateAppBar!,
-                      );
+                          context, reminder.getReminderTime(), widget.updateReminder!);
                     },
                   ),
                 ],
               ),
-              SettingsSection(
+                            SettingsSection(
                 title: const Text('Dhikr'),
                 tiles: [
                   SettingsTile.switchTile(
@@ -157,12 +116,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ],
               ),
+
               SettingsSection(title: const Text('Help'), tiles: [
                 SettingsTile.navigation(
                   title: const Text('Reset Notifications'),
                   leading: const Icon(Icons.restart_alt),
                   onPressed: (context) async {
-                    widget.updatePrayers!();
+                    widget.updateSummerTime!();
                     Navigator.pop(context);
                   },
                 ),
