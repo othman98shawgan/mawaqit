@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _scheduledPrayers = [];
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
+  List<IconButton> appBarActions = [];
 
   Future<void> updateReminderValue(int val) async {
     Provider.of<ReminderNotifier>(context, listen: false).setReminderTime(val);
@@ -155,12 +156,58 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    updateAppBar(false);
     NotificationsService.init();
     readJson();
     scheduleNextPrayers(DateTime.now());
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
+  }
+
+  void updateAppBar(bool added) {
+    appBarActions = [
+      IconButton(
+        icon: const Icon(Icons.settings),
+        tooltip: 'Settings',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SettingsPage(
+                title: 'Settings Page',
+                updatePrayers: updatePrayers,
+                updateReminder: updateReminder,
+                cancelNotifications: cancelAllPrayers,
+                updateAppBar: updateAppBar,
+              ),
+            ),
+          );
+        },
+      ),
+    ];
+    if (!added) {
+      return;
+    }
+    List<IconButton> newAppBarActions = [
+      IconButton(
+        icon: const Icon(Icons.notifications),
+        onPressed: () {
+          Navigator.pushNamed(context, '/notifications');
+        },
+        tooltip: 'Notifications',
+      ),
+      IconButton(
+        icon: const Icon(Icons.cancel),
+        onPressed: () {
+          cancelAllPrayers();
+        },
+        tooltip: 'Cancel Prayers',
+      ),
+    ];
+    appBarActions.addAll(newAppBarActions);
+    appBarActions = appBarActions.reversed.toList();
+    setState(() {});
   }
 
   @override
@@ -183,39 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text(widget.title),
-          actions: [
-            // IconButton(
-            //   icon: const Icon(Icons.cancel),
-            //   onPressed: () {
-            //     cancelAllPrayers();
-            //   },
-            //   tooltip: 'Cancel Prayers',
-            // ),
-            // IconButton(
-            //   icon: const Icon(Icons.notifications),
-            //   onPressed: () {
-            //     Navigator.pushNamed(context, '/notifications');
-            //   },
-            //   tooltip: 'Notifications',
-            // ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Settings',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsPage(
-                      title: 'Settings Page',
-                      updatePrayers: updatePrayers,
-                      updateReminder: updateReminder,
-                      cancelNotifications: cancelAllPrayers,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
+          actions: appBarActions,
         ),
         body: FutureBuilder<List>(
           future: Future.wait([
