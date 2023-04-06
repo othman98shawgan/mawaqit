@@ -1,9 +1,14 @@
 import 'dart:typed_data';
 
+import 'package:app_settings/app_settings.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+
+import 'store_manager.dart';
 
 class NotificationsService {
   static final _notifications = FlutterLocalNotificationsPlugin();
@@ -64,4 +69,54 @@ class NotificationsService {
         androidAllowWhileIdle: true,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
+}
+
+class NotificationsStatusNotifier with ChangeNotifier {
+  bool _notificationsStatus = false;
+  bool _notificationsAlreadyRequested = false;
+
+  bool getNotificationsStatus() => _notificationsStatus;
+
+  NotificationsStatusNotifier() {
+    StorageManager.readData('NotificationsStatus').then((value) {
+      _notificationsStatus = value ?? 10;
+      notifyListeners();
+    });
+  }
+
+  void setNotificationsOn() async {
+    _notificationsStatus = true;
+    StorageManager.saveData('NotificationsStatus', true);
+    notifyListeners();
+  }
+
+  void setNotificationsOff() async {
+    _notificationsStatus = false;
+    StorageManager.saveData('NotificationsStatus', false);
+    notifyListeners();
+  }
+
+  void requestNotification() async {
+    if (_notificationsAlreadyRequested) {
+      AppSettings.openNotificationSettings();
+    }
+
+    await Permission.notification.isDenied.then((value) {
+      if (value) {
+        Permission.notification.request();
+        _notificationsAlreadyRequested = true;
+      }
+    });
+    await Permission.notification.isPermanentlyDenied.then((value) {
+      if (value) {
+        Permission.notification.request();
+        _notificationsAlreadyRequested = true;
+      }
+    });
+    await Permission.notification.isGranted.then((value) {
+      if (!value) {
+        setNotificationsOff();
+      }
+    });
+  }
 }
