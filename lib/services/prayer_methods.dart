@@ -6,10 +6,10 @@ import '../models/prayer.dart';
 import '../models/prayers.dart';
 import 'day_of_year_service.dart';
 
-void printSnackBar(String message, BuildContext context) {
+void printSnackBar(String message, BuildContext context, {int durationInSeconds = 1}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(message),
-    duration: const Duration(seconds: 1),
+    duration: Duration(seconds: durationInSeconds),
   ));
 }
 

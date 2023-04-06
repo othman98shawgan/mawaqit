@@ -11,17 +11,20 @@ import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage(
-      {super.key,
-      required this.title,
-      this.updatePrayers,
-      this.updateReminder,
-      this.cancelNotifications});
+  const SettingsPage({
+    super.key,
+    required this.title,
+    this.updatePrayers,
+    this.updateReminder,
+    this.cancelNotifications,
+    this.updateAppBar,
+  });
 
   final String title;
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
+  final Function? updateAppBar;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -34,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
         Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
             ? 'Summer Time'
             : 'Winter Time';
-    
+
     return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
         NotificationsStatusNotifier>(
       builder: (context, theme, daylightSaving, reminder, dhikr, notifications, child) => Center(
@@ -105,8 +108,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         ? Text('${reminder.getReminderTime()} mins')
                         : const Text('Off'),
                     onPressed: (context) async {
-                      await showReminderDialog(context, reminder.getReminderStatus(),
-                          reminder.getReminderTime(), widget.updateReminder!);
+                      await showReminderDialog(
+                        context,
+                        reminder.getReminderStatus(),
+                        reminder.getReminderTime(),
+                        widget.updateReminder!,
+                        widget.updateAppBar!,
+                      );
                     },
                   ),
                 ],

@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-showReminderDialog(
-    BuildContext context, bool reminderStatus, int reminderValue, Function updateReminder) async {
+import '../../services/prayer_methods.dart';
+
+showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue,
+    Function updateReminder, Function updateAppBar) async {
   var currentReminderValue = reminderValue;
   var currentReminderStatus = reminderStatus;
+  var longPressCount = 0;
 
   var confirmMethod = (() {
     Navigator.pop(context);
@@ -20,6 +23,12 @@ showReminderDialog(
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
         ElevatedButton(
+          onLongPress: () {
+            if (++longPressCount == 5) {
+              updateAppBar(true);
+              printSnackBar("Developer options available", context);
+            }
+          },
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
