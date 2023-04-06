@@ -118,10 +118,5 @@ class NotificationsStatusNotifier with ChangeNotifier {
         setNotificationsOff();
       }
     });
-    // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    //     FlutterLocalNotificationsPlugin();
-    // flutterLocalNotificationsPlugin
-    //     .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-    //     ?.requestPermission();
   }
 }
