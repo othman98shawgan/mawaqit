@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _scheduledPrayers = [];
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
+  List<IconButton> appBarActions = [];
 
   Future<void> updateReminderValue(int val) async {
     Provider.of<ReminderNotifier>(context, listen: false).setReminderTime(val);
@@ -66,11 +67,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> scheduleNextPrayers(DateTime time) async {
     // prayersToday = dummyDay; //TODO: FOR TESTING
-    // cancelAllPrayers();
+
+    var notifiactionsStatus =
+        Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
+    var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
     _scheduledPrayers = await getScheduledPrayers();
     removePassedPrayers(_scheduledPrayers);
-    if (_scheduledPrayers.length > 71) {
+    if (!notifiactionsStatus ||
+        (reminderStatus && _scheduledPrayers.length > 71) ||
+        (!reminderStatus && _scheduledPrayers.length > 35)) {
       return;
     }
     List<Prayer> prayersToSchedule = [];
@@ -99,26 +105,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
       _scheduledPrayers.add(id);
       //Set reminder
-      var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
-      if (reminderTime.isBefore(DateTime.now())) {
-        continue;
-      }
-      var reminderId = getPrayerNotificationId(reminderTime);
-      var reminderTitle = '';
-      if (prayer.label == 'Shuruq') {
-        reminderTitle = '${prayer.label} is in $reminderValue minutes';
-      } else {
-        reminderTitle = '${prayer.label} Azan is in $reminderValue minutes';
-      }
+      if (reminderStatus) {
+        var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
+        if (reminderTime.isBefore(DateTime.now())) {
+          continue;
+        }
+        var reminderId = getPrayerNotificationId(reminderTime);
+        var reminderTitle = '';
+        if (prayer.label == 'Shuruq') {
+          reminderTitle = '${prayer.label} is in $reminderValue minutes';
+        } else {
+          reminderTitle = '${prayer.label} Azan is in $reminderValue minutes';
+        }
 
-      NotificationsService.scheduleNotifications(
-          id: int.parse(reminderId.substring(6)),
-          channelId: reminderId,
-          title: reminderTitle,
-          payload: 'alfajr',
-          sheduledDate: reminderTime);
+        NotificationsService.scheduleNotifications(
+            id: int.parse(reminderId.substring(6)),
+            channelId: reminderId,
+            title: reminderTitle,
+            payload: 'alfajr',
+            sheduledDate: reminderTime);
 
-      _scheduledPrayers.add(reminderId);
+        _scheduledPrayers.add(reminderId);
+      }
     }
 
     setScheduledPrayers(_scheduledPrayers);
@@ -148,12 +156,58 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    updateAppBar(false);
     NotificationsService.init();
     readJson();
     scheduleNextPrayers(DateTime.now());
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
+  }
+
+  void updateAppBar(bool added) {
+    appBarActions = [
+      IconButton(
+        icon: const Icon(Icons.settings),
+        tooltip: 'Settings',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SettingsPage(
+                title: 'Settings Page',
+                updatePrayers: updatePrayers,
+                updateReminder: updateReminder,
+                cancelNotifications: cancelAllPrayers,
+                updateAppBar: updateAppBar,
+              ),
+            ),
+          );
+        },
+      ),
+    ];
+    if (!added) {
+      return;
+    }
+    List<IconButton> newAppBarActions = [
+      IconButton(
+        icon: const Icon(Icons.notifications),
+        onPressed: () {
+          Navigator.pushNamed(context, '/notifications');
+        },
+        tooltip: 'Notifications',
+      ),
+      IconButton(
+        icon: const Icon(Icons.cancel),
+        onPressed: () {
+          cancelAllPrayers();
+        },
+        tooltip: 'Cancel Prayers',
+      ),
+    ];
+    appBarActions.addAll(newAppBarActions);
+    appBarActions = appBarActions.reversed.toList();
+    setState(() {});
   }
 
   @override
@@ -176,38 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text(widget.title),
-          actions: [
-            // IconButton(
-            //   icon: const Icon(Icons.cancel),
-            //   onPressed: () {
-            //     cancelAllPrayers();
-            //   },
-            //   tooltip: 'Cancel Prayers',
-            // ),
-            // IconButton(
-            //   icon: const Icon(Icons.notifications),
-            //   onPressed: () {
-            //     Navigator.pushNamed(context, '/notifications');
-            //   },
-            //   tooltip: 'Notifications',
-            // ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Settings',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsPage(
-                      title: 'Settings Page',
-                      updateSummerTime: updatePrayers,
-                      updateReminder: updateReminder,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
+          actions: appBarActions,
         ),
         body: FutureBuilder<List>(
           future: Future.wait([

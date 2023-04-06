@@ -1,10 +1,19 @@
+import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:settings_ui/settings_ui.dart';
 
-showReminderDialog(BuildContext context, int reminderValue, Function updateReminder) async {
+import '../../services/prayer_methods.dart';
+
+showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue,
+    Function updateReminder, Function updateAppBar) async {
   var currentReminderValue = reminderValue;
+  var currentReminderStatus = reminderStatus;
+  var longPressCount = 0;
 
   var confirmMethod = (() {
     Navigator.pop(context);
+    Provider.of<ReminderNotifier>(context, listen: false).setReminderStatus(currentReminderStatus);
     updateReminder(currentReminderValue);
   });
 
@@ -13,7 +22,16 @@ showReminderDialog(BuildContext context, int reminderValue, Function updateRemin
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        ElevatedButton(
+          onLongPress: () {
+            if (++longPressCount == 5) {
+              updateAppBar(true);
+              printSnackBar("Developer options available", context);
+            }
+          },
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         TextButton(
           onPressed: confirmMethod,
           child: const Text('Confirm'),
@@ -22,12 +40,25 @@ showReminderDialog(BuildContext context, int reminderValue, Function updateRemin
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 20.0),
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: SwitchListTile(
+              title: const Text('Set prayer reminder'),
+              value: currentReminderStatus,
+              onChanged: (bool value) {
+                setState(() {
+                  currentReminderStatus = value;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 0.0, 24.0, 20.0),
             child: Row(
               children: [
                 Text(
                   "Reminder for each prayer: ${currentReminderValue.toInt()}",
                   textAlign: TextAlign.start,
+                  style: TextStyle(color: currentReminderStatus ? null : Colors.grey),
                 ),
               ],
             ),
@@ -37,11 +68,13 @@ showReminderDialog(BuildContext context, int reminderValue, Function updateRemin
               max: 30,
               divisions: 30,
               label: currentReminderValue.round().toString(),
-              onChanged: (double value) {
-                setState(() {
-                  currentReminderValue = value.toInt();
-                });
-              }),
+              onChanged: currentReminderStatus
+                  ? (double value) {
+                      setState(() {
+                        currentReminderValue = value.toInt();
+                      });
+                    }
+                  : null),
         ]);
       }));
 
