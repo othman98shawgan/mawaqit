@@ -73,7 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
     var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
     _scheduledPrayers = await getScheduledPrayers();
-    removePassedPrayers(_scheduledPrayers);
+    if (removePassedPrayers(_scheduledPrayers)) {
+      setScheduledPrayers(_scheduledPrayers);
+    }
     if (!notifiactionsStatus ||
         (reminderStatus && _scheduledPrayers.length > 71) ||
         (!reminderStatus && _scheduledPrayers.length > 35)) {

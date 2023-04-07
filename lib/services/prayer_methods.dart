@@ -117,17 +117,20 @@ String getPrayerNotificationId(DateTime time) {
   return DateFormat('yyyyMMddkkmm').format(time);
 }
 
-void removePassedPrayers(List<String> prayers) {
+bool removePassedPrayers(List<String> prayers) {
   List<String> toDelete = [];
+  var removed = false;
   for (final prayer in prayers) {
     var time = getDateFromId(prayer);
     if (time.isBefore(DateTime.now())) {
       toDelete.add(prayer);
+      removed = true;
     }
   }
   for (final element in toDelete) {
     prayers.remove(element);
   }
+  return removed;
 }
 
 List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime) {
