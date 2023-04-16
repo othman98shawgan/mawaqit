@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -239,4 +240,16 @@ Future<List<String>> getScheduledPrayers() async {
 Future<void> setScheduledPrayers(List<String> scheduledPrayers) async {
   final prefs = await SharedPreferences.getInstance();
   prefs.setStringList('scheduledPrayers', scheduledPrayers);
+}
+
+String getPrayerTranslation(String label, BuildContext context) {
+  var map = {
+    'Fajr': AppLocalizations.of(context)!.fajrString,
+    'Shuruq': AppLocalizations.of(context)!.shuruqString,
+    'Duhr': AppLocalizations.of(context)!.duhrString,
+    'Asr': AppLocalizations.of(context)!.asrString,
+    'Maghrib': AppLocalizations.of(context)!.maghribString,
+    'Isha': AppLocalizations.of(context)!.ishaString,
+  };
+  return map[label]!;
 }

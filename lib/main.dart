@@ -1,3 +1,6 @@
+import 'package:alfajr/l10n/l10n.dart';
+import 'package:alfajr/services/locale_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/dhikr_service.dart';
 import 'package:alfajr/services/notifications_service.dart';
@@ -6,6 +9,7 @@ import 'package:alfajr/ui/counter_page.dart';
 import 'package:alfajr/ui/mathurat_page.dart';
 import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'services/reminder_service.dart';
@@ -31,6 +35,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => ReminderNotifier()),
         ChangeNotifierProvider(create: (context) => DhikrNotifier()),
         ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
+        ChangeNotifierProvider(create: (context) => LocaleNotifier()),
       ],
       child: const MyApp(),
     ),
@@ -42,23 +47,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeNotifier>(
-        builder: (context, theme, _) => MaterialApp(
+    return Consumer2<ThemeNotifier, LocaleNotifier>(
+        builder: (context, theme, localeProvider, _) => MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'Mawaqit Al-Quds',
               theme: theme.getTheme(),
+              locale: localeProvider.locale,
               initialRoute: '/home',
               routes: {
-                '/home': (context) => const MyHomePage(
-                      title: 'Mawaqit Al-Quds',
-                    ),
+                '/home': (context) => const MyHomePage(),
                 '/counter': (context) => const CounterPage(),
                 '/missed_prayer': (context) => const MissedPrayerPage(),
                 '/calendar': (context) => const CalendarPage(),
                 '/mathurat': (context) => const MathuratPage(),
-                '/settings': (context) => const SettingsPage(title: 'Settings'),
+                '/settings': (context) => const SettingsPage(),
                 '/notifications': (context) => const NotificationsPage(),
               },
+              supportedLocales: L10n.all,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
             ));
   }
 }
