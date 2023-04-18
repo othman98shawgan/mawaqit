@@ -54,7 +54,10 @@
    "targetDialogTitle": "الهدف",
    "languageDialogTitle": "اللغة",
    "notificationsPrayerTimeTitle":"حان موعد صلاة {prayer}",
+   "notificationsShuruqPrayerTimeTitle":"حان وقت الشروق",
    "notificationsShuruqBody":"صلاة الضحى بعد 20 دقيقة",
-   "notificationsReminderTitle":"أذان صلاة {prayer} بعد {reminder}",
-   "notificationsShuruqReminderTitle":"الشروق بعد {reminder}"
+   "notificationsReminderTitle":"أذان صلاة {prayer} بعد {reminder} دقيقة",
+   "notificationsReminderTitleMinutes":"أذان صلاة {prayer} بعد {reminder} دقائق",
+   "notificationsShuruqReminderTitle":"الشروق بعد {reminder} دقيقة",
+   "notificationsShuruqReminderTitleMinutes":"الشروق بعد {reminder} دقائق"
 }

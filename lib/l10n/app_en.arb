@@ -255,6 +255,10 @@
          }
       }
    },
+   "notificationsShuruqPrayerTimeTitle":"Time for Shuruq",
+   "@notificationsShuruqPrayerTimeTitle":{
+      "description":"Notification title for when a Shuruq time arrives"
+   },
    "notificationsShuruqBody":"Duha is in 20 minutes",
    "@notificationsShuruqBody":{
       "description":"Notification body for Shuruq"
@@ -273,9 +277,34 @@
          }
       }
    },
+   "notificationsReminderTitleMinutes":"{prayer} Azan is in {reminder} minutes",
+   "@notificationsReminderTitleMinutes":{
+      "description":"Notification title for prayer reminder - For arabic Locale",
+      "placeholders":{
+         "prayer":{
+            "type":"String",
+            "example":"Fajr"
+         },
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+
    "notificationsShuruqReminderTitle":"Shuruq is in {reminder} minutes",
    "@notificationsShuruqReminderTitle":{
       "description":"Notification title for Shuruq reminder",
+      "placeholders":{
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "notificationsShuruqReminderTitleMinutes":"Shuruq is in {reminder} minutes",
+   "@notificationsShuruqReminderTitleMinutes":{
+      "description":"Notification title for Shuruq reminder - For arabic Locale",
       "placeholders":{
          "reminder":{
             "type":"num",

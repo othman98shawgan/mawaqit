@@ -95,13 +95,19 @@ class _MyHomePageState extends State<MyHomePage> {
         continue;
       }
       var prayerBody = '';
+      var pryaerTitle = '';
       if (prayer.label == 'Shuruq') {
-        prayerBody = 'Duha is around 20 minutes';
+        prayerBody = AppLocalizations.of(context)!.notificationsShuruqBody;
+        pryaerTitle = AppLocalizations.of(context)!.notificationsShuruqPrayerTimeTitle;
+      } else {
+        pryaerTitle = AppLocalizations.of(context)!
+            .notificationsPrayerTimeTitle(getPrayerTranslation(prayer.label, context));
       }
+
       NotificationsService.scheduleNotifications(
           id: int.parse(id.substring(6)),
           channelId: id,
-          title: 'Time for ${prayer.label}',
+          title: pryaerTitle,
           body: prayerBody,
           payload: 'alfajr',
           sheduledDate: prayer.time);
@@ -116,17 +122,28 @@ class _MyHomePageState extends State<MyHomePage> {
         var reminderId = getPrayerNotificationId(reminderTime);
         var reminderTitle = '';
         if (prayer.label == 'Shuruq') {
-          reminderTitle = '${prayer.label} is in $reminderValue minutes';
+          reminderTitle =
+              AppLocalizations.of(context)!.notificationsShuruqReminderTitle(reminderValue);
+          if (reminderValue <= 10) {
+            reminderTitle = AppLocalizations.of(context)!
+                .notificationsShuruqReminderTitleMinutes(reminderValue);
+          }
         } else {
-          reminderTitle = '${prayer.label} Azan is in $reminderValue minutes';
+          reminderTitle = AppLocalizations.of(context)!.notificationsReminderTitle(
+              getPrayerTranslation(prayer.label, context), reminderValue);
+          if (reminderValue <= 10) {
+            reminderTitle = AppLocalizations.of(context)!.notificationsReminderTitleMinutes(
+                getPrayerTranslation(prayer.label, context), reminderValue);
+          }
         }
 
         NotificationsService.scheduleNotifications(
-            id: int.parse(reminderId.substring(6)),
-            channelId: reminderId,
-            title: reminderTitle,
-            payload: 'alfajr',
-            sheduledDate: reminderTime);
+          id: int.parse(reminderId.substring(6)),
+          channelId: reminderId,
+          title: reminderTitle,
+          payload: 'alfajr',
+          sheduledDate: reminderTime,
+        );
 
         _scheduledPrayers.add(reminderId);
       }
@@ -170,17 +187,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void updateAppBar(bool added) {
     appBarActions = [
-      IconButton(
-        icon: const Icon(Icons.language),
-        onPressed: () {
-          if (Provider.of<LocaleNotifier>(context, listen: false).locale == const Locale('en')) {
-            Provider.of<LocaleNotifier>(context, listen: false).setLocale(const Locale('ar'));
-          } else {
-            Provider.of<LocaleNotifier>(context, listen: false).setLocale(const Locale('en'));
-          }
-        },
-        tooltip: 'Language',
-      ),
       IconButton(
         icon: const Icon(Icons.settings),
         tooltip: 'Settings',
