@@ -47,6 +47,8 @@ dependencies:
   flutter_launcher_icons: ^0.12.0
   hijri: ^3.0.0
   app_settings: ^4.2.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -73,7 +75,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  generate: true
+  
   assets:
     - lib/data/prayer-time.json
     - images/

@@ -1,6 +1,11 @@
+import 'package:alfajr/services/locale_service.dart';
+import 'package:alfajr/services/prayer_methods.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'widgets/card_widget.dart';
+import 'dart:ui' as ui;
 
 class MissedPrayerPage extends StatefulWidget {
   const MissedPrayerPage({Key? key}) : super(key: key);
@@ -55,49 +60,52 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     // Height (without status and toolbar)
     double height3 = height - padding.top - kToolbarHeight;
 
-    return Scaffold(
-      floatingActionButton: _fab(0),
-      appBar: AppBar(
-        title: const Text('Missed Prayers'),
-      ),
-      body: FutureBuilder(
-        future: getAllMissed(),
-        builder: (buildContext, snapshot) {
-          if (snapshot.hasData) {
-            return Column(
-              children: [
-                _missedPrayerWidget("Fajr", 0),
-                _missedPrayerWidget("Duhr", 1),
-                _missedPrayerWidget("Asr", 2),
-                _missedPrayerWidget("Maghrib", 3),
-                _missedPrayerWidget("Isha", 4),
-                Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: width * 0.02, top: height3 * 0.01),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          showClearAllDialog(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(10),
-                          backgroundColor: Colors.red,
-                        ),
-                        child: const Text(
-                          "Clear all",
-                          textAlign: TextAlign.center,
+    return Directionality(
+      textDirection: ui.TextDirection.ltr,
+      child: Scaffold(
+        floatingActionButton: _fab(0),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.missedPrayersString),
+        ),
+        body: FutureBuilder(
+          future: getAllMissed(),
+          builder: (buildContext, snapshot) {
+            if (snapshot.hasData) {
+              return Column(
+                children: [
+                  _missedPrayerWidget("Fajr", 0),
+                  _missedPrayerWidget("Duhr", 1),
+                  _missedPrayerWidget("Asr", 2),
+                  _missedPrayerWidget("Maghrib", 3),
+                  _missedPrayerWidget("Isha", 4),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: width * 0.02, top: height3 * 0.01),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            showClearAllDialog(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(10),
+                            backgroundColor: Colors.red,
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)!.missedPrayersClearAll,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          } else {
-            // Return loading screen while reading preferences
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+                    ],
+                  ),
+                ],
+              );
+            } else {
+              // Return loading screen while reading preferences
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
       ),
     );
   }
@@ -117,39 +125,59 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     // Height (without status and toolbar)
     double height3 = height - padding.top - kToolbarHeight;
 
+    var ltrPrayer = Padding(
+      padding: const EdgeInsets.only(left: 10.0),
+      child: Container(
+        width: width * 0.35,
+        height: height3 * 0.1,
+        alignment: Alignment.centerLeft,
+        child: Text(
+          getPrayerTranslation(label, context),
+          textAlign: TextAlign.center,
+          style: style,
+        ),
+      ),
+    );
+    var rtlPrayer = Padding(
+      padding: const EdgeInsets.only(right: 20.0),
+      child: Container(
+        width: width * 0.3,
+        height: height3 * 0.1,
+        alignment: Alignment.centerRight,
+        child: Text(
+          getPrayerTranslation(label, context),
+          textAlign: TextAlign.center,
+          style: style,
+        ),
+      ),
+    );
+    var locale = Provider.of<LocaleNotifier>(context, listen: false).locale;
+    var localeTextDirection =
+        Provider.of<LocaleNotifier>(context, listen: false).getTextDirection(locale);
+    var currentPrayer = localeTextDirection == ui.TextDirection.ltr ? ltrPrayer : rtlPrayer;
+
     return MyCard(
-        widget: Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0),
-          child: Container(
-            width: width * 0.35,
-            height: height3 * 0.1,
-            alignment: Alignment.centerLeft,
+      widget: Row(
+        children: [
+          currentPrayer,
+          Container(
+            width: width * 0.2,
+            alignment: Alignment.center,
             child: Text(
-              label,
-              textAlign: TextAlign.center,
+              '${prayers[index]}',
               style: style,
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
-        Container(
-          width: width * 0.2,
-          alignment: Alignment.center,
-          child: Text(
-            '${prayers[index]}',
-            style: style,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Container(
-            alignment: Alignment.centerLeft,
-            width: width * 0.4,
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [_incrementButton(index), _doneButton(index)]))
-      ],
-    ));
+          Container(
+              alignment: Alignment.centerLeft,
+              width: width * 0.4,
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [_incrementButton(index), _doneButton(index)]))
+        ],
+      ),
+    );
   }
 
   Widget _fab(int index) {
@@ -211,7 +239,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
         });
       },
       style: ElevatedButton.styleFrom(
-          fixedSize: Size(width * 0.4, 0), padding: const EdgeInsets.all(10)),
+          fixedSize: Size(width * 0.4, 40), padding: const EdgeInsets.all(10)),
       child: Text(label, textAlign: TextAlign.center),
     );
   }
@@ -220,17 +248,19 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     double height = MediaQuery.of(context).size.height;
 
     AlertDialog alert = AlertDialog(
-        title: const Text("Add missed prayers"),
+        title: Text(AppLocalizations.of(context)!.addMissedPrayersTitle),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.closeString)),
         ],
         content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
           return SizedBox(
             height: height * 0.2,
             child: Column(children: [
-              _addDaysButton(7, "Add Week"),
-              _addDaysButton(30, "Add Month"),
-              _addDaysButton(365, "Add Year"),
+              _addDaysButton(7, AppLocalizations.of(context)!.addWeekString),
+              _addDaysButton(30, AppLocalizations.of(context)!.addMonthString),
+              _addDaysButton(365, AppLocalizations.of(context)!.addYearString),
             ]),
           );
         }));
@@ -244,6 +274,11 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
   }
 
   showClearAllDialog(BuildContext context) async {
+    var clearAllString = AppLocalizations.of(context)!.missedPrayersClearAll;
+    var clearAllMessageString = AppLocalizations.of(context)!.missedPrayersClearAllMessage;
+    var confirmString = AppLocalizations.of(context)!.confirmString;
+    var cancelString = AppLocalizations.of(context)!.cancelString;
+
     var confirmMethod = (() {
       setState(() {
         clearAllMissed();
@@ -252,16 +287,16 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     });
 
     AlertDialog alert = AlertDialog(
-        title: const Text("Clear All"),
+        title: Text(clearAllString),
         actions: [
-          ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
           TextButton(
             onPressed: confirmMethod,
-            child: const Text('Confirm'),
+            child: Text(confirmString),
           ),
         ],
         content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-          return const Text("Are you sure you want to clear all missed prayers?");
+          return Text(clearAllMessageString);
         }));
 
     showDialog(

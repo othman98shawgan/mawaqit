@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timer_builder/timer_builder.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/prayer.dart';
 import '../../models/prayers.dart';
@@ -82,13 +83,15 @@ class _PrayerClockState extends State<PrayerClockWidget> {
           ListTile(
             contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
             visualDensity: const VisualDensity(vertical: -4),
-            leading: Text("Time until ${next.label}:   ", style: prayerTextStyle),
+            leading: Text(AppLocalizations.of(context)!.timeUntil(getPrayerTranslation(next.label, context)),
+                style: prayerTextStyle),
             trailing: Text(nextText, style: prayerTimeStyle),
           ),
           ListTile(
             contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
             visualDensity: const VisualDensity(vertical: -4),
-            leading: Text("Time since ${prev.label}:   ", style: prayerTextStyle),
+            leading: Text(AppLocalizations.of(context)!.timeSince(getPrayerTranslation(prev.label, context)),
+                style: prayerTextStyle),
             trailing: Text(prevText, style: prayerTimeStyle),
           )
         ],
