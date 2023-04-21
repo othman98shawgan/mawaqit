@@ -190,60 +190,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SettingsSection(
-                title: Text(
-                  dhikrSection,
-                  strutStyle: const StrutStyle(forceStrutHeight: true),
-                ),
-                tiles: [
-                  SettingsTile.switchTile(
-                    title: Text(
-                      dhikrVibrateOnTap,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
-                    leading: const Icon(Icons.vibration),
-                    initialValue: dhikr.getVibrateOnTap(),
-                    onToggle: (value) {
-                      if (value) {
-                        dhikr.enableVibrateOnTap();
-                      } else {
-                        dhikr.disableVibrateOnTap();
-                      }
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text(
-                      dhikrVibrateOnTarget,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
-                    leading: const Icon(Icons.vibration),
-                    initialValue: dhikr.getVibrateOnCountTarget(),
-                    onToggle: (value) {
-                      if (value) {
-                        dhikr.enableVibrateOnCountTarget();
-                      } else {
-                        dhikr.disableVibrateOnCountTarget();
-                      }
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    enabled: dhikr.getVibrateOnCountTarget(),
-                    leading: const Icon(Icons.track_changes),
-                    title: Text(
-                      targetString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
-                    value: Text(
-                      AppLocalizations.of(context)!
-                          .settingsTargetDescription(dhikr.getDhikrTarget()),
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
-                    onPressed: (context) {
-                      showTargetDialog(context, dhikr.getDhikrTarget());
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
                   title: Text(
                     helpSection,
                     strutStyle: const StrutStyle(forceStrutHeight: true),
@@ -265,77 +211,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-
-showTargetDialog(BuildContext context, int target) async {
-  int? currentTarget = target;
-
-  var confirmMethod = (() {
-    Navigator.pop(context);
-    Provider.of<DhikrNotifier>(context, listen: false).setDhikrCount(currentTarget!);
-  });
-
-  var targetDialogTitle = AppLocalizations.of(context)!.targetDialogTitle;
-  var confirmString = AppLocalizations.of(context)!.confirmString;
-  var cancelString = AppLocalizations.of(context)!.cancelString;
-
-  AlertDialog alert = AlertDialog(
-      title: Text(targetDialogTitle),
-      // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
-      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
-      actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
-      ],
-      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
-                    value: 33,
-                    title: const Text('33'),
-                    groupValue: currentTarget,
-                    onChanged: (val) {
-                      setState(() {
-                        currentTarget = (val ?? 0) as int?;
-                      });
-                    }),
-                RadioListTile(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
-                    value: 100,
-                    title: const Text('100'),
-                    groupValue: currentTarget,
-                    onChanged: (val) {
-                      setState(() {
-                        currentTarget = (val ?? 0) as int?;
-                      });
-                    }),
-              ],
-            ),
-          ),
-        ]);
-      }));
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
-}
-
 showLocaleDialog(BuildContext context, Locale locale) async {
   Locale? currentLocale = locale;
 

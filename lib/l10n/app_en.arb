@@ -291,7 +291,6 @@
          }
       }
    },
-
    "notificationsShuruqReminderTitle":"Shuruq is in {reminder} minutes",
    "@notificationsShuruqReminderTitle":{
       "description":"Notification title for Shuruq reminder",
