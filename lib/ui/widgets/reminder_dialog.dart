@@ -19,8 +19,6 @@ showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue,
 
   var dialogTitle = AppLocalizations.of(context)!.reminderDialogTitle;
   var reminderSetMessage = AppLocalizations.of(context)!.reminderDialogMessage;
-  var reminderValueMessage =
-      AppLocalizations.of(context)!.reminderPrayerMessage(currentReminderValue.toInt());
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
 
@@ -63,7 +61,7 @@ showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue,
             child: Row(
               children: [
                 Text(
-                  reminderValueMessage,
+                  AppLocalizations.of(context)!.reminderPrayerMessage(currentReminderValue.toInt()),
                   textAlign: TextAlign.start,
                   style: TextStyle(color: currentReminderStatus ? null : Colors.grey),
                 ),
