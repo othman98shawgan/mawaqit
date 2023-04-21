@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/dhikr_service.dart';
 import '../services/store_manager.dart';
 import '../services/theme_service.dart';
+import 'settings_dhikr_page.dart';
 import 'settings_page.dart';
 import 'dart:ui' as ui;
 
@@ -95,7 +96,7 @@ class _CounterPageState extends State<CounterPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SettingsPage(),
+                      builder: (context) => const SettingsDhikrPage(),
                     ),
                   );
                 },
