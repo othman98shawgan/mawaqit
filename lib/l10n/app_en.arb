@@ -31,7 +31,7 @@
    "@ishaString":{
       "description":"Isha prayer string"
    },
-   "timeUntil":"Time until {prayer}:   ",
+   "timeUntil":"Time until {prayer}:",
    "@timeUntil":{
       "description":"Time until prayer string",
       "placeholders":{
@@ -41,7 +41,7 @@
          }
       }
    },
-   "timeSince":"Time since {prayer}:   ",
+   "timeSince":"Time since {prayer}:",
    "@timeSince":{
       "description":"Time since prayer string",
       "placeholders":{
