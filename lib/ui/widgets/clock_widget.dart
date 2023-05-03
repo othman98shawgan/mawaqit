@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:timer_builder/timer_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/prayer.dart';
 import '../../models/prayers.dart';
+import '../../services/locale_service.dart';
 import '../../services/prayer_methods.dart';
 
 class ClockWidget extends StatelessWidget {
@@ -64,6 +66,11 @@ class _PrayerClockState extends State<PrayerClockWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
+    var locale = Provider.of<LocaleNotifier>(context, listen: false).locale.toString();
+    var prayerTextAlingment = locale == 'ar' ? Alignment.centerRight : Alignment.centerLeft;
+    var prayerTextWidth = locale == 'ar' ? width * 0.45 : width * 0.4;
+
     updatePrayers();
     var prayerTextStyle = const TextStyle(
       fontWeight: FontWeight.w300,
@@ -78,22 +85,75 @@ class _PrayerClockState extends State<PrayerClockWidget> {
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {
       var nextText = printDuration(next.time.difference(DateTime.now()));
       var prevText = printDuration(DateTime.now().difference(prev.time));
+
       return Column(
         children: [
-          ListTile(
-            contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
-            visualDensity: const VisualDensity(vertical: -4),
-            leading: Text(AppLocalizations.of(context)!.timeUntil(getPrayerTranslation(next.label, context)),
-                style: prayerTextStyle),
-            trailing: Text(nextText, style: prayerTimeStyle),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: width * 0.1,
+              ),
+              SizedBox(
+                width: prayerTextWidth,
+                child: FittedBox(
+                  alignment: prayerTextAlingment,
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    AppLocalizations.of(context)!
+                        .timeUntil(getPrayerTranslation(next.label, context)),
+                    style: prayerTextStyle,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: width * 0.025,
+              ),
+              SizedBox(
+                width: width * 0.3,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(nextText, style: prayerTimeStyle, textAlign: TextAlign.center),
+                ),
+              ),
+              SizedBox(
+                width: width * 0.1,
+              ),
+            ],
           ),
-          ListTile(
-            contentPadding: const EdgeInsets.only(left: 40.0, right: 40.0),
-            visualDensity: const VisualDensity(vertical: -4),
-            leading: Text(AppLocalizations.of(context)!.timeSince(getPrayerTranslation(prev.label, context)),
-                style: prayerTextStyle),
-            trailing: Text(prevText, style: prayerTimeStyle),
-          )
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: width * 0.1,
+              ),
+              SizedBox(
+                width: prayerTextWidth,
+                child: FittedBox(
+                  alignment: prayerTextAlingment,
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    AppLocalizations.of(context)!
+                        .timeSince(getPrayerTranslation(prev.label, context)),
+                    style: prayerTextStyle,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: width * 0.025,
+              ),
+              SizedBox(
+                width: width * 0.3,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(prevText, style: prayerTimeStyle, textAlign: TextAlign.center),
+                ),
+              ),
+              SizedBox(
+                width: width * 0.1,
+              ),
+            ],
+          ),
         ],
       );
     });
