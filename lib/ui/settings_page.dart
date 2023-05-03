@@ -1,8 +1,10 @@
 import 'package:alfajr/services/daylight_time_service.dart';
+import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
@@ -10,17 +12,17 @@ import '../services/notifications_service.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 
+var localeMap = {'ar': "العربية", 'en': "English"};
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     super.key,
-    required this.title,
     this.updatePrayers,
     this.updateReminder,
     this.cancelNotifications,
     this.updateAppBar,
   });
 
-  final String title;
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
@@ -33,26 +35,72 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
+    var title = AppLocalizations.of(context)!.settingsString;
+    var generalSection = AppLocalizations.of(context)!.settingsGeneralSection;
+    var languageString = AppLocalizations.of(context)!.settingsLanguage;
+    var darkModeString = AppLocalizations.of(context)!.settingsDarkMode;
+    var dstString = AppLocalizations.of(context)!.settingsDaylightSaving;
+    var summerTimeString = AppLocalizations.of(context)!.settingsSummerTime;
+    var winterTimeString = AppLocalizations.of(context)!.settingsWinterTime;
+    var notificationsSection = AppLocalizations.of(context)!.settingsNotificationsSection;
+    var sendNotificationsString = AppLocalizations.of(context)!.settingsSendNotifications;
+    var prayerReminderString = AppLocalizations.of(context)!.settingsPrayerReminder;
+    var prayerReminderOffString =
+        AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
+    var dhikrSection = AppLocalizations.of(context)!.settingsDhikrSection;
+    var dhikrVibrateOnTap = AppLocalizations.of(context)!.settingsDhikrVibrateOnTap;
+    var dhikrVibrateOnTarget = AppLocalizations.of(context)!.settingsDhikrVibrateOnTarget;
+    var targetString = AppLocalizations.of(context)!.settingsTarget;
+    var helpSection = AppLocalizations.of(context)!.settingsHelpSection;
+    var resetNotificationsString = AppLocalizations.of(context)!.settingsResetNotifications;
+
+    var forceStrutHeightStrutStyle = const StrutStyle(forceStrutHeight: true);
+
     var summerTimeDescription =
         Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
-            ? 'Summer Time'
-            : 'Winter Time';
+            ? summerTimeString
+            : winterTimeString;
 
-    return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
-        NotificationsStatusNotifier>(
-      builder: (context, theme, daylightSaving, reminder, dhikr, notifications, child) => Center(
+    return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
+        NotificationsStatusNotifier, LocaleNotifier>(
+      builder:
+          (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) =>
+              Center(
+                  child: Directionality(
+        textDirection: TextDirection.ltr,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(widget.title),
+            title: Text(title),
           ),
           body: SettingsList(
+            contentPadding: EdgeInsets.all(0),
             lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
             sections: [
               SettingsSection(
-                title: const Text('General'),
+                title: Text(
+                  generalSection,
+                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                ),
                 tiles: [
+                  SettingsTile.navigation(
+                    leading: const Icon(Icons.language),
+                    title: Text(
+                      languageString,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
+                    value: Text(
+                      localeMap[localeProvider.locale.toString()]!,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
+                    onPressed: (context) {
+                      showLocaleDialog(context, localeProvider.locale);
+                    },
+                  ),
                   SettingsTile.switchTile(
-                    title: const Text('Dark Mode'),
+                    title: Text(
+                      darkModeString,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
                     leading: const Icon(Icons.dark_mode_outlined),
                     initialValue: theme.getTheme() == theme.darkTheme,
                     onToggle: (value) {
@@ -64,18 +112,24 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                   SettingsTile.switchTile(
-                    title: const Text('Daylight Saving'),
-                    description: Text(summerTimeDescription),
+                    title: Text(
+                      dstString,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
+                    description: Text(
+                      summerTimeDescription,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
                     leading: const Icon(Icons.access_time),
                     initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
                     onToggle: (value) {
                       if (value) {
                         daylightSaving.setSummerTime();
-                        summerTimeDescription = 'Summer Time';
+                        summerTimeDescription = summerTimeString;
                         widget.updatePrayers!();
                       } else {
                         daylightSaving.setWinterTime();
-                        summerTimeDescription = 'Winter Time';
+                        summerTimeDescription = winterTimeString;
                         widget.updatePrayers!();
                       }
                     },
@@ -83,10 +137,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SettingsSection(
-                title: const Text('Notifications'),
+                title: Text(
+                  notificationsSection,
+                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                ),
                 tiles: [
                   SettingsTile.switchTile(
-                    title: const Text('Send Prayer Notifications'),
+                    title: Text(
+                      sendNotificationsString,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
                     leading: const Icon(Icons.notifications),
                     initialValue: notifications.getNotificationsStatus() == true,
                     onToggle: (value) {
@@ -102,11 +162,21 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                   SettingsTile.navigation(
-                    title: const Text('Prayer Reminder'),
+                    title: Text(
+                      prayerReminderString,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                    ),
                     leading: const Icon(Icons.notification_important_sharp),
                     value: reminder.getReminderStatus()
-                        ? Text('${reminder.getReminderTime()} mins')
-                        : const Text('Off'),
+                        ? Text(
+                            AppLocalizations.of(context)!
+                                .settingsPrayerReminderDescription(reminder.getReminderTime()),
+                            strutStyle: const StrutStyle(forceStrutHeight: true),
+                          )
+                        : Text(
+                            prayerReminderOffString,
+                            strutStyle: const StrutStyle(forceStrutHeight: true),
+                          ),
                     onPressed: (context) async {
                       await showReminderDialog(
                         context,
@@ -120,78 +190,47 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SettingsSection(
-                title: const Text('Dhikr'),
-                tiles: [
-                  SettingsTile.switchTile(
-                    title: const Text('Vibrate on each Tap'),
-                    leading: const Icon(Icons.vibration),
-                    initialValue: dhikr.getVibrateOnTap(),
-                    onToggle: (value) {
-                      if (value) {
-                        dhikr.enableVibrateOnTap();
-                      } else {
-                        dhikr.disableVibrateOnTap();
-                      }
-                    },
+                  title: Text(
+                    helpSection,
+                    strutStyle: const StrutStyle(forceStrutHeight: true),
                   ),
-                  SettingsTile.switchTile(
-                    title: const Text('Vibrate on reaching Target'),
-                    leading: const Icon(Icons.vibration),
-                    initialValue: dhikr.getVibrateOnCountTarget(),
-                    onToggle: (value) {
-                      if (value) {
-                        dhikr.enableVibrateOnCountTarget();
-                      } else {
-                        dhikr.disableVibrateOnCountTarget();
-                      }
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    enabled: dhikr.getVibrateOnCountTarget(),
-                    leading: const Icon(Icons.track_changes),
-                    title: const Text('Target'),
-                    value: Text('Current target is: ${dhikr.getDhikrTarget()}'),
-                    onPressed: (context) {
-                      showRoundToDialog(context, dhikr.getDhikrTarget());
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(title: const Text('Help'), tiles: [
-                SettingsTile.navigation(
-                  title: const Text('Reset Notifications'),
-                  leading: const Icon(Icons.restart_alt),
-                  onPressed: (context) async {
-                    widget.updatePrayers!();
-                    Navigator.pop(context);
-                  },
-                ),
-              ]),
+                  tiles: [
+                    SettingsTile.navigation(
+                      title: Text(resetNotificationsString,strutStyle: const StrutStyle(forceStrutHeight: true),),
+                      leading: const Icon(Icons.restart_alt),
+                      onPressed: (context) async {
+                        widget.updatePrayers!();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ]),
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }
-
-showRoundToDialog(BuildContext context, int target) async {
-  int? currentTarget = target;
+showLocaleDialog(BuildContext context, Locale locale) async {
+  Locale? currentLocale = locale;
 
   var confirmMethod = (() {
     Navigator.pop(context);
-    Provider.of<DhikrNotifier>(context, listen: false).setDhikrCount(currentTarget!);
+    Provider.of<LocaleNotifier>(context, listen: false).setLocale(currentLocale!);
   });
+  var languageDialogTitle = AppLocalizations.of(context)!.languageDialogTitle;
+  var confirmString = AppLocalizations.of(context)!.confirmString;
+  var cancelString = AppLocalizations.of(context)!.cancelString;
 
   AlertDialog alert = AlertDialog(
-      title: const Text("Counter target"),
+      title: Text(languageDialogTitle),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
         TextButton(
           onPressed: confirmMethod,
-          child: const Text('Confirm'),
+          child: Text(confirmString),
         ),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -206,12 +245,12 @@ showRoundToDialog(BuildContext context, int target) async {
                     visualDensity: const VisualDensity(
                         horizontal: VisualDensity.minimumDensity,
                         vertical: VisualDensity.minimumDensity),
-                    value: 33,
-                    title: const Text('33'),
-                    groupValue: currentTarget,
+                    value: const Locale('ar'),
+                    title: Text(localeMap['ar']!),
+                    groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentTarget = (val ?? 0) as int?;
+                        currentLocale = val as Locale?;
                       });
                     }),
                 RadioListTile(
@@ -219,12 +258,12 @@ showRoundToDialog(BuildContext context, int target) async {
                     visualDensity: const VisualDensity(
                         horizontal: VisualDensity.minimumDensity,
                         vertical: VisualDensity.minimumDensity),
-                    value: 100,
-                    title: const Text('100'),
-                    groupValue: currentTarget,
+                    value: const Locale('en'),
+                    title: Text(localeMap['en']!),
+                    groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentTarget = (val ?? 0) as int?;
+                        currentLocale = val as Locale?;
                       });
                     }),
               ],

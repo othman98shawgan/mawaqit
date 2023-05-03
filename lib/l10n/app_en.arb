@@ -1,0 +1,314 @@
+{
+   "language":"English",
+   "@language":{
+      "description":"The current Language"
+   },
+   "appName":"Mawaqit Al-Quds",
+   "@appName":{
+      "description":"The name of the app"
+   },
+   "fajrString":"Fajr",
+   "@fajrString":{
+      "description":"Fajr string"
+   },
+   "shuruqString":"Shuruq",
+   "@shuruqString":{
+      "description":"Shuruq string"
+   },
+   "duhrString":"Duhr",
+   "@duhrString":{
+      "description":"Duhr prayer string"
+   },
+   "asrString":"Asr",
+   "@asrString":{
+      "description":"Asr prayer string"
+   },
+   "maghribString":"Maghrib",
+   "@maghribString":{
+      "description":"Maghrib prayer string"
+   },
+   "ishaString":"Isha",
+   "@ishaString":{
+      "description":"Isha prayer string"
+   },
+   "timeUntil":"Time until {prayer}:",
+   "@timeUntil":{
+      "description":"Time until prayer string",
+      "placeholders":{
+         "prayer":{
+            "type":"String",
+            "example":"Fajr"
+         }
+      }
+   },
+   "timeSince":"Time since {prayer}:",
+   "@timeSince":{
+      "description":"Time since prayer string",
+      "placeholders":{
+         "prayer":{
+            "type":"String",
+            "example":"Fajr"
+         }
+      }
+   },
+   "calendarString":"Calendar",
+   "@calendarString":{
+      "description":"Calendar page title string"
+   },
+   "todayTooltip":"Today",
+   "@todayTooltip":{
+      "description":"Today icon tooltip"
+   },
+   "dstTooltip":"Daylight Saving Mode",
+   "@dstTooltip":{
+      "description":"Daylight Saving Mode icon tooltip"
+   },
+   "prevoiusDayTooltip":"Prevoius Day",
+   "@prevoiusDayTooltip":{
+      "description":"Prevoius Day icon tooltip"
+   },
+   "nextDayTooltip":"Next Day",
+   "@nextDayTooltip":{
+      "description":"Next Day icon tooltip"
+   },
+   "qiblaString":"Qibla",
+   "@qiblaString":{
+      "description":"Qibla page title string"
+   },
+   "dhikrString":"Tasbeeh Counter",
+   "@dhikrString":{
+      "description":"Dhikr Counter page title string"
+   },
+   "missedPrayersString":"Missed Prayers",
+   "@missedPrayersString":{
+      "description":"Missed Prayers page title string"
+   },
+   "notificationsString":"Notifications",
+   "@notificationsString":{
+      "description":"Notifications icon string"
+   },
+   "cancelPrayersTooltip":"Cancel Prayers",
+   "@cancelPrayersTooltip":{
+      "description":"Cancel Prayers icon tooltip"
+   },
+   "settingsString":"Settings",
+   "@settingsString":{
+      "description":"Settings page title string"
+   },
+   "resetCountTooltip":"Reset Count",
+   "@resetCountTooltip":{
+      "description":"Reset Count icon tooltip"
+   },
+   "missedPrayersClearAll":"Clear All",
+   "@missedPrayersClearAll":{
+      "description":"Missed Prayers clear all button"
+   },
+   "confirmString":"Confirm",
+   "@confirmString":{
+      "description":"Confirm button string"
+   },
+   "cancelString":"Cancel",
+   "@cancelString":{
+      "description":"Cancel button string"
+   },
+   "closeString":"Close",
+   "@closeString":{
+      "description":"Close button string"
+   },
+   "missedPrayersClearAllMessage":"Are you sure you want to clear all missed prayers?",
+   "@missedPrayersClearAllMessage":{
+      "description":"Message shown after pressing Clear All button"
+   },
+   "addMissedPrayersTitle":"Add missed prayers",
+   "@addMissedPrayersTitle":{
+      "description":"Add missed prayers dialog string"
+   },
+   "addWeekString":"Add Week",
+   "@addWeekString":{
+      "description":"Add Week button string"
+   },
+   "addMonthString":"Add Month",
+   "@addMonthString":{
+      "description":"Add Month button string"
+   },
+   "addYearString":"Add Year",
+   "@addYearString":{
+      "description":"Add Year button string"
+   },
+   "reminderDialogTitle":"Prayer reminder",
+   "@reminderDialogTitle":{
+      "description":"Prayer reminder dialog title"
+   },
+   "reminderDialogMessage":"Set prayer reminder",
+   "@reminderDialogMessage":{
+      "description":"Prayer reminder dialog message"
+   },
+   "reminderPrayerMessage":"Reminder for each prayer: {reminder}",
+   "@reminderPrayerMessage":{
+      "description":"Prayer reminder value message",
+      "placeholders":{
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "settingsGeneralSection":"General",
+   "@settingsGeneralSection":{
+      "description":"General section string in Settings page"
+   },
+   "settingsLanguage":"Language",
+   "@settingsLanguage":{
+      "description":"Language string in Settings page"
+   },
+   "settingsDarkMode":"Dark Mode",
+   "@settingsDarkMode":{
+      "description":"Dark Mode string in Settings page"
+   },
+   "settingsDaylightSaving":"Daylight Saving",
+   "@settingsDaylightSaving":{
+      "description":"Daylight Saving string in Settings page"
+   },
+   "settingsSummerTime":"Summer Time",
+   "@settingsSummerTime":{
+      "description":"Summer Time dialog string in Settings page"
+   },
+   "settingsWinterTime":"Winter Time",
+   "@settingsWinterTime":{
+      "description":"Winter Time dialog string in Settings page"
+   },
+   "settingsNotificationsSection":"Notifications",
+   "@settingsNotificationsSection":{
+      "description":"Notifications section string in Settings page"
+   },
+   "settingsSendNotifications":"Send Notifications",
+   "@settingsSendNotifications":{
+      "description":"Send Notifications string in Settings page"
+   },
+   "settingsPrayerReminder":"Prayer Reminder",
+   "@settingsPrayerReminder":{
+      "description":"Prayer Reminder string in Settings page"
+   },
+   "settingsPrayerReminderDescription":"{reminder} mins",
+   "@settingsPrayerReminderDescription":{
+      "description":"Prayer Reminder description string in Settings page",
+      "placeholders":{
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "settingsPrayerReminderDescriptionOff":"Off",
+   "@settingsPrayerReminderDescriptionOff":{
+      "description":"Prayer Reminder description off string in Settings page"
+   },
+   "settingsDhikrSection":"Tasbeeh",
+   "@settingsDhikrSection":{
+      "description":"Dhikr section string in Settings page"
+   },
+   "settingsDhikrVibrateOnTap":"Vibrate on each Tap",
+   "@settingsDhikrVibrateOnTap":{
+      "description":"Vibrate on each Tap string in Settings page"
+   },
+   "settingsDhikrVibrateOnTarget":"Vibrate on finishing Cycle",
+   "@settingsDhikrVibrateOnTarget":{
+      "description":"Vibrate on reaching Target string in Settings page"
+   },
+   "settingsTarget":"Cycle length",
+   "@settingsTarget":{
+      "description":"Target string in Settings page"
+   },
+   "settingsTargetDescription":"Current Cycle is: {dhikrTarget}",
+   "@settingsTargetDescription":{
+      "description":"Target description string in Settings page",
+      "placeholders":{
+         "dhikrTarget":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "settingsHelpSection":"Help",
+   "@settingsHelpSection":{
+      "description":"Help section string in Settings page"
+   },
+   "settingsResetNotifications":"Reset Notifications",
+   "@settingsResetNotifications":{
+      "description":"Reset Notifications string in Settings page"
+   },
+   "targetDialogTitle":"Counter target",
+   "@targetDialogTitle":{
+      "description":"Target Dialog Title string"
+   },
+   "languageDialogTitle":"Language",
+   "@languageDialogTitle":{
+      "description":"Language Dialog Title string"
+   },
+   "notificationsPrayerTimeTitle":"Time for {prayer}",
+   "@notificationsPrayerTimeTitle":{
+      "description":"Notification title for when a prayer time arrives",
+      "placeholders":{
+         "prayer":{
+            "type":"String",
+            "example":"Fajr"
+         }
+      }
+   },
+   "notificationsShuruqPrayerTimeTitle":"Time for Shuruq",
+   "@notificationsShuruqPrayerTimeTitle":{
+      "description":"Notification title for when a Shuruq time arrives"
+   },
+   "notificationsShuruqBody":"Duha is in 20 minutes",
+   "@notificationsShuruqBody":{
+      "description":"Notification body for Shuruq"
+   },
+   "notificationsReminderTitle":"{prayer} Azan is in {reminder} minutes",
+   "@notificationsReminderTitle":{
+      "description":"Notification title for prayer reminder",
+      "placeholders":{
+         "prayer":{
+            "type":"String",
+            "example":"Fajr"
+         },
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "notificationsReminderTitleMinutes":"{prayer} Azan is in {reminder} minutes",
+   "@notificationsReminderTitleMinutes":{
+      "description":"Notification title for prayer reminder - For arabic Locale",
+      "placeholders":{
+         "prayer":{
+            "type":"String",
+            "example":"Fajr"
+         },
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "notificationsShuruqReminderTitle":"Shuruq is in {reminder} minutes",
+   "@notificationsShuruqReminderTitle":{
+      "description":"Notification title for Shuruq reminder",
+      "placeholders":{
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   },
+   "notificationsShuruqReminderTitleMinutes":"Shuruq is in {reminder} minutes",
+   "@notificationsShuruqReminderTitleMinutes":{
+      "description":"Notification title for Shuruq reminder - For arabic Locale",
+      "placeholders":{
+         "reminder":{
+            "type":"num",
+            "format":"compact"
+         }
+      }
+   }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/prayer_methods.dart';
 import 'card_widget.dart';
 
 class PrayerWidget extends StatefulWidget {
@@ -27,7 +28,7 @@ class PrayerState extends State<PrayerWidget> {
         leading: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            widget.label,
+            getPrayerTranslation(widget.label,context),
             style: style,
             textAlign: TextAlign.center,
           ),

@@ -1,3 +1,4 @@
+import 'package:alfajr/services/locale_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,14 +24,18 @@ class _MyCardState extends State<MyCard> {
     } else {
       bgColor = const Color.fromARGB(180, 255, 255, 255);
     }
-    return Consumer<ThemeNotifier>(
-      builder: (context, theme, child) => SizedBox(
-        height: widget.height > 0 ? widget.height : null,
-        child: Card(
-          color: bgColor,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[widget.widget],
+
+    return Consumer2<ThemeNotifier, LocaleNotifier>(
+      builder: (context, theme, localeProvider, child) => Directionality(
+        textDirection: localeProvider.getTextDirection(localeProvider.locale),
+        child: SizedBox(
+          height: widget.height > 0 ? widget.height : null,
+          child: Card(
+            color: bgColor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[widget.widget],
+            ),
           ),
         ),
       ),
