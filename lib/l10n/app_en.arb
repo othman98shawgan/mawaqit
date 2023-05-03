@@ -75,7 +75,7 @@
    "@qiblaString":{
       "description":"Qibla page title string"
    },
-   "dhikrString":"Dhikr Counter",
+   "dhikrString":"Tasbeeh Counter",
    "@dhikrString":{
       "description":"Dhikr Counter page title string"
    },
@@ -203,7 +203,7 @@
    "@settingsPrayerReminderDescriptionOff":{
       "description":"Prayer Reminder description off string in Settings page"
    },
-   "settingsDhikrSection":"Dhikr",
+   "settingsDhikrSection":"Tasbeeh",
    "@settingsDhikrSection":{
       "description":"Dhikr section string in Settings page"
    },
@@ -211,15 +211,15 @@
    "@settingsDhikrVibrateOnTap":{
       "description":"Vibrate on each Tap string in Settings page"
    },
-   "settingsDhikrVibrateOnTarget":"Vibrate on reaching Target",
+   "settingsDhikrVibrateOnTarget":"Vibrate on finishing Cycle",
    "@settingsDhikrVibrateOnTarget":{
       "description":"Vibrate on reaching Target string in Settings page"
    },
-   "settingsTarget":"Target",
+   "settingsTarget":"Cycle length",
    "@settingsTarget":{
       "description":"Target string in Settings page"
    },
-   "settingsTargetDescription":"Current target is: {dhikrTarget}",
+   "settingsTargetDescription":"Current Cycle is: {dhikrTarget}",
    "@settingsTargetDescription":{
       "description":"Target description string in Settings page",
       "placeholders":{
