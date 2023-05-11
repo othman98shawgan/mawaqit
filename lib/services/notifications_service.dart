@@ -72,14 +72,14 @@ class NotificationsService {
 }
 
 class NotificationsStatusNotifier with ChangeNotifier {
-  bool _notificationsStatus = false;
-  bool _notificationsAlreadyRequested = false;
+  bool? _notificationsStatus;
+  late bool _notificationsAlreadyRequested;
 
-  bool getNotificationsStatus() => _notificationsStatus;
+  bool? getNotificationsStatus() => _notificationsStatus;
 
   NotificationsStatusNotifier() {
     StorageManager.readData('NotificationsStatus').then((value) {
-      _notificationsStatus = value ?? 10;
+      _notificationsStatus = value ?? false;
       notifyListeners();
     });
   }
