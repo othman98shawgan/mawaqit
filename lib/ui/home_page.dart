@@ -50,8 +50,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   updatePrayers() {
-    cancelAllPrayers().whenComplete(
-        () => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
+    Future.delayed(Duration.zero, () {
+      cancelAllPrayers().whenComplete(
+          () => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
+    });
   }
 
   updateReminder(int newReminderTime) {
@@ -246,8 +248,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     HijriCalendar.setLocal(Provider.of<LocaleNotifier>(context, listen: false).locale.toString());
 
-    return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,NotificationsStatusNotifier>(
-      builder: (context, theme, daylightSaving, reminder, localeProvider,notifications, child) => Directionality(
+    return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
+        NotificationsStatusNotifier>(
+      builder: (context, theme, daylightSaving, reminder, localeProvider, notifications, child) =>
+          Directionality(
         textDirection: ui.TextDirection.ltr,
         child: Scaffold(
           backgroundColor: Colors.transparent,
