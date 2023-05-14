@@ -93,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       strutStyle: const StrutStyle(forceStrutHeight: true),
                     ),
                     onPressed: (context) {
-                      showLocaleDialog(context, localeProvider.locale);
+                      showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
                     },
                   ),
                   SettingsTile.switchTile(
@@ -196,7 +196,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   tiles: [
                     SettingsTile.navigation(
-                      title: Text(resetNotificationsString,strutStyle: const StrutStyle(forceStrutHeight: true),),
+                      title: Text(
+                        resetNotificationsString,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                      ),
                       leading: const Icon(Icons.restart_alt),
                       onPressed: (context) async {
                         widget.updatePrayers!();
@@ -211,12 +214,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-showLocaleDialog(BuildContext context, Locale locale) async {
+
+showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
   Locale? currentLocale = locale;
 
-  var confirmMethod = (() {
+  var confirmMethod = (() async {
     Navigator.pop(context);
     Provider.of<LocaleNotifier>(context, listen: false).setLocale(currentLocale!);
+    updatePrayers();
   });
   var languageDialogTitle = AppLocalizations.of(context)!.languageDialogTitle;
   var confirmString = AppLocalizations.of(context)!.confirmString;

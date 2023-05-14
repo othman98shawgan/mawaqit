@@ -50,8 +50,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   updatePrayers() {
-    cancelAllPrayers().whenComplete(
-        () => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
+    Future.delayed(Duration.zero, () {
+      cancelAllPrayers().whenComplete(
+          () => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
+    });
   }
 
   updateReminder(int newReminderTime) {
@@ -69,21 +71,21 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> scheduleNextPrayers(DateTime time) async {
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
-    var notifiactionsStatus =
-        Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
-    var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
-
     _scheduledPrayers = await getScheduledPrayers();
     if (removePassedPrayers(_scheduledPrayers)) {
       setScheduledPrayers(_scheduledPrayers);
     }
-    if (!notifiactionsStatus ||
+    if (!mounted) return; //Make sure widget is mounted
+    var notifiactionsStatus =
+        Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
+    var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
+
+    if ((!notifiactionsStatus) ||
         (reminderStatus && _scheduledPrayers.length > 71) ||
         (!reminderStatus && _scheduledPrayers.length > 35)) {
       return;
     }
     List<Prayer> prayersToSchedule = [];
-    if (!mounted) return; //Make sure widget is mounted
     reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
     summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
 
@@ -179,7 +181,6 @@ class _MyHomePageState extends State<MyHomePage> {
     updateAppBar(false);
     NotificationsService.init();
     readJson();
-    scheduleNextPrayers(DateTime.now());
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
@@ -247,8 +248,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     HijriCalendar.setLocal(Provider.of<LocaleNotifier>(context, listen: false).locale.toString());
 
-    return Consumer4<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier>(
-      builder: (context, theme, daylightSaving, reminder, localeProvider, child) => Directionality(
+    return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
+        NotificationsStatusNotifier>(
+      builder: (context, theme, daylightSaving, reminder, localeProvider, notifications, child) =>
+          Directionality(
         textDirection: ui.TextDirection.ltr,
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -258,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           body: FutureBuilder<List>(
             future: Future.wait([
-              // readJson(),
+              scheduleNextPrayers(DateTime.now()),
             ]),
             builder: (buildContext, snapshot) {
               if (snapshot.hasData) {
