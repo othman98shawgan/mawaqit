@@ -11,6 +11,7 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:wakelock/wakelock.dart';
 import '../data/prayer_times.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -179,6 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    Wakelock.enable();
     updateAppBar(false);
     NotificationsService.init();
     readJson();
