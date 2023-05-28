@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timer_builder/timer_builder.dart';
@@ -17,13 +18,15 @@ class ClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {
-      return Text(
-        DateFormat('HH:mm:ss').format(DateTime.now()),
-        style: const TextStyle(
-          fontWeight: FontWeight.w300,
-          fontSize: 48,
-        ),
-      );
+      return Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
+          child: Text(
+            DateFormat('HH:mm:ss').format(DateTime.now()),
+            style: GoogleFonts.roboto(
+              fontWeight: FontWeight.w300,
+              fontSize: 48,
+            ),
+          ));
     });
   }
 }
@@ -77,9 +80,9 @@ class _PrayerClockState extends State<PrayerClockWidget> {
       fontSize: 18,
     );
 
-    var prayerTimeStyle = const TextStyle(
+    var prayerTimeStyle = GoogleFonts.roboto(
       fontWeight: FontWeight.w300,
-      fontSize: 28,
+      fontSize: 24,
     );
 
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {
@@ -90,6 +93,7 @@ class _PrayerClockState extends State<PrayerClockWidget> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               SizedBox(
                 width: width * 0.1,
@@ -121,8 +125,12 @@ class _PrayerClockState extends State<PrayerClockWidget> {
               ),
             ],
           ),
+          SizedBox(
+            height: 4,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               SizedBox(
                 width: width * 0.1,

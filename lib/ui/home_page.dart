@@ -6,6 +6,7 @@ import 'package:alfajr/services/theme_service.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -238,8 +239,8 @@ class _MyHomePageState extends State<MyHomePage> {
     var padding = MediaQuery.of(context).viewPadding;
     // Height (without status and toolbar)
     double height3 = height - padding.top - kToolbarHeight;
-    double prayerCardHeight = height3 * 0.11;
-    double mainCardHeight = height3 * 0.28;
+    double prayerCardHeight = height3 * 0.1;
+    double mainCardHeight = height3 * 0.3;
     var title = AppLocalizations.of(context)!.appName;
 
     SystemChrome.setPreferredOrientations([
@@ -289,12 +290,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   'dd MMM yyyy', localeProvider.locale.toString())
                                               .format(DateTime.now()),
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
+                                          style: const TextStyle(fontSize: 16),
                                         ),
-                                        const Text("  -  "),
+                                        const Text(
+                                          "  -  ",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                                         Text(
                                           (HijriCalendar.now().toFormat('dd MMMM yyyy')),
                                           locale: localeProvider.locale,
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                       ],
                                     ),

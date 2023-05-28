@@ -2,6 +2,7 @@ import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -47,19 +48,15 @@ class _SettingsPageState extends State<SettingsPage> {
     var prayerReminderString = AppLocalizations.of(context)!.settingsPrayerReminder;
     var prayerReminderOffString =
         AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
-    var dhikrSection = AppLocalizations.of(context)!.settingsDhikrSection;
-    var dhikrVibrateOnTap = AppLocalizations.of(context)!.settingsDhikrVibrateOnTap;
-    var dhikrVibrateOnTarget = AppLocalizations.of(context)!.settingsDhikrVibrateOnTarget;
-    var targetString = AppLocalizations.of(context)!.settingsTarget;
     var helpSection = AppLocalizations.of(context)!.settingsHelpSection;
     var resetNotificationsString = AppLocalizations.of(context)!.settingsResetNotifications;
-
-    var forceStrutHeightStrutStyle = const StrutStyle(forceStrutHeight: true);
 
     var summerTimeDescription =
         Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
             ? summerTimeString
             : winterTimeString;
+
+    var fontFamily = GoogleFonts.tajawal().fontFamily;
 
     return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
         NotificationsStatusNotifier, LocaleNotifier>(
@@ -77,30 +74,28 @@ class _SettingsPageState extends State<SettingsPage> {
             lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
             sections: [
               SettingsSection(
-                title: Text(
-                  generalSection,
-                  strutStyle: const StrutStyle(forceStrutHeight: true),
-                ),
+                title: Text(generalSection,
+                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                    style: TextStyle(fontFamily: fontFamily)),
                 tiles: [
                   SettingsTile.navigation(
                     leading: const Icon(Icons.language),
                     title: Text(
                       languageString,
                       strutStyle: const StrutStyle(forceStrutHeight: true),
+                      style: TextStyle(fontFamily: fontFamily),
                     ),
-                    value: Text(
-                      localeMap[localeProvider.locale.toString()]!,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
+                    value: Text(localeMap[localeProvider.locale.toString()]!,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                        style: TextStyle(fontFamily: fontFamily)),
                     onPressed: (context) {
                       showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
                     },
                   ),
                   SettingsTile.switchTile(
-                    title: Text(
-                      darkModeString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
+                    title: Text(darkModeString,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                        style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.dark_mode_outlined),
                     initialValue: theme.getTheme() == theme.darkTheme,
                     onToggle: (value) {
@@ -112,14 +107,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                   SettingsTile.switchTile(
-                    title: Text(
-                      dstString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
-                    description: Text(
-                      summerTimeDescription,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
+                    title: Text(dstString,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                        style: TextStyle(fontFamily: fontFamily)),
+                    description: Text(summerTimeDescription,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                        style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.access_time),
                     initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
                     onToggle: (value) {
@@ -137,16 +130,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SettingsSection(
-                title: Text(
-                  notificationsSection,
-                  strutStyle: const StrutStyle(forceStrutHeight: true),
-                ),
+                title: Text(notificationsSection,
+                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                    style: TextStyle(fontFamily: fontFamily)),
                 tiles: [
                   SettingsTile.switchTile(
-                    title: Text(
-                      sendNotificationsString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
+                    title: Text(sendNotificationsString,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                        style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.notifications),
                     initialValue: notifications.getNotificationsStatus() == true,
                     onToggle: (value) {
@@ -162,21 +153,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                   SettingsTile.navigation(
-                    title: Text(
-                      prayerReminderString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                    ),
+                    title: Text(prayerReminderString,
+                        strutStyle: const StrutStyle(forceStrutHeight: true),
+                        style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.notification_important_sharp),
                     value: reminder.getReminderStatus()
                         ? Text(
                             AppLocalizations.of(context)!
                                 .settingsPrayerReminderDescription(reminder.getReminderTime()),
                             strutStyle: const StrutStyle(forceStrutHeight: true),
-                          )
-                        : Text(
-                            prayerReminderOffString,
+                            style: TextStyle(fontFamily: fontFamily))
+                        : Text(prayerReminderOffString,
                             strutStyle: const StrutStyle(forceStrutHeight: true),
-                          ),
+                            style: TextStyle(fontFamily: fontFamily)),
                     onPressed: (context) async {
                       await showReminderDialog(
                         context,
@@ -190,16 +179,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SettingsSection(
-                  title: Text(
-                    helpSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                  ),
+                  title: Text(helpSection,
+                      strutStyle: const StrutStyle(forceStrutHeight: true),
+                      style: TextStyle(fontFamily: fontFamily)),
                   tiles: [
                     SettingsTile.navigation(
-                      title: Text(
-                        resetNotificationsString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                      ),
+                      title: Text(resetNotificationsString,
+                          strutStyle: const StrutStyle(forceStrutHeight: true),
+                          style: TextStyle(fontFamily: fontFamily)),
                       leading: const Icon(Icons.restart_alt),
                       onPressed: (context) async {
                         widget.updatePrayers!();
