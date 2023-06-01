@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -43,6 +44,24 @@ class _MyHomePageState extends State<MyHomePage> {
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
   List<IconButton> appBarActions = [];
+
+  Future<void> checkForUpdate() async {
+    InAppUpdate.checkForUpdate().then((info) {
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        InAppUpdate.startFlexibleUpdate().then((_) {
+          InAppUpdate.completeFlexibleUpdate().then((_) {
+            printSnackBar("Success!", context);
+          }).catchError((e) {
+            printSnackBar(e.toString(), context);
+          });
+        }).catchError((e) {
+          printSnackBar(e.toString(), context);
+        });
+      }
+    }).catchError((e) {
+      printSnackBar(e.toString(), context);
+    });
+  }
 
   Future<void> updateReminderValue(int val) async {
     Provider.of<ReminderNotifier>(context, listen: false).setReminderTime(val);
@@ -180,6 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    checkForUpdate();
     Wakelock.enable();
     updateAppBar(false);
     NotificationsService.init();
