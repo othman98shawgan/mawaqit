@@ -38,10 +38,6 @@ class PrayerState extends State<PrayerWidget> {
             textAlign: TextAlign.center,
           ),
         ),
-        title: const Padding(
-          padding: EdgeInsets.all(18.0),
-          child: Text(""),
-        ),
         trailing: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
