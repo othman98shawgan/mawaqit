@@ -15,7 +15,8 @@ class LocaleNotifier extends ChangeNotifier {
 
   void readLocaleFromStorage() {
     StorageManager.readData('Locale').then((value) {
-      _locale = Locale(value);
+      var lang = value ?? 'ar';
+      _locale = Locale(lang);
       notifyListeners();
     });
   }
