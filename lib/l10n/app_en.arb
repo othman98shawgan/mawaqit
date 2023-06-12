@@ -310,5 +310,145 @@
             "format":"compact"
          }
       }
-   }
+   },
+   "citySelect":"Selcet your city",
+   "@citySelect": {
+      "description": "City selection string"
+   },
+   "cityCurrnet":"Currnet city",
+   "@cityCurrnet": {
+      "description": "Selected city description"
+   },
+   "alQuds": "Al-Quds",
+   "@alQuds": {
+      "description": "City title for Al-Quds"
+   },
+   "kfarKama": "Kfar Kama",
+   "@kfarKama": {
+      "description": "City title for Kfar Kama"
+   },
+   "ramallah": "Ramallah",
+   "@ramallah": {
+      "description": "City title for Ramallah"
+   },
+   "bethlehem": "Bethlehem",
+   "@bethlehem": {
+      "description": "City title for Bethlehem"
+   },
+   "jenin": "Jenin",
+   "@jenin": {
+      "description": "City title for Jenin"
+   },
+   "nablus": "Nablus",
+   "@nablus": {
+      "description": "City title for Nablus"
+   },
+   "nazareth": "Nazareth",
+   "@nazareth": {
+      "description": "City title for Nazareth"
+   },
+   "ummAlFahm": "Umm al-Fahm",
+   "@ummAlFahm": {
+      "description": "City title for Umm al-Fahm"
+   },
+   "jericho": "Jericho",
+   "@jericho": {
+      "description": "City title for Jericho"
+   },
+   "tiberias": "Tiberias",
+   "@tiberias": {
+      "description": "City title for Tiberias"
+   },
+   "safad": "Safad",
+   "@safad": {
+      "description": "City title for Safad"
+   },
+   "beisan": "Beisan",
+   "@beisan": {
+      "description": "City title for Beisan"
+   },
+   "haifa": "Haifa",
+   "@haifa": {
+      "description": "City title for Haifa"
+   },
+   "acre": "Acre",
+   "@acre": {
+      "description": "City title for Acre"
+   },
+   "tulkarm": "Tulkarm",
+   "@tulkarm": {
+      "description": "City title for Tulkarm"
+   },
+   "kafrQasim": "Kafr Qasim",
+   "@kafrQasim": {
+      "description": "City title for Kafr Qasim"
+   },
+   "tayibe": "Tayibe",
+   "@tayibe": {
+      "description": "City title for Tayibe"
+   },
+   "alKhalil": "Al-Khalil",
+   "@alKhalil": {
+      "description": "City title for Al-Khalil"
+   },
+   "alLid": "Al-Lid",
+   "@alLid": {
+      "description": "City title for Al-Lid"
+   },
+   "ramla": "Ramla",
+   "@ramla": {
+      "description": "City title for Ramla"
+   },
+   "qalqilya": "Qalqilya",
+   "@qalqilya": {
+      "description": "City title for Qalqilya"
+   },
+   "birAsSaba": "Bir as-Saba",
+   "@birAsSaba": {
+      "description": "City title for BirAsSaba"
+   },
+   "jaffa": "Jaffa",
+   "@jaffa": {
+      "description": "City title for Jaffa"
+   },
+   "gaza": "Gaza",
+   "@gaza": {
+      "description": "City title for Gaza"
+   },
+   "rafah": "Rafah",
+   "@rafah": {
+      "description": "City title for Rafah"
+   },
+   "khanYunis": "Khan Yunis",
+   "@khanYunis": {
+      "description": "City title for Khan Yunis"
+   },
+   "deirAlBalah": "Deir al-Balah",
+   "@deirAlBalah": {
+      "description": "City title for Deir al-Balah"
+   },
+   "min1BeforeAlQuds": "1 minutes before Al-Quds",
+   "@min1BeforeAlQuds": {
+      "description": "City title for 1 minute before"
+   },
+   "min2BeforeAlQuds": "2 minutes before Al-Quds",
+   "@min2BeforeAlQuds": {
+      "description": "City title for 3 minute before"
+   },
+   "min3BeforeAlQuds": "3 minutes before Al-Quds",
+   "@min3BeforeAlQuds": {
+      "description": "City title for 3 minute before"
+   },
+   "min1AfterAlQuds": "1 minutes after Al-Quds",
+   "@min1AfterAlQuds": {
+      "description": "City title for 1 minute after"
+   },
+   "min2AfterAlQuds": "2 minutes after Al-Quds",
+   "@min2AfterAlQuds": {
+      "description": "City title for 2 minute after"
+   },
+   "min3AfterAlQuds": "3 minutes after Al-Quds",
+   "@min3AfterAlQuds": {
+      "description": "City title for 3 minute after"
+   }   
 }
