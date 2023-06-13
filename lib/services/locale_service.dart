@@ -79,6 +79,7 @@ class LocaleNotifier extends ChangeNotifier {
     }
     _city = city;
     StorageManager.saveData('City', city);
+    StorageManager.saveData('TimeDiff', _timeDiff);
     notifyListeners();
   }
 }

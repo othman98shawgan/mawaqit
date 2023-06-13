@@ -6,7 +6,6 @@ import 'package:alfajr/services/theme_service.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
@@ -44,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
   List<IconButton> appBarActions = [];
+  int timeDiff = 0;
 
   Future<void> checkForUpdate() async {
     InAppUpdate.checkForUpdate().then((info) {
@@ -109,9 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Prayer> prayersToSchedule = [];
     reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
     summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+    timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
-    prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
-    prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime));
+    prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
+    prayersToSchedule
+        .addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime, timeDiff));
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -175,11 +177,13 @@ class _MyHomePageState extends State<MyHomePage> {
     setScheduledPrayers(_scheduledPrayers);
   }
 
-  String toSummerTime(String time) {
-    if (!summerTime) return time;
+  String adjustTime(String time) {
+    var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+    if (!summerTime && timeDiff == 0) return time;
     int hour = int.parse(time.split(':')[0]);
-    String minute = (time.split(':')[1]);
+    int minute = int.parse(time.split(':')[1]);
     hour++;
+    minute += currTimeDiff;
     time = "$hour:$minute";
     return time;
   }
@@ -290,6 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
               if (snapshot.hasData) {
                 summerTime = daylightSaving.getSummerTime();
                 reminderValue = reminder.getReminderTime();
+                timeDiff = localeProvider.timeDiff;
                 return Container(
                   decoration: const BoxDecoration(
                       image:
@@ -332,6 +337,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     PrayerClockWidget(
                                       prayersToday: prayersToday,
                                       summerTime: summerTime,
+                                      timeDiff: timeDiff,
                                       prayerList: _prayerList,
                                     ),
                                   ],
@@ -341,32 +347,32 @@ class _MyHomePageState extends State<MyHomePage> {
                           )),
                       PrayerWidget(
                         label: "Fajr",
-                        time: toSummerTime(prayersToday.fajr),
+                        time: adjustTime(prayersToday.fajr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Shuruq",
-                        time: toSummerTime(prayersToday.shuruq),
+                        time: adjustTime(prayersToday.shuruq),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Duhr",
-                        time: toSummerTime(prayersToday.duhr),
+                        time: adjustTime(prayersToday.duhr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Asr",
-                        time: toSummerTime(prayersToday.asr),
+                        time: adjustTime(prayersToday.asr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Maghrib",
-                        time: toSummerTime(prayersToday.maghrib),
+                        time: adjustTime(prayersToday.maghrib),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Isha",
-                        time: toSummerTime(prayersToday.isha),
+                        time: adjustTime(prayersToday.isha),
                         height: prayerCardHeight,
                       ),
                     ],

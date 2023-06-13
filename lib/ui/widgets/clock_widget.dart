@@ -33,11 +33,16 @@ class ClockWidget extends StatelessWidget {
 
 class PrayerClockWidget extends StatefulWidget {
   const PrayerClockWidget(
-      {Key? key, required this.prayersToday, required this.summerTime, required this.prayerList})
+      {Key? key,
+      required this.prayersToday,
+      required this.summerTime,
+      required this.timeDiff,
+      required this.prayerList})
       : super(key: key);
 
   final PrayersModel prayersToday;
   final bool summerTime;
+  final int timeDiff;
   final List prayerList;
 
   @override
@@ -49,8 +54,10 @@ class _PrayerClockState extends State<PrayerClockWidget> {
   late Prayer prev;
 
   void updatePrayers() {
-    next = getNextPrayer(DateTime.now(), widget.prayersToday, widget.summerTime, widget.prayerList);
-    prev = getPrevPrayer(DateTime.now(), widget.prayersToday, widget.summerTime, widget.prayerList);
+    next = getNextPrayer(
+        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList);
+    prev = getPrevPrayer(
+        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList);
   }
 
   String printDuration(Duration duration) {

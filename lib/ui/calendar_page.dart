@@ -29,11 +29,13 @@ class _CalendarPageState extends State<CalendarPage> {
   late PrayersModel prayersToday;
   var pickedDate = DateTime.now();
 
-  String toSummerTime(String time) {
-    if (!summerTime) return time;
+  String adjustTime(String time) {
+        var timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+    if (!summerTime && timeDiff ==0) return time;
     int hour = int.parse(time.split(':')[0]);
-    String minute = (time.split(':')[1]);
+    int minute =int.parse(time.split(':')[1]);
     hour++;
+    minute +=timeDiff;
     time = "$hour:$minute";
     return time;
   }
@@ -192,32 +194,32 @@ class _CalendarPageState extends State<CalendarPage> {
                           )),
                       PrayerWidget(
                         label: "Fajr",
-                        time: toSummerTime(prayersToday.fajr),
+                        time: adjustTime(prayersToday.fajr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Shuruq",
-                        time: toSummerTime(prayersToday.shuruq),
+                        time: adjustTime(prayersToday.shuruq),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Duhr",
-                        time: toSummerTime(prayersToday.duhr),
+                        time: adjustTime(prayersToday.duhr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Asr",
-                        time: toSummerTime(prayersToday.asr),
+                        time: adjustTime(prayersToday.asr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Maghrib",
-                        time: toSummerTime(prayersToday.maghrib),
+                        time: adjustTime(prayersToday.maghrib),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Isha",
-                        time: toSummerTime(prayersToday.isha),
+                        time: adjustTime(prayersToday.isha),
                         height: prayerCardHeight,
                       ),
                     ],
