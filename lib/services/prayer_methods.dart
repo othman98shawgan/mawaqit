@@ -14,7 +14,8 @@ void printSnackBar(String message, BuildContext context, {int durationInSeconds 
   ));
 }
 
-Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List prayerList) {
+Prayer getNextPrayer(
+    DateTime time, PrayersModel today, bool summerTime, int timeDiff, List prayerList) {
   DateTime fajr =
       DateTime(time.year, time.month, time.day, getHour(today.fajr), getMinute(today.fajr));
   DateTime shuruq =
@@ -27,6 +28,7 @@ Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
       DateTime(time.year, time.month, time.day, getHour(today.maghrib), getMinute(today.maghrib));
   DateTime isha =
       DateTime(time.year, time.month, time.day, getHour(today.isha), getMinute(today.isha));
+
   if (summerTime) {
     fajr = fajr.add(const Duration(hours: 1));
     shuruq = shuruq.add(const Duration(hours: 1));
@@ -34,6 +36,15 @@ Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
     asr = asr.add(const Duration(hours: 1));
     maghrib = maghrib.add(const Duration(hours: 1));
     isha = isha.add(const Duration(hours: 1));
+  }
+
+  if (timeDiff != 0) {
+    fajr = fajr.add(Duration(minutes: timeDiff));
+    shuruq = shuruq.add(Duration(minutes: timeDiff));
+    duhr = duhr.add(Duration(minutes: timeDiff));
+    asr = asr.add(Duration(minutes: timeDiff));
+    maghrib = maghrib.add(Duration(minutes: timeDiff));
+    isha = isha.add(Duration(minutes: timeDiff));
   }
 
   if (time.isBefore(fajr)) return Prayer("Fajr", fajr);
@@ -51,10 +62,12 @@ Prayer getNextPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
   DateTime fajrTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day,
       getHour(tomorrowPrayers.fajr), getMinute(tomorrowPrayers.fajr));
   fajrTomorrow = summerTime ? fajrTomorrow.add(const Duration(hours: 1)) : fajrTomorrow;
+  fajrTomorrow = fajrTomorrow.add(Duration(minutes: timeDiff));
   return Prayer("Fajr", fajrTomorrow);
 }
 
-Prayer getPrevPrayer(DateTime time, PrayersModel today, bool summerTime, List prayerList) {
+Prayer getPrevPrayer(
+    DateTime time, PrayersModel today, bool summerTime, int timeDiff, List prayerList) {
   DateTime fajr =
       DateTime(time.year, time.month, time.day, getHour(today.fajr), getMinute(today.fajr));
   DateTime shuruq =
@@ -75,6 +88,15 @@ Prayer getPrevPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
     asr = asr.add(const Duration(hours: 1));
     maghrib = maghrib.add(const Duration(hours: 1));
     isha = isha.add(const Duration(hours: 1));
+  }
+
+  if (timeDiff != 0) {
+    fajr = fajr.add(Duration(minutes: timeDiff));
+    shuruq = shuruq.add(Duration(minutes: timeDiff));
+    duhr = duhr.add(Duration(minutes: timeDiff));
+    asr = asr.add(Duration(minutes: timeDiff));
+    maghrib = maghrib.add(Duration(minutes: timeDiff));
+    isha = isha.add(Duration(minutes: timeDiff));
   }
 
   if (time.isAfter(isha)) return Prayer("Isha", isha);
@@ -93,6 +115,7 @@ Prayer getPrevPrayer(DateTime time, PrayersModel today, bool summerTime, List pr
   DateTime ishaYesterday = DateTime(yesterday.year, yesterday.month, yesterday.day,
       getHour(yesterdayPrayers.isha), getMinute(yesterdayPrayers.isha));
   ishaYesterday = summerTime ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
+  ishaYesterday = ishaYesterday.add(Duration(minutes: timeDiff));
   return Prayer("Isha", ishaYesterday);
 }
 
@@ -134,7 +157,7 @@ bool removePassedPrayers(List<String> prayers) {
   return removed;
 }
 
-List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime) {
+List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime, int timeDiff) {
   var time = DateTime.now();
   List<Prayer> today = [];
   DateTime fajr = DateTime(
@@ -159,6 +182,15 @@ List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime) {
     isha = isha.add(const Duration(hours: 1));
   }
 
+  if (timeDiff != 0) {
+    fajr = fajr.add(Duration(minutes: timeDiff));
+    shuruq = shuruq.add(Duration(minutes: timeDiff));
+    duhr = duhr.add(Duration(minutes: timeDiff));
+    asr = asr.add(Duration(minutes: timeDiff));
+    maghrib = maghrib.add(Duration(minutes: timeDiff));
+    isha = isha.add(Duration(minutes: timeDiff));
+  }
+
   if (fajr.isAfter(time)) today.add(Prayer('Fajr', fajr));
   if (shuruq.isAfter(time)) today.add(Prayer('Shuruq', shuruq));
   if (duhr.isAfter(time)) today.add(Prayer('Duhr', duhr));
@@ -170,7 +202,7 @@ List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime) {
 }
 
 List<Prayer> getNextWeekPrayers(
-    PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime) {
+    PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime, int timeDiff) {
   List<Prayer> prayersList = [];
 
   var day1 = DateTime.now().add(const Duration(days: 1));
@@ -180,23 +212,23 @@ List<Prayer> getNextWeekPrayers(
   var day5 = DateTime.now().add(const Duration(days: 5));
   var day6 = DateTime.now().add(const Duration(days: 6));
 
-  prayersList.addAll(getDayPrayers(
-      day1, prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day1)]), summerTime));
-  prayersList.addAll(getDayPrayers(
-      day2, prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day2)]), summerTime));
-  prayersList.addAll(getDayPrayers(
-      day3, prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day3)]), summerTime));
-  prayersList.addAll(getDayPrayers(
-      day4, prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day4)]), summerTime));
-  prayersList.addAll(getDayPrayers(
-      day5, prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day5)]), summerTime));
-  prayersList.addAll(getDayPrayers(
-      day6, prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day6)]), summerTime));
+  prayersList.addAll(getDayPrayers(day1,
+      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day1)]), summerTime, timeDiff));
+  prayersList.addAll(getDayPrayers(day2,
+      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day2)]), summerTime, timeDiff));
+  prayersList.addAll(getDayPrayers(day3,
+      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day3)]), summerTime, timeDiff));
+  prayersList.addAll(getDayPrayers(day4,
+      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day4)]), summerTime, timeDiff));
+  prayersList.addAll(getDayPrayers(day5,
+      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day5)]), summerTime, timeDiff));
+  prayersList.addAll(getDayPrayers(day6,
+      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day6)]), summerTime, timeDiff));
 
   return prayersList;
 }
 
-List<Prayer> getDayPrayers(DateTime day, PrayersModel prayers, bool summerTime) {
+List<Prayer> getDayPrayers(DateTime day, PrayersModel prayers, bool summerTime, int timeDiff) {
   var time = day;
   List<Prayer> prayersList = [];
   DateTime fajr =
@@ -219,6 +251,15 @@ List<Prayer> getDayPrayers(DateTime day, PrayersModel prayers, bool summerTime) 
     asr = asr.add(const Duration(hours: 1));
     maghrib = maghrib.add(const Duration(hours: 1));
     isha = isha.add(const Duration(hours: 1));
+  }
+
+  if (timeDiff != 0) {
+    fajr = fajr.add(Duration(minutes: timeDiff));
+    shuruq = shuruq.add(Duration(minutes: timeDiff));
+    duhr = duhr.add(Duration(minutes: timeDiff));
+    asr = asr.add(Duration(minutes: timeDiff));
+    maghrib = maghrib.add(Duration(minutes: timeDiff));
+    isha = isha.add(Duration(minutes: timeDiff));
   }
 
   prayersList.add(Prayer('Fajr', fajr));
