@@ -431,11 +431,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
                 ListTile(
-                  minLeadingWidth: 0,
-                  leading: Image.asset(
-                    'images/calendar.png',
-                    height: 24,
-                  ),
+                  minLeadingWidth: 0,                  
+                  leading: const Icon(Icons.calendar_month),
                   title: Text(AppLocalizations.of(context)!.calendarString),
                   onTap: () {
                     Navigator.pop(context);
