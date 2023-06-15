@@ -9,7 +9,7 @@
    "ishaString": "العشاء",
    "timeUntil": "الوقت المتبقي حتى {prayer}:",
    "timeSince": "الوقت المنقضي منذ {prayer}:",
-   "calendarString":"التقويم",
+   "calendarString":"تقويم الصلاة",
    "todayTooltip":"اليوم",
    "dstTooltip":"التوقيت الصيفي/الشتوي",
    "prevoiusDayTooltip":"اليوم السابق",
