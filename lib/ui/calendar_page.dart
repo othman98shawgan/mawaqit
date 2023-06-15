@@ -30,13 +30,14 @@ class _CalendarPageState extends State<CalendarPage> {
   var pickedDate = DateTime.now();
 
   String adjustTime(String time) {
-        var timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
-    if (!summerTime && timeDiff ==0) return time;
+    var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+    if (!summerTime && currTimeDiff == 0) return time;
     int hour = int.parse(time.split(':')[0]);
-    int minute =int.parse(time.split(':')[1]);
-    hour++;
-    minute +=timeDiff;
-    time = "$hour:$minute";
+    int minute = int.parse(time.split(':')[1]);
+    var today = DateTime.now();
+    var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
+    dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+    time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
     return time;
   }
 
