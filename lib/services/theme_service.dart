@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../resources/colors.dart';
 import 'store_manager.dart';
 
 class ThemeNotifier with ChangeNotifier {
   final darkTheme = ThemeData(
+    fontFamily: GoogleFonts.tajawal().fontFamily,  
     // appBarTheme:
     //     const AppBarTheme(backgroundColor: Color(0xff2C363F), foregroundColor: Colors.white),
     // primaryColor: Colors.black,

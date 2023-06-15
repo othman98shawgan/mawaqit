@@ -7,9 +7,11 @@ import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:wakelock/wakelock.dart';
 import '../data/prayer_times.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -41,6 +43,25 @@ class _MyHomePageState extends State<MyHomePage> {
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
   List<IconButton> appBarActions = [];
+  int timeDiff = 0;
+
+  Future<void> checkForUpdate() async {
+    InAppUpdate.checkForUpdate().then((info) {
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        InAppUpdate.startFlexibleUpdate().then((_) {
+          InAppUpdate.completeFlexibleUpdate().then((_) {
+            printSnackBar("Success!", context);
+          }).catchError((e) {
+            printSnackBar(e.toString(), context);
+          });
+        }).catchError((e) {
+          printSnackBar(e.toString(), context);
+        });
+      }
+    }).catchError((e) {
+      printSnackBar(e.toString(), context);
+    });
+  }
 
   Future<void> updateReminderValue(int val) async {
     Provider.of<ReminderNotifier>(context, listen: false).setReminderTime(val);
@@ -88,9 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Prayer> prayersToSchedule = [];
     reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
     summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+    timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
-    prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime));
-    prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime));
+    prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
+    prayersToSchedule
+        .addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime, timeDiff));
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -154,12 +177,15 @@ class _MyHomePageState extends State<MyHomePage> {
     setScheduledPrayers(_scheduledPrayers);
   }
 
-  String toSummerTime(String time) {
-    if (!summerTime) return time;
+  String adjustTime(String time) {
+    var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+    if (!summerTime && currTimeDiff == 0) return time;
     int hour = int.parse(time.split(':')[0]);
-    String minute = (time.split(':')[1]);
-    hour++;
-    time = "$hour:$minute";
+    int minute = int.parse(time.split(':')[1]);
+    var today = DateTime.now();
+    var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
+    dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+    time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
     return time;
   }
 
@@ -178,6 +204,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    checkForUpdate();
+    Wakelock.enable();
     updateAppBar(false);
     NotificationsService.init();
     readJson();
@@ -238,8 +266,8 @@ class _MyHomePageState extends State<MyHomePage> {
     var padding = MediaQuery.of(context).viewPadding;
     // Height (without status and toolbar)
     double height3 = height - padding.top - kToolbarHeight;
-    double prayerCardHeight = height3 * 0.11;
-    double mainCardHeight = height3 * 0.28;
+    double prayerCardHeight = height3 * 0.1;
+    double mainCardHeight = height3 * 0.3;
     var title = AppLocalizations.of(context)!.appName;
 
     SystemChrome.setPreferredOrientations([
@@ -267,6 +295,7 @@ class _MyHomePageState extends State<MyHomePage> {
               if (snapshot.hasData) {
                 summerTime = daylightSaving.getSummerTime();
                 reminderValue = reminder.getReminderTime();
+                timeDiff = localeProvider.timeDiff;
                 return Container(
                   decoration: const BoxDecoration(
                       image:
@@ -289,12 +318,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   'dd MMM yyyy', localeProvider.locale.toString())
                                               .format(DateTime.now()),
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
+                                          style: const TextStyle(fontSize: 16),
                                         ),
-                                        const Text("  -  "),
+                                        const Text(
+                                          "  -  ",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                                         Text(
                                           (HijriCalendar.now().toFormat('dd MMMM yyyy')),
                                           locale: localeProvider.locale,
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                       ],
                                     ),
@@ -304,6 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     PrayerClockWidget(
                                       prayersToday: prayersToday,
                                       summerTime: summerTime,
+                                      timeDiff: timeDiff,
                                       prayerList: _prayerList,
                                     ),
                                   ],
@@ -313,32 +348,32 @@ class _MyHomePageState extends State<MyHomePage> {
                           )),
                       PrayerWidget(
                         label: "Fajr",
-                        time: toSummerTime(prayersToday.fajr),
+                        time: adjustTime(prayersToday.fajr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Shuruq",
-                        time: toSummerTime(prayersToday.shuruq),
+                        time: adjustTime(prayersToday.shuruq),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Duhr",
-                        time: toSummerTime(prayersToday.duhr),
+                        time: adjustTime(prayersToday.duhr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Asr",
-                        time: toSummerTime(prayersToday.asr),
+                        time: adjustTime(prayersToday.asr),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Maghrib",
-                        time: toSummerTime(prayersToday.maghrib),
+                        time: adjustTime(prayersToday.maghrib),
                         height: prayerCardHeight,
                       ),
                       PrayerWidget(
                         label: "Isha",
-                        time: toSummerTime(prayersToday.isha),
+                        time: adjustTime(prayersToday.isha),
                         height: prayerCardHeight,
                       ),
                     ],
@@ -398,10 +433,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: Image.asset(
-                    'images/calendar.png',
-                    height: 24,
-                  ),
+                  leading: const Icon(Icons.calendar_month),
                   title: Text(AppLocalizations.of(context)!.calendarString),
                   onTap: () {
                     Navigator.pop(context);
@@ -414,7 +446,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: Text(AppLocalizations.of(context)!.qiblaString),
                   onTap: () async {
                     Navigator.pop(context);
-                    await _launchURL();
+                    await _launchURL('https://qiblafinder.withgoogle.com/');
+                  },
+                ),
+                const Divider(thickness: 1),
+                ListTile(
+                  minLeadingWidth: 0,
+                  leading: const Icon(Icons.apps),
+                  title: Text(AppLocalizations.of(context)!.ourAppsString),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/apps');
+                  },
+                ),
+                ListTile(
+                  minLeadingWidth: 0,
+                  leading: const Icon(Icons.email),
+                  title: Text(AppLocalizations.of(context)!.contactUsString),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _contactUs();
                   },
                 ),
               ],
@@ -425,8 +476,18 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _launchURL() async {
-    Uri url = Uri.parse('https://qiblafinder.withgoogle.com/');
+  _launchURL(String urlAddress) async {
+    Uri url = Uri.parse(urlAddress);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
+  }
+
+  _contactUs() async {
+    String mailAddress = 'mailto:oth1998@gmail.com';
+    String urlAddress =
+        '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }

@@ -1,5 +1,6 @@
 import 'package:alfajr/l10n/l10n.dart';
 import 'package:alfajr/services/locale_service.dart';
+import 'package:alfajr/ui/our_apps_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/dhikr_service.dart';
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
                 '/mathurat': (context) => const MathuratPage(),
                 '/settings': (context) => const SettingsPage(),
                 '/notifications': (context) => const NotificationsPage(),
+                '/apps': (context) => const OurAppsPage(),
               },
               supportedLocales: L10n.all,
               localizationsDelegates: const [
