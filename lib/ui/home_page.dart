@@ -179,12 +179,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String adjustTime(String time) {
     var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
-    if (!summerTime && timeDiff == 0) return time;
+    if (!summerTime && currTimeDiff == 0) return time;
     int hour = int.parse(time.split(':')[0]);
     int minute = int.parse(time.split(':')[1]);
-    hour++;
-    minute += currTimeDiff;
-    time = "$hour:$minute";
+    var today = DateTime.now();
+    var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
+    dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+    time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
     return time;
   }
 
@@ -431,7 +432,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
                 ListTile(
-                  minLeadingWidth: 0,                  
+                  minLeadingWidth: 0,
                   leading: const Icon(Icons.calendar_month),
                   title: Text(AppLocalizations.of(context)!.calendarString),
                   onTap: () {

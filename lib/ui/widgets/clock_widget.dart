@@ -64,14 +64,9 @@ class _PrayerClockState extends State<PrayerClockWidget> {
     if (duration.isNegative) {
       updatePrayers();
     }
-    return "${addZero(duration.inHours.toString())}:"
-        "${addZero(duration.inMinutes.remainder(60).toString())}:"
-        "${addZero(duration.inSeconds.remainder(60).toString())}";
-  }
-
-  String addZero(String time) {
-    if (time.length == 2) return time;
-    return '0$time';
+    return "${duration.inHours.toString().padLeft(2, '0')}:"
+        "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:"
+        "${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}";
   }
 
   @override
