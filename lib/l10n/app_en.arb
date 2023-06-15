@@ -75,6 +75,10 @@
    "@qiblaString":{
       "description":"Qibla page title string"
    },
+   "ourAppsString":"Our Apps",
+   "@ourAppsString":{
+      "description":"Our Apps page title string"
+   },
    "dhikrString":"Tasbeeh Counter",
    "@dhikrString":{
       "description":"Dhikr Counter page title string"
