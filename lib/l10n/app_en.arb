@@ -79,6 +79,10 @@
    "@ourAppsString":{
       "description":"Our Apps page title string"
    },
+   "contactUsString":"Contact Us",
+   "@contactUsString":{
+      "description":"Contact Us page title string"
+   },
    "dhikrString":"Tasbeeh Counter",
    "@dhikrString":{
       "description":"Dhikr Counter page title string"

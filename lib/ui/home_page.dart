@@ -446,7 +446,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: Text(AppLocalizations.of(context)!.qiblaString),
                   onTap: () async {
                     Navigator.pop(context);
-                    await _launchURL();
+                    await _launchURL('https://qiblafinder.withgoogle.com/');
                   },
                 ),
                 const Divider(thickness: 1),
@@ -459,6 +459,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.pushNamed(context, '/apps');
                   },
                 ),
+                ListTile(
+                  minLeadingWidth: 0,
+                  leading: const Icon(Icons.email),
+                  title: Text(AppLocalizations.of(context)!.contactUsString),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _contactUs();
+                  },
+                ),
               ],
             ),
           ),
@@ -467,8 +476,18 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _launchURL() async {
-    Uri url = Uri.parse('https://qiblafinder.withgoogle.com/');
+  _launchURL(String urlAddress) async {
+    Uri url = Uri.parse(urlAddress);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
+  }
+
+  _contactUs() async {
+    String mailAddress = 'mailto:oth1998@gmail.com';
+    String urlAddress =
+        '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
