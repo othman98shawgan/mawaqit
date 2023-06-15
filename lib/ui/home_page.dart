@@ -449,6 +449,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     await _launchURL();
                   },
                 ),
+                const Divider(thickness: 1),
+                ListTile(
+                  minLeadingWidth: 0,
+                  leading: const Icon(Icons.apps),
+                  title: Text(AppLocalizations.of(context)!.ourAppsString),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/apps');
+                  },
+                ),
               ],
             ),
           ),
