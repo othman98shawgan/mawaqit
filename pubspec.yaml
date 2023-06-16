@@ -53,6 +53,7 @@ dependencies:
   google_fonts: ^4.0.4
   wakelock: ^0.6.2
   in_app_update: ^4.0.1
+  share_plus: ^6.3.4
 
 dev_dependencies:
   flutter_test:

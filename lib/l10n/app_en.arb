@@ -83,6 +83,18 @@
    "@contactUsString":{
       "description":"Contact Us page title string"
    },
+   "shareString":"Share",
+   "@shareString":{
+      "description":"Share navigation drawer string"
+   },
+   "shareMessageTitle":"Prayer Times for",
+   "@shareMessageTitle":{
+      "description":"Share message title "
+   },
+   "shareMessageDownload":"Download Mawaqit Al-Quds using",
+   "@shareMessageDownload":{
+      "description":"Share message download"
+   },
    "dhikrString":"Tasbeeh Counter",
    "@dhikrString":{
       "description":"Dhikr Counter page title string"

@@ -11,6 +11,7 @@ import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:wakelock/wakelock.dart';
 import '../data/prayer_times.dart';
 import '../models/prayer.dart';
@@ -468,6 +469,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     await _contactUs();
                   },
                 ),
+                ListTile(
+                  minLeadingWidth: 0,
+                  leading: const Icon(Icons.share),
+                  title: Text(AppLocalizations.of(context)!.shareString),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _sharePrayerTimes(localeProvider.city, localeProvider.locale);
+                  },
+                ),
               ],
             ),
           ),
@@ -491,5 +501,47 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
+  }
+
+  _sharePrayerTimes(String city, Locale locale) {
+    var localization = AppLocalizations.of(context)!;
+
+    var title = localization.shareMessageTitle;
+    var day = DateFormat('EEEE', locale.toString()).format(DateTime.now());
+    var date = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    var fajrPryaer = '${localization.fajrString} - ${adjustTime(prayersToday.fajr)}';
+    var shuruqPryaer = '${localization.shuruqString} - ${adjustTime(prayersToday.shuruq)}';
+    var duhrPryaer = '${localization.duhrString} - ${adjustTime(prayersToday.duhr)}';
+    var asrPryaer = '${localization.asrString} - ${adjustTime(prayersToday.asr)}';
+    var maghribPryaer = '${localization.maghribString} - ${adjustTime(prayersToday.maghrib)}';
+    var ishaPryaer = '${localization.ishaString} - ${adjustTime(prayersToday.isha)}';
+    var downloadApp = localization.shareMessageDownload;
+    var downloadLink = 'https://bit.ly/mawaqitquds';
+    var newLine = '\n';
+    var space = ' ';
+    var dash = ' - ';
+    Share.share(title +
+        space +
+        day +
+        space +
+        date +
+        newLine +
+        newLine +
+        fajrPryaer +
+        newLine +
+        shuruqPryaer +
+        newLine +
+        duhrPryaer +
+        newLine +
+        asrPryaer +
+        newLine +
+        maghribPryaer +
+        newLine +
+        ishaPryaer +
+        newLine +
+        newLine +
+        downloadApp +
+        dash +
+        downloadLink);
   }
 }
