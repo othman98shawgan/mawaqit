@@ -1,11 +1,15 @@
+import 'package:alfajr/services/locale_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import 'day_of_year_service.dart';
+import 'daylight_time_service.dart';
 
 void printSnackBar(String message, BuildContext context, {int durationInSeconds = 1}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -293,4 +297,61 @@ String getPrayerTranslation(String label, BuildContext context) {
     'Isha': AppLocalizations.of(context)!.ishaString,
   };
   return map[label]!;
+}
+
+String adjustTime(BuildContext context, String time) {
+  var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+  var summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).summer;
+  if (!summerTime && currTimeDiff == 0) return time;
+  int hour = int.parse(time.split(':')[0]);
+  int minute = int.parse(time.split(':')[1]);
+  var today = DateTime.now();
+  var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
+  dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+  time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
+  return time;
+}
+
+sharePrayerTimes(BuildContext context, LocaleNotifier localeNotifier, PrayersModel prayersToday,DateTime date) {
+  var locale = localeNotifier.locale;
+  var localization = AppLocalizations.of(context)!;
+
+  var title = localization.shareMessageTitle;  
+  var day = DateFormat('EEEE', locale.toString()).format(date);
+  var dateFormatted = DateFormat('dd/MM/yyyy').format(date);
+  var fajrPryaer = '${localization.fajrString} - ${adjustTime(context, prayersToday.fajr)}';
+  var shuruqPryaer = '${localization.shuruqString} - ${adjustTime(context, prayersToday.shuruq)}';
+  var duhrPryaer = '${localization.duhrString} - ${adjustTime(context, prayersToday.duhr)}';
+  var asrPryaer = '${localization.asrString} - ${adjustTime(context, prayersToday.asr)}';
+  var maghribPryaer =
+      '${localization.maghribString} - ${adjustTime(context, prayersToday.maghrib)}';
+  var ishaPryaer = '${localization.ishaString} - ${adjustTime(context, prayersToday.isha)}';
+  var downloadApp = localization.shareMessageDownload;
+  var downloadLink = 'https://bit.ly/mawaqitquds';
+  var newLine = '\n';
+  var space = ' ';
+  var dash = ' - ';
+  Share.share(title +
+      space +
+      day +
+      space +
+      dateFormatted +
+      newLine +
+      newLine +
+      fajrPryaer +
+      newLine +
+      shuruqPryaer +
+      newLine +
+      duhrPryaer +
+      newLine +
+      asrPryaer +
+      newLine +
+      maghribPryaer +
+      newLine +
+      ishaPryaer +
+      newLine +
+      newLine +
+      downloadApp +
+      dash +
+      downloadLink);
 }

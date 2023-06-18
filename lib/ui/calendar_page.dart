@@ -12,6 +12,7 @@ import '../models/prayers.dart';
 import '../services/day_of_year_service.dart';
 import '../services/daylight_time_service.dart';
 import '../services/locale_service.dart';
+import '../services/prayer_methods.dart';
 import '../services/theme_service.dart';
 import 'widgets/prayer_widget.dart';
 import 'dart:ui' as ui;
@@ -114,11 +115,9 @@ class _CalendarPageState extends State<CalendarPage> {
             title: Text(AppLocalizations.of(context)!.calendarString),
             actions: [
               IconButton(
-                icon: const Icon(Icons.today),
+                icon: const Icon(Icons.share),
                 onPressed: () {
-                  setState(() {
-                    pickedDate = DateTime.now();
-                  });
+                  sharePrayerTimes(context, localeProvider, prayersToday, pickedDate);
                 },
                 tooltip: AppLocalizations.of(context)!.todayTooltip,
               ),
