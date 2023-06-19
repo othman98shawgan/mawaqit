@@ -51,8 +51,8 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
           ),
           body: SettingsList(
             contentPadding: EdgeInsets.all(0),
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
-            sections: [           
+            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor),
+            sections: [
               SettingsSection(
                 title: Text(
                   dhikrSection,

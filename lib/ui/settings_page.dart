@@ -108,7 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           body: SettingsList(
             contentPadding: EdgeInsets.all(0),
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
+            lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
             sections: [
               SettingsSection(
                 title: Text(generalSection,
