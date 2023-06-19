@@ -50,7 +50,7 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
             title: Text(title),
           ),
           body: SettingsList(
-            contentPadding: EdgeInsets.all(0),
+            contentPadding: const EdgeInsets.all(0),
             lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor),
             sections: [
               SettingsSection(

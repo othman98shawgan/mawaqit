@@ -127,7 +127,7 @@ class _PrayerClockState extends State<PrayerClockWidget> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 4,
           ),
           Row(
