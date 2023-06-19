@@ -1,3 +1,4 @@
+import 'package:alfajr/resources/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -119,12 +120,12 @@ class _CounterPageState extends State<CounterPage> {
                     borderRadius: const BorderRadius.all(Radius.circular(50.0)),
                     color: theme.getTheme() == theme.darkTheme
                         ? Colors.black54
-                        : const Color.fromARGB(120, 96, 125, 139),
+                        : color3.withOpacity(0.5),
                   ),
                   child: Center(
                     child: Text(_counter.toString().padLeft(4, '0'),
-                        style: Theme.of(context).textTheme.headline1?.merge(
-                            GoogleFonts.roboto(fontSize: _currnetFontSize, fontWeight: FontWeight.w100))),
+                        style: Theme.of(context).textTheme.headline1?.merge(GoogleFonts.roboto(
+                            fontSize: _currnetFontSize, fontWeight: FontWeight.w100))),
                   ),
                 ),
               ),

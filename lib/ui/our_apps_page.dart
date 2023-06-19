@@ -1,8 +1,11 @@
 import 'package:alfajr/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
+
+import '../services/theme_service.dart';
 
 class OurAppsPage extends StatefulWidget {
   const OurAppsPage({super.key});
@@ -48,6 +51,9 @@ class _OurAppsPageState extends State<OurAppsPage> {
   }
 
   Widget _buildRow(AppModel app) {
+    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
+    var descriptionColor = theme == 'dark' ? Colors.grey.shade400 : Colors.grey.shade700;
+
     return ListTile(
       onTap: () {
         _launchURL(app.appUrl);
@@ -55,7 +61,10 @@ class _OurAppsPageState extends State<OurAppsPage> {
       contentPadding: const EdgeInsets.only(left: 16.0, right: 4.0),
       leading: Image(image: NetworkImage(app.imageUrl)),
       title: Text(app.name),
-      subtitle: Text(app.description),
+      subtitle: Text(
+        app.description,
+        style: TextStyle(color: descriptionColor),
+      ),
       trailing: IconButton(
           icon: const Icon(Icons.navigate_next),
           onPressed: () {

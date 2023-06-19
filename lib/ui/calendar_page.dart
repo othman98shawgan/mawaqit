@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/ui/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -87,7 +88,7 @@ class _CalendarPageState extends State<CalendarPage> {
       style: TextStyle(
           fontWeight: FontWeight.w300,
           fontSize: 40,
-          color: theme == 'dark' ? Colors.white : Colors.black),
+          color: theme == 'dark' ? colorTextDark : colorTextLight),
     );
 
     var dateTextButtonWidget = Padding(
@@ -139,9 +140,9 @@ class _CalendarPageState extends State<CalendarPage> {
             builder: (buildContext, snapshot) {
               if (snapshot.hasData) {
                 return Container(
-                  decoration: const BoxDecoration(
-                      image:
-                          DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(theme.backgroundImage), fit: BoxFit.cover)),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[

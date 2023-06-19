@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/services/day_of_year_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/theme_service.dart';
@@ -276,6 +277,8 @@ class _MyHomePageState extends State<MyHomePage> {
     ]);
 
     HijriCalendar.setLocal(Provider.of<LocaleNotifier>(context, listen: false).locale.toString());
+    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
+    var iconColor = theme == 'dark' ? colorTextDark : colorTextLight;
 
     return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
         NotificationsStatusNotifier>(
@@ -298,9 +301,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 reminderValue = reminder.getReminderTime();
                 timeDiff = localeProvider.timeDiff;
                 return Container(
-                  decoration: const BoxDecoration(
-                      image:
-                          DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(theme.backgroundImage), fit: BoxFit.cover)),
                   child: Column(
                     children: <Widget>[
                       MyCard(
@@ -434,7 +437,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.calendar_month),
+                  leading: Icon(Icons.calendar_month, color: iconColor),
                   title: Text(AppLocalizations.of(context)!.calendarString),
                   onTap: () {
                     Navigator.pop(context);
@@ -443,7 +446,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.mosque),
+                  leading: Icon(Icons.mosque, color: iconColor),
                   title: Text(AppLocalizations.of(context)!.qiblaString),
                   onTap: () async {
                     Navigator.pop(context);
@@ -453,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Divider(thickness: 1),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.apps),
+                  leading: Icon(Icons.apps, color: iconColor),
                   title: Text(AppLocalizations.of(context)!.ourAppsString),
                   onTap: () async {
                     Navigator.pop(context);
@@ -462,7 +465,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.email),
+                  leading: Icon(Icons.email, color: iconColor),
                   title: Text(AppLocalizations.of(context)!.contactUsString),
                   onTap: () async {
                     Navigator.pop(context);
@@ -471,7 +474,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.share),
+                  leading: Icon(Icons.share, color: iconColor),
                   title: Text(AppLocalizations.of(context)!.shareString),
                   onTap: () async {
                     Navigator.pop(context);
