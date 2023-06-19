@@ -9,7 +9,6 @@ import '../services/dhikr_service.dart';
 import '../services/store_manager.dart';
 import '../services/theme_service.dart';
 import 'settings_dhikr_page.dart';
-import 'settings_page.dart';
 import 'dart:ui' as ui;
 
 class CounterPage extends StatefulWidget {
@@ -124,7 +123,7 @@ class _CounterPageState extends State<CounterPage> {
                   ),
                   child: Center(
                     child: Text(_counter.toString().padLeft(4, '0'),
-                        style: Theme.of(context).textTheme.headline1?.merge(GoogleFonts.roboto(
+                        style: Theme.of(context).textTheme.displayLarge?.merge(GoogleFonts.roboto(
                             fontSize: _currnetFontSize, fontWeight: FontWeight.w100))),
                   ),
                 ),

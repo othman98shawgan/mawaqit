@@ -73,50 +73,6 @@ class _OurAppsPageState extends State<OurAppsPage> {
     );
   }
 
-  Widget _buildRow2(AppModel app) {
-    var width = MediaQuery.of(context).size.width;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: width * 0.25,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: Image(
-              image: NetworkImage(app.imageUrl),
-              height: 72,
-            ),
-          ),
-        ),
-        SizedBox(
-            width: width * 0.55,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    app.name,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  Text(
-                    app.description,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
-                  ),
-                ],
-              ),
-            )),
-        SizedBox(
-          width: width * 0.2,
-          child: IconButton(
-              icon: const Icon(Icons.navigate_next),
-              onPressed: () {
-                _launchURL(app.appUrl);
-              }),
-        ),
-      ],
-    );
-  }
 
   _launchURL(String urlString) async {
     Uri url = Uri.parse(urlString);
