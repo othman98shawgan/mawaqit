@@ -418,20 +418,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: Image.asset(
-                    'images/salah.png',
-                    height: 24,
-                  ),
+                  leading: Icon(Icons.calendar_month, color: iconColor),
                   title: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      AppLocalizations.of(context)!.missedPrayersString,
+                      AppLocalizations.of(context)!.calendarString,
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/missed_prayer');
+                    Navigator.pushNamed(context, '/calendar');
                   },
                 ),
                 ListTile(
@@ -454,17 +451,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: Icon(Icons.calendar_month, color: iconColor),
+                  leading: Image.asset(
+                    'images/salah.png',
+                    height: 24,
+                  ),
                   title: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      AppLocalizations.of(context)!.calendarString,
+                      AppLocalizations.of(context)!.missedPrayersString,
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/calendar');
+                    Navigator.pushNamed(context, '/missed_prayer');
                   },
                 ),
                 ListTile(
