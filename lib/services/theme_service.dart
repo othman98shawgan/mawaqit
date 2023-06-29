@@ -5,14 +5,14 @@ import '../resources/colors.dart';
 import 'store_manager.dart';
 
 class ThemeNotifier with ChangeNotifier {
-  late ThemeData _themeData = darkTheme;
-  ThemeData getTheme() => _themeData;
+  ThemeData? _themeData;
+  ThemeData? getTheme() => _themeData;
 
-  late String _currTheme = 'dark';
-  String getThemeStr() => _currTheme;
+  ThemeMode? _themeMode;
+  ThemeMode? get themeMode => _themeMode;
 
-  late String _backgroundImage = 'images/bg.png';
-  String get backgroundImage => _backgroundImage;
+  String? _backgroundImage;
+  String? get backgroundImage => _backgroundImage;
 
   ThemeNotifier() {
     StorageManager.readData('themeMode').then((value) {
@@ -22,14 +22,14 @@ class ThemeNotifier with ChangeNotifier {
       var themeMode = value ?? 'dark';
       if (themeMode == 'light') {
         _themeData = lightTheme;
-        _currTheme = 'light';
+        _themeMode = ThemeMode.light;
         _backgroundImage = 'images/bgGreen.png';
       } else {
         if (kDebugMode) {
           print('setting dark theme');
         }
         _themeData = darkTheme;
-        _currTheme = 'dark';
+        _themeMode = ThemeMode.dark;
         _backgroundImage = 'images/bg.png';
       }
       notifyListeners();
@@ -38,7 +38,7 @@ class ThemeNotifier with ChangeNotifier {
 
   void setDarkMode() async {
     _themeData = darkTheme;
-    _currTheme = 'dark';
+    _themeMode = ThemeMode.dark;
     _backgroundImage = 'images/bg.png';
     StorageManager.saveData('themeMode', 'dark');
     notifyListeners();
@@ -46,7 +46,7 @@ class ThemeNotifier with ChangeNotifier {
 
   void setLightMode() async {
     _themeData = lightTheme;
-    _currTheme = 'light';
+    _themeMode = ThemeMode.light;
     _backgroundImage = 'images/bgGreen.png';
     StorageManager.saveData('themeMode', 'light');
     notifyListeners();

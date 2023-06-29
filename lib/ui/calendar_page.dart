@@ -80,7 +80,7 @@ class _CalendarPageState extends State<CalendarPage> {
     double mainCardHeight = height3 * 0.20;
     var sunIcon = const Icon(Icons.light_mode);
     var moonIcon = const Icon(Icons.dark_mode);
-    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
     var locale = Provider.of<LocaleNotifier>(context, listen: false).locale.toString();
 
     var dateTextWidget = Text(
@@ -88,7 +88,7 @@ class _CalendarPageState extends State<CalendarPage> {
       style: TextStyle(
           fontWeight: FontWeight.w300,
           fontSize: 40,
-          color: theme == 'dark' ? colorTextDark : colorTextLight),
+          color: themeMode == ThemeMode.dark ? colorTextDark : colorTextLight),
     );
 
     var dateTextButtonWidget = Padding(
@@ -142,7 +142,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 return Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage(theme.backgroundImage), fit: BoxFit.cover)),
+                          image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[

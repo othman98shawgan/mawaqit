@@ -51,8 +51,8 @@ class _OurAppsPageState extends State<OurAppsPage> {
   }
 
   Widget _buildRow(AppModel app) {
-    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
-    var descriptionColor = theme == 'dark' ? Colors.grey.shade400 : Colors.grey.shade700;
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
+    var descriptionColor = themeMode == ThemeMode.dark ? Colors.grey.shade400 : Colors.grey.shade700;
 
     return ListTile(
       onTap: () {

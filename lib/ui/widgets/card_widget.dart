@@ -18,8 +18,8 @@ class MyCard extends StatefulWidget {
 class _MyCardState extends State<MyCard> {
   @override
   Widget build(BuildContext context) {
-    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
-    Color bgColor = theme == 'dark' ? prayerBgColorDark : prayerBgColorLight;
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
+    Color bgColor = themeMode == ThemeMode.dark ? prayerBgColorDark : prayerBgColorLight;
 
     return Consumer2<ThemeNotifier, LocaleNotifier>(
       builder: (context, theme, localeProvider, child) => Directionality(
