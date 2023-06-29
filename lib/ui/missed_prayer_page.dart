@@ -112,7 +112,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
 
   Widget _missedPrayerWidget(String label, int index) {
     var style = const TextStyle(
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w400,
       fontSize: 24,
     );
     // Full screen width and height

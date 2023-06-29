@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../resources/colors.dart';
 import 'store_manager.dart';
 
@@ -52,7 +51,7 @@ class ThemeNotifier with ChangeNotifier {
 
   //*** Dark Theme ***/
   final darkTheme = ThemeData(
-    fontFamily: GoogleFonts.tajawal().fontFamily,
+    fontFamily: 'Tajawal',
     appBarTheme: const AppBarTheme(backgroundColor: appBarColor, foregroundColor: Colors.white),
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSwatch(primarySwatch: darkThemeSwatch).copyWith(
@@ -65,7 +64,7 @@ class ThemeNotifier with ChangeNotifier {
 
   //*** Light Theme ***/
   final lightTheme = ThemeData(
-    fontFamily: GoogleFonts.tajawal().fontFamily,
+    fontFamily: 'Tajawal',
     appBarTheme: AppBarTheme(backgroundColor: color5, foregroundColor: colorTextLight),
     brightness: Brightness.light,
     drawerTheme: const DrawerThemeData(

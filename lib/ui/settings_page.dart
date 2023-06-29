@@ -2,7 +2,6 @@ import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -57,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ? summerTimeString
             : winterTimeString;
 
-    var fontFamily = GoogleFonts.tajawal().fontFamily;
+    var fontFamily = 'Tajawal';
 
     var citiesList = {
       'alQuds': AppLocalizations.of(context)!.alQuds,

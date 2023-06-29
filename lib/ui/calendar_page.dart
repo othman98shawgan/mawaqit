@@ -86,7 +86,7 @@ class _CalendarPageState extends State<CalendarPage> {
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy', locale).format(pickedDate),
       style: TextStyle(
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           fontSize: 40,
           color: themeMode == ThemeMode.dark ? colorTextDark : colorTextLight),
     );
