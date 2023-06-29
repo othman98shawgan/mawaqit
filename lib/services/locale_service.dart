@@ -4,36 +4,18 @@ import '../l10n/l10n.dart';
 import 'dart:ui' as ui;
 
 class LocaleNotifier extends ChangeNotifier {
-  late Locale _locale = const Locale('ar');
-  late String _city;
-  late int _timeDiff = 0;
+  Locale _locale;
+  String _city;
+  int _timeDiff;
 
   String get city => _city;
   int get timeDiff => _timeDiff;
   Locale get locale => _locale;
-  Locale getLocale() => _locale;
 
-  LocaleNotifier() {
-    Future.delayed(Duration.zero, readLocaleFromStorage);
-  }
-
-  void readLocaleFromStorage() {
-    StorageManager.readData('Locale').then((value) {
-      var lang = value ?? 'ar';
-      _locale = Locale(lang);
-      notifyListeners();
-    });
-
-    StorageManager.readData('City').then((value) {
-      _city = value ?? "alQuds";
-      notifyListeners();
-    });
-
-    StorageManager.readData('TimeDiff').then((value) {
-      _timeDiff = value ?? 0;
-      notifyListeners();
-    });
-  }
+  LocaleNotifier(Locale locale, String city, int timeDiff)
+      : _city = city,
+        _locale = locale,
+        _timeDiff = timeDiff;
 
   //Locale
   void setLocale(Locale locale) {

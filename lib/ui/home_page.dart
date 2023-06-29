@@ -276,8 +276,8 @@ class _MyHomePageState extends State<MyHomePage> {
     ]);
 
     HijriCalendar.setLocal(Provider.of<LocaleNotifier>(context, listen: false).locale.toString());
-    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
-    var iconColor = theme == 'dark' ? colorTextDark : colorTextLight;
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
+    var iconColor = themeMode == ThemeMode.dark ? colorTextDark : colorTextLight;
 
     return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
         NotificationsStatusNotifier>(
@@ -302,7 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage(theme.backgroundImage), fit: BoxFit.cover)),
+                          image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
                   child: Column(
                     children: <Widget>[
                       MyCard(

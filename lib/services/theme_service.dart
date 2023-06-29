@@ -5,16 +5,57 @@ import '../resources/colors.dart';
 import 'store_manager.dart';
 
 class ThemeNotifier with ChangeNotifier {
+  ThemeData? _themeData;
+  ThemeData? getTheme() => _themeData;
+
+  ThemeMode? _themeMode;
+  ThemeMode? get themeMode => _themeMode;
+
+  String? _backgroundImage;
+  String? get backgroundImage => _backgroundImage;
+
+  ThemeNotifier(ThemeMode themeMode) {
+    if (themeMode == ThemeMode.light) {
+      _themeData = lightTheme;
+      _themeMode = ThemeMode.light;
+      _backgroundImage = 'images/bgGreen.png';
+    } else {
+      if (kDebugMode) {
+        print('setting dark theme');
+      }
+      _themeData = darkTheme;
+      _themeMode = ThemeMode.dark;
+      _backgroundImage = 'images/bg.png';
+    }
+    notifyListeners();
+  }
+
+  void setDarkMode() async {
+    _themeData = darkTheme;
+    _themeMode = ThemeMode.dark;
+    _backgroundImage = 'images/bg.png';
+    StorageManager.saveData('themeMode', 'dark');
+    notifyListeners();
+  }
+
+  void setLightMode() async {
+    _themeData = lightTheme;
+    _themeMode = ThemeMode.light;
+    _backgroundImage = 'images/bgGreen.png';
+    StorageManager.saveData('themeMode', 'light');
+    notifyListeners();
+  }
+
+  //=============================================================================
+  // Themes
+  //=============================================================================
+
+  //*** Dark Theme ***/
   final darkTheme = ThemeData(
     fontFamily: GoogleFonts.tajawal().fontFamily,
     appBarTheme: const AppBarTheme(backgroundColor: appBarColor, foregroundColor: Colors.white),
     brightness: Brightness.dark,
-
-    // backgroundColor: const Color(0xFF212121),
-    // dividerColor: Colors.black12,
-    // focusColor: darkThemeSwatch,
     colorScheme: ColorScheme.fromSwatch(primarySwatch: darkThemeSwatch).copyWith(
-      // secondary: const Color(0xffCFD6DE),
       brightness: Brightness.dark,
     ),
     toggleButtonsTheme: const ToggleButtonsThemeData(
@@ -22,6 +63,7 @@ class ThemeNotifier with ChangeNotifier {
     ),
   );
 
+  //*** Light Theme ***/
   final lightTheme = ThemeData(
     fontFamily: GoogleFonts.tajawal().fontFamily,
     appBarTheme: AppBarTheme(backgroundColor: color5, foregroundColor: colorTextLight),
@@ -49,51 +91,4 @@ class ThemeNotifier with ChangeNotifier {
     iconTheme: const IconThemeData(color: Colors.white),
     colorScheme: ColorScheme.fromSwatch(primarySwatch: greenMaterialColor).copyWith(),
   );
-
-  late ThemeData _themeData = darkTheme;
-  ThemeData getTheme() => _themeData;
-
-  late String _currTheme = 'dark';
-  String getThemeStr() => _currTheme;
-
-  late String _backgroundImage = 'images/bg.png';
-  String get backgroundImage => _backgroundImage;
-
-  ThemeNotifier() {
-    StorageManager.readData('themeMode').then((value) {
-      if (kDebugMode) {
-        print('value read from storage: $value');
-      }
-      var themeMode = value ?? 'dark';
-      if (themeMode == 'light') {
-        _themeData = lightTheme;
-        _currTheme = 'light';
-        _backgroundImage = 'images/bgGreen.png';
-      } else {
-        if (kDebugMode) {
-          print('setting dark theme');
-        }
-        _themeData = darkTheme;
-        _currTheme = 'dark';
-        _backgroundImage = 'images/bg.png';
-      }
-      notifyListeners();
-    });
-  }
-
-  void setDarkMode() async {
-    _themeData = darkTheme;
-    _currTheme = 'dark';
-    _backgroundImage = 'images/bg.png';
-    StorageManager.saveData('themeMode', 'dark');
-    notifyListeners();
-  }
-
-  void setLightMode() async {
-    _themeData = lightTheme;
-    _currTheme = 'light';
-    _backgroundImage = 'images/bgGreen.png';
-    StorageManager.saveData('themeMode', 'light');
-    notifyListeners();
-  }
 }
