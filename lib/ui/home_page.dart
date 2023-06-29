@@ -287,7 +287,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(title),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             actions: appBarActions,
           ),
           body: FutureBuilder<List>(
@@ -416,7 +422,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     'images/salah.png',
                     height: 24,
                   ),
-                  title: Text(AppLocalizations.of(context)!.missedPrayersString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.missedPrayersString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/missed_prayer');
@@ -428,7 +440,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     'images/misbaha.png',
                     height: 24,
                   ),
-                  title: Text(AppLocalizations.of(context)!.dhikrString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.dhikrString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/counter');
@@ -437,7 +455,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.calendar_month, color: iconColor),
-                  title: Text(AppLocalizations.of(context)!.calendarString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.calendarString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/calendar');
@@ -446,7 +470,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.mosque, color: iconColor),
-                  title: Text(AppLocalizations.of(context)!.qiblaString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.qiblaString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await _launchURL('https://qiblafinder.withgoogle.com/');
@@ -456,7 +486,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.apps, color: iconColor),
-                  title: Text(AppLocalizations.of(context)!.ourAppsString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.ourAppsString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/apps');
@@ -465,7 +501,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.email, color: iconColor),
-                  title: Text(AppLocalizations.of(context)!.contactUsString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.contactUsString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await _contactUs();
@@ -474,7 +516,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.share, color: iconColor),
-                  title: Text(AppLocalizations.of(context)!.shareString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.shareString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());

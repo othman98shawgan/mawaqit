@@ -103,7 +103,13 @@ class _SettingsPageState extends State<SettingsPage> {
         textDirection: TextDirection.ltr,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(title),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
           ),
           body: SettingsList(
             contentPadding: const EdgeInsets.all(0),

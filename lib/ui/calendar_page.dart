@@ -113,7 +113,13 @@ class _CalendarPageState extends State<CalendarPage> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.calendarString),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                AppLocalizations.of(context)!.calendarString,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.share),

@@ -23,7 +23,13 @@ class _OurAppsPageState extends State<OurAppsPage> {
       textDirection: ui.TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.ourAppsString),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              AppLocalizations.of(context)!.ourAppsString,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
         ),
         body: Container(
           child: _buildList(data),
@@ -52,7 +58,8 @@ class _OurAppsPageState extends State<OurAppsPage> {
 
   Widget _buildRow(AppModel app) {
     var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
-    var descriptionColor = themeMode == ThemeMode.dark ? Colors.grey.shade400 : Colors.grey.shade700;
+    var descriptionColor =
+        themeMode == ThemeMode.dark ? Colors.grey.shade400 : Colors.grey.shade700;
 
     return ListTile(
       onTap: () {
@@ -72,7 +79,6 @@ class _OurAppsPageState extends State<OurAppsPage> {
           }),
     );
   }
-
 
   _launchURL(String urlString) async {
     Uri url = Uri.parse(urlString);
