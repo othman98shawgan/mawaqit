@@ -19,7 +19,7 @@ class PrayerState extends State<PrayerWidget> {
   @override
   Widget build(BuildContext context) {
     var labelStyle = const TextStyle(
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w400,
       fontSize: 28,
     );
     var timeStyle = GoogleFonts.roboto(

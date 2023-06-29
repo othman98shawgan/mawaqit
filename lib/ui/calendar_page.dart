@@ -86,7 +86,7 @@ class _CalendarPageState extends State<CalendarPage> {
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy', locale).format(pickedDate),
       style: TextStyle(
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           fontSize: 40,
           color: themeMode == ThemeMode.dark ? colorTextDark : colorTextLight),
     );
@@ -113,7 +113,13 @@ class _CalendarPageState extends State<CalendarPage> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.calendarString),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                AppLocalizations.of(context)!.calendarString,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.share),

@@ -121,7 +121,7 @@ class _MathuratCardState extends State<MathuratCard> {
               Text(
                 widget.cardText,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w300,
+                  fontWeight: FontWeight.w400,
                   fontSize: 24,
                 ),
                 locale: const Locale('ar', 'AE'),

@@ -81,11 +81,24 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   generate: true
-  
+
   assets:
     - lib/data/prayer-time.json
     - images/
     - lib/data/mathurat.json
+
+  fonts:
+    - family: Tajawal
+      fonts:        
+        - asset: fonts/Tajawal-Light.ttf
+          weight: 300
+        - asset: fonts/Tajawal-Regular.ttf
+          weight: 400
+        - asset: fonts/Tajawal-Medium.ttf
+          weight: 500
+        - asset: fonts/Tajawal-Bold.ttf
+          weight: 700
+          
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

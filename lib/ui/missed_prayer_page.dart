@@ -65,7 +65,13 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
       child: Scaffold(
         floatingActionButton: _fab(0),
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.missedPrayersString),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              AppLocalizations.of(context)!.missedPrayersString,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
         ),
         body: FutureBuilder(
           future: getAllMissed(),
@@ -112,7 +118,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
 
   Widget _missedPrayerWidget(String label, int index) {
     var style = const TextStyle(
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w400,
       fontSize: 24,
     );
     // Full screen width and height

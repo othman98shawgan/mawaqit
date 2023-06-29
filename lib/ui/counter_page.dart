@@ -83,7 +83,13 @@ class _CounterPageState extends State<CounterPage> {
         textDirection: ui.TextDirection.ltr,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(titleString),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                titleString,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
