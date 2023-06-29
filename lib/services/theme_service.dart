@@ -14,26 +14,20 @@ class ThemeNotifier with ChangeNotifier {
   String? _backgroundImage;
   String? get backgroundImage => _backgroundImage;
 
-  ThemeNotifier() {
-    StorageManager.readData('themeMode').then((value) {
+  ThemeNotifier(ThemeMode themeMode) {
+    if (themeMode == ThemeMode.light) {
+      _themeData = lightTheme;
+      _themeMode = ThemeMode.light;
+      _backgroundImage = 'images/bgGreen.png';
+    } else {
       if (kDebugMode) {
-        print('value read from storage: $value');
+        print('setting dark theme');
       }
-      var themeMode = value ?? 'dark';
-      if (themeMode == 'light') {
-        _themeData = lightTheme;
-        _themeMode = ThemeMode.light;
-        _backgroundImage = 'images/bgGreen.png';
-      } else {
-        if (kDebugMode) {
-          print('setting dark theme');
-        }
-        _themeData = darkTheme;
-        _themeMode = ThemeMode.dark;
-        _backgroundImage = 'images/bg.png';
-      }
-      notifyListeners();
-    });
+      _themeData = darkTheme;
+      _themeMode = ThemeMode.dark;
+      _backgroundImage = 'images/bg.png';
+    }
+    notifyListeners();
   }
 
   void setDarkMode() async {

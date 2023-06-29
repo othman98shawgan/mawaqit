@@ -1,5 +1,6 @@
 import 'package:alfajr/l10n/l10n.dart';
 import 'package:alfajr/services/locale_service.dart';
+import 'package:alfajr/services/store_manager.dart';
 import 'package:alfajr/ui/our_apps_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:alfajr/services/daylight_time_service.dart';
@@ -28,19 +29,26 @@ Future<void> main() async {
     }
   });
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => ThemeNotifier()),
-        ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
-        ChangeNotifierProvider(create: (context) => ReminderNotifier()),
-        ChangeNotifierProvider(create: (context) => DhikrNotifier()),
-        ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
-        ChangeNotifierProvider(create: (context) => LocaleNotifier()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  StorageManager.init().then((value) {
+    var prefs = value;
+  
+    var theme = StorageManager.readDataFromPrefs('themeMode', prefs) ?? 'dark';
+    ThemeMode themeMode = theme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => ThemeNotifier(themeMode)),
+          ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
+          ChangeNotifierProvider(create: (context) => ReminderNotifier()),
+          ChangeNotifierProvider(create: (context) => DhikrNotifier()),
+          ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
+          ChangeNotifierProvider(create: (context) => LocaleNotifier()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+  });
 }
 
 class MyApp extends StatelessWidget {
