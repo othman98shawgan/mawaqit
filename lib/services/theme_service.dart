@@ -34,6 +34,7 @@ class ThemeNotifier with ChangeNotifier {
     _themeMode = ThemeMode.dark;
     _backgroundImage = 'images/bg.png';
     StorageManager.saveData('themeMode', 'dark');
+    StorageManager.saveData('isDark', true);
     notifyListeners();
   }
 
@@ -42,6 +43,7 @@ class ThemeNotifier with ChangeNotifier {
     _themeMode = ThemeMode.light;
     _backgroundImage = 'images/bgGreen.png';
     StorageManager.saveData('themeMode', 'light');
+    StorageManager.saveData('isDark', false);
     notifyListeners();
   }
 

@@ -33,13 +33,13 @@ Future<void> main() async {
     var prefs = value;
 
     //Theme
-    var theme = StorageManager.readDataFromPrefs('themeMode', prefs) ?? 'dark';
-    ThemeMode themeMode = theme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    var isDark = StorageManager.readDataFromPrefs('isDark', prefs) ?? true;
+    ThemeMode themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
 
     //Locale
-    String language = StorageManager.readDataFromPrefs('Locale', prefs) ?? 'ar';
+    var isArabic = StorageManager.readDataFromPrefs('isArabic', prefs) ?? true;
+    String language = isArabic ? 'ar' : 'en';
     String city = StorageManager.readDataFromPrefs('City', prefs) ?? 'alQuds';
-    int timeDiff = StorageManager.readDataFromPrefs('TimeDiff', prefs) ?? 0;
 
     runApp(
       MultiProvider(
@@ -49,8 +49,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (context) => ReminderNotifier()),
           ChangeNotifierProvider(create: (context) => DhikrNotifier()),
           ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
-          ChangeNotifierProvider(
-              create: (context) => LocaleNotifier(Locale(language), city, timeDiff)),
+          ChangeNotifierProvider(create: (context) => LocaleNotifier(Locale(language), city)),
         ],
         child: const MyApp(),
       ),
