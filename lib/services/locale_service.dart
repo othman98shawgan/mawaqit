@@ -6,16 +6,17 @@ import 'dart:ui' as ui;
 class LocaleNotifier extends ChangeNotifier {
   Locale _locale;
   String _city;
-  int _timeDiff;
+  late int _timeDiff;
 
   String get city => _city;
   int get timeDiff => _timeDiff;
   Locale get locale => _locale;
 
-  LocaleNotifier(Locale locale, String city, int timeDiff)
+  LocaleNotifier(Locale locale, String city)
       : _city = city,
-        _locale = locale,
-        _timeDiff = timeDiff;
+        _locale = locale {
+    _timeDiff = getTimeDiff(city);
+  }
 
   //Locale
   void setLocale(Locale locale) {
@@ -23,6 +24,8 @@ class LocaleNotifier extends ChangeNotifier {
 
     _locale = locale;
     StorageManager.saveData('Locale', locale.toString());
+    var isArabic = locale.toString() == 'ar';
+    StorageManager.saveData('isArabic', isArabic);
     notifyListeners();
   }
 
@@ -35,34 +38,39 @@ class LocaleNotifier extends ChangeNotifier {
 
   //City
   void setCity(String city) {
-    if (diff0.contains(city)) {
-      _timeDiff = 0;
-    }
-    if (diff1.contains(city)) {
-      _timeDiff = 1;
-    }
-    if (diff2.contains(city)) {
-      _timeDiff = 2;
-    }
-    if (diff3.contains(city)) {
-      _timeDiff = 3;
-    }
-    if (diff4.contains(city)) {
-      _timeDiff = 4;
-    }
-    if (diffMinus1.contains(city)) {
-      _timeDiff = -1;
-    }
-    if (diffMinus2.contains(city)) {
-      _timeDiff = -2;
-    }
-    if (diffMinus3.contains(city)) {
-      _timeDiff = -3;
-    }
+    _timeDiff = getTimeDiff(city);
     _city = city;
     StorageManager.saveData('City', city);
-    StorageManager.saveData('TimeDiff', _timeDiff);
     notifyListeners();
+  }
+
+  //TimeDiff
+  int getTimeDiff(String city) {
+    if (diff0.contains(city)) {
+      return 0;
+    }
+    if (diff1.contains(city)) {
+      return 1;
+    }
+    if (diff2.contains(city)) {
+      return 2;
+    }
+    if (diff3.contains(city)) {
+      return 3;
+    }
+    if (diff4.contains(city)) {
+      return 4;
+    }
+    if (diffMinus1.contains(city)) {
+      return -1;
+    }
+    if (diffMinus2.contains(city)) {
+      return -2;
+    }
+    if (diffMinus3.contains(city)) {
+      return -3;
+    }
+    return 0;
   }
 }
 
