@@ -203,6 +203,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void didChangeDependencies() {
+    // Adjust the provider based on the image type
+    precacheImage(const AssetImage('images/bg.png'), context);
+    precacheImage(const AssetImage('images/bgGreen.png'), context);
+    super.didChangeDependencies();
+  }
+
+  @override
   void initState() {
     super.initState();
     checkForUpdate();
