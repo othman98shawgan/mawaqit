@@ -1,8 +1,11 @@
 import 'package:alfajr/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
+
+import '../services/theme_service.dart';
 
 class OurAppsPage extends StatefulWidget {
   const OurAppsPage({super.key});
@@ -20,7 +23,13 @@ class _OurAppsPageState extends State<OurAppsPage> {
       textDirection: ui.TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.ourAppsString),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              AppLocalizations.of(context)!.ourAppsString,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
         ),
         body: Container(
           child: _buildList(data),
@@ -48,6 +57,10 @@ class _OurAppsPageState extends State<OurAppsPage> {
   }
 
   Widget _buildRow(AppModel app) {
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
+    var descriptionColor =
+        themeMode == ThemeMode.dark ? Colors.grey.shade400 : Colors.grey.shade700;
+
     return ListTile(
       onTap: () {
         _launchURL(app.appUrl);
@@ -55,57 +68,15 @@ class _OurAppsPageState extends State<OurAppsPage> {
       contentPadding: const EdgeInsets.only(left: 16.0, right: 4.0),
       leading: Image(image: NetworkImage(app.imageUrl)),
       title: Text(app.name),
-      subtitle: Text(app.description),
+      subtitle: Text(
+        app.description,
+        style: TextStyle(color: descriptionColor),
+      ),
       trailing: IconButton(
           icon: const Icon(Icons.navigate_next),
           onPressed: () {
             _launchURL(app.appUrl);
           }),
-    );
-  }
-
-  Widget _buildRow2(AppModel app) {
-    var width = MediaQuery.of(context).size.width;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: width * 0.25,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: Image(
-              image: NetworkImage(app.imageUrl),
-              height: 72,
-            ),
-          ),
-        ),
-        SizedBox(
-            width: width * 0.55,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    app.name,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  Text(
-                    app.description,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
-                  ),
-                ],
-              ),
-            )),
-        SizedBox(
-          width: width * 0.2,
-          child: IconButton(
-              icon: const Icon(Icons.navigate_next),
-              onPressed: () {
-                _launchURL(app.appUrl);
-              }),
-        ),
-      ],
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,13 +18,8 @@ class MyCard extends StatefulWidget {
 class _MyCardState extends State<MyCard> {
   @override
   Widget build(BuildContext context) {
-    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
-    Color bgColor;
-    if (theme == 'dark') {
-      bgColor = const Color.fromARGB(180, 0, 0, 0);
-    } else {
-      bgColor = const Color.fromARGB(180, 255, 255, 255);
-    }
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
+    Color bgColor = themeMode == ThemeMode.dark ? prayerBgColorDark : prayerBgColorLight;
 
     return Consumer2<ThemeNotifier, LocaleNotifier>(
       builder: (context, theme, localeProvider, child) => Directionality(

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/services/day_of_year_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/theme_service.dart';
@@ -202,6 +203,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void didChangeDependencies() {
+    // Adjust the provider based on the image type
+    precacheImage(const AssetImage('images/bg.png'), context);
+    precacheImage(const AssetImage('images/bgGreen.png'), context);
+    super.didChangeDependencies();
+  }
+
+  @override
   void initState() {
     super.initState();
     checkForUpdate();
@@ -275,6 +284,8 @@ class _MyHomePageState extends State<MyHomePage> {
     ]);
 
     HijriCalendar.setLocal(Provider.of<LocaleNotifier>(context, listen: false).locale.toString());
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
+    var iconColor = themeMode == ThemeMode.dark ? colorTextDark : colorTextLight;
 
     return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
         NotificationsStatusNotifier>(
@@ -284,7 +295,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(title),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             actions: appBarActions,
           ),
           body: FutureBuilder<List>(
@@ -297,9 +314,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 reminderValue = reminder.getReminderTime();
                 timeDiff = localeProvider.timeDiff;
                 return Container(
-                  decoration: const BoxDecoration(
-                      image:
-                          DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
                   child: Column(
                     children: <Widget>[
                       MyCard(
@@ -409,14 +426,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: Image.asset(
-                    'images/salah.png',
-                    height: 24,
+                  leading: Icon(Icons.calendar_month, color: iconColor),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.calendarString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                   ),
-                  title: Text(AppLocalizations.of(context)!.missedPrayersString),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/missed_prayer');
+                    Navigator.pushNamed(context, '/calendar');
                   },
                 ),
                 ListTile(
@@ -425,7 +445,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     'images/misbaha.png',
                     height: 24,
                   ),
-                  title: Text(AppLocalizations.of(context)!.dhikrString),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.dhikrString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/counter');
@@ -433,17 +459,32 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.calendar_month),
-                  title: Text(AppLocalizations.of(context)!.calendarString),
+                  leading: Image.asset(
+                    'images/salah.png',
+                    height: 24,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.missedPrayersString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/calendar');
+                    Navigator.pushNamed(context, '/missed_prayer');
                   },
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.mosque),
-                  title: Text(AppLocalizations.of(context)!.qiblaString),
+                  leading: Icon(Icons.mosque, color: iconColor),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.qiblaString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await _launchURL('https://qiblafinder.withgoogle.com/');
@@ -452,8 +493,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Divider(thickness: 1),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.apps),
-                  title: Text(AppLocalizations.of(context)!.ourAppsString),
+                  leading: Icon(Icons.apps, color: iconColor),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.ourAppsString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/apps');
@@ -461,11 +508,32 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   minLeadingWidth: 0,
-                  leading: const Icon(Icons.email),
-                  title: Text(AppLocalizations.of(context)!.contactUsString),
+                  leading: Icon(Icons.email, color: iconColor),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.contactUsString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await _contactUs();
+                  },
+                ),
+                ListTile(
+                  minLeadingWidth: 0,
+                  leading: Icon(Icons.share, color: iconColor),
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.shareString,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());
                   },
                 ),
               ],

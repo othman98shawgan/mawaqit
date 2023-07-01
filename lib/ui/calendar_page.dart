@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/ui/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import '../models/prayers.dart';
 import '../services/day_of_year_service.dart';
 import '../services/daylight_time_service.dart';
 import '../services/locale_service.dart';
+import '../services/prayer_methods.dart';
 import '../services/theme_service.dart';
 import 'widgets/prayer_widget.dart';
 import 'dart:ui' as ui;
@@ -78,15 +80,15 @@ class _CalendarPageState extends State<CalendarPage> {
     double mainCardHeight = height3 * 0.20;
     var sunIcon = const Icon(Icons.light_mode);
     var moonIcon = const Icon(Icons.dark_mode);
-    var theme = Provider.of<ThemeNotifier>(context, listen: false).getThemeStr();
+    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
     var locale = Provider.of<LocaleNotifier>(context, listen: false).locale.toString();
 
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy', locale).format(pickedDate),
       style: TextStyle(
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           fontSize: 40,
-          color: theme == 'dark' ? Colors.white : Colors.black),
+          color: themeMode == ThemeMode.dark ? colorTextDark : colorTextLight),
     );
 
     var dateTextButtonWidget = Padding(
@@ -111,14 +113,18 @@ class _CalendarPageState extends State<CalendarPage> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.calendarString),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                AppLocalizations.of(context)!.calendarString,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.today),
+                icon: const Icon(Icons.share),
                 onPressed: () {
-                  setState(() {
-                    pickedDate = DateTime.now();
-                  });
+                  sharePrayerTimes(context, localeProvider, prayersToday, pickedDate);
                 },
                 tooltip: AppLocalizations.of(context)!.todayTooltip,
               ),
@@ -140,9 +146,9 @@ class _CalendarPageState extends State<CalendarPage> {
             builder: (buildContext, snapshot) {
               if (snapshot.hasData) {
                 return Container(
-                  decoration: const BoxDecoration(
-                      image:
-                          DecorationImage(image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[

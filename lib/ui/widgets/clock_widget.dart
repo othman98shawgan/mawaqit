@@ -78,7 +78,7 @@ class _PrayerClockState extends State<PrayerClockWidget> {
 
     updatePrayers();
     var prayerTextStyle = const TextStyle(
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w400,
       fontSize: 18,
     );
 
@@ -127,7 +127,7 @@ class _PrayerClockState extends State<PrayerClockWidget> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 4,
           ),
           Row(

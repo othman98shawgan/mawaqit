@@ -2,7 +2,6 @@ import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -57,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ? summerTimeString
             : winterTimeString;
 
-    var fontFamily = GoogleFonts.tajawal().fontFamily;
+    var fontFamily = 'Tajawal';
 
     var citiesList = {
       'alQuds': AppLocalizations.of(context)!.alQuds,
@@ -104,11 +103,17 @@ class _SettingsPageState extends State<SettingsPage> {
         textDirection: TextDirection.ltr,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(title),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
           ),
           body: SettingsList(
-            contentPadding: EdgeInsets.all(0),
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor2),
+            contentPadding: const EdgeInsets.all(0),
+            lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
             sections: [
               SettingsSection(
                 title: Text(generalSection,
@@ -171,7 +176,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       strutStyle: const StrutStyle(forceStrutHeight: true),
                       style: TextStyle(fontFamily: fontFamily),
                     ),
-                    value: Text(cityDescriptionString + ': ' + citiesList[localeProvider.city]!,
+                    value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
                         strutStyle: const StrutStyle(forceStrutHeight: true),
                         style: TextStyle(fontFamily: fontFamily)),
                     onPressed: (context) {
@@ -260,7 +265,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
   var currentCityValue =
       citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
 
-  int _selected = 0;
+  int selected = 0;
 
   var citiesList = citiesMap.values.toList();
   citiesList.sort((a, b) {
@@ -280,7 +285,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
 
   for (int i = 0; i < citiesList.length; i++) {
     if (citiesList[i] == currentCityValue) {
-      _selected = i;
+      selected = i;
       break;
     }
   }
@@ -288,7 +293,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
   var confirmMethod = (() async {
     Navigator.pop(context);
     currentCity =
-        citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[_selected]);
+        citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[selected]);
     Provider.of<LocaleNotifier>(context, listen: false).setCity(currentCity);
     updatePrayers();
   });
@@ -325,10 +330,10 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
                         return RadioListTile(
                             title: Text(citiesList.elementAt(index)),
                             value: index,
-                            groupValue: _selected,
+                            groupValue: selected,
                             onChanged: (value) {
                               setState(() {
-                                _selected = index;
+                                selected = index;
                               });
                             });
                       }),
