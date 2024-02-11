@@ -25,6 +25,7 @@ import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
+import 'dart:io' show Platform;
 
 // PrayersModel dummyDay =
 //     PrayersModel("31.12", "00:11", "00:12", "00:13", "14:45", "21:32", "22:33"); //TODO: FOR TESTING
@@ -213,7 +214,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    checkForUpdate();
+    if(Platform.isAndroid){
+      checkForUpdate();
+    }
     Wakelock.enable();
     updateAppBar(false);
     NotificationsService.init();

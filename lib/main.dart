@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:alfajr/l10n/l10n.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/store_manager.dart';
@@ -20,9 +22,16 @@ import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:desktop_window/desktop_window.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    var size = const Size(1600, 900);
+    await DesktopWindow.setMinWindowSize(size);
+    await DesktopWindow.setMaxWindowSize(size);
+  }
+
   await Permission.notification.isDenied.then((value) {
     if (value) {
       Permission.notification.request();
