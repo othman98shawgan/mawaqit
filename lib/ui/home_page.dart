@@ -73,8 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   updatePrayers() {
     Future.delayed(Duration.zero, () {
-      cancelAllPrayers().whenComplete(
-          () => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
+      cancelAllPrayers().whenComplete(() => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
     });
   }
 
@@ -98,8 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setScheduledPrayers(_scheduledPrayers);
     }
     if (!mounted) return; //Make sure widget is mounted
-    var notifiactionsStatus =
-        Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
+    var notifiactionsStatus = Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
     var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
     if ((!notifiactionsStatus) ||
@@ -113,8 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
     timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
-    prayersToSchedule
-        .addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime, timeDiff));
+    prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime, timeDiff));
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -126,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
         prayerBody = AppLocalizations.of(context)!.notificationsShuruqBody;
         pryaerTitle = AppLocalizations.of(context)!.notificationsShuruqPrayerTimeTitle;
       } else {
-        pryaerTitle = AppLocalizations.of(context)!
-            .notificationsPrayerTimeTitle(getPrayerTranslation(prayer.label, context));
+        pryaerTitle =
+            AppLocalizations.of(context)!.notificationsPrayerTimeTitle(getPrayerTranslation(prayer.label, context));
       }
 
       NotificationsService.scheduleNotifications(
@@ -148,18 +145,16 @@ class _MyHomePageState extends State<MyHomePage> {
         var reminderId = getPrayerNotificationId(reminderTime);
         var reminderTitle = '';
         if (prayer.label == 'Shuruq') {
-          reminderTitle =
-              AppLocalizations.of(context)!.notificationsShuruqReminderTitle(reminderValue);
+          reminderTitle = AppLocalizations.of(context)!.notificationsShuruqReminderTitle(reminderValue);
           if (reminderValue <= 10) {
-            reminderTitle = AppLocalizations.of(context)!
-                .notificationsShuruqReminderTitleMinutes(reminderValue);
+            reminderTitle = AppLocalizations.of(context)!.notificationsShuruqReminderTitleMinutes(reminderValue);
           }
         } else {
-          reminderTitle = AppLocalizations.of(context)!.notificationsReminderTitle(
-              getPrayerTranslation(prayer.label, context), reminderValue);
+          reminderTitle = AppLocalizations.of(context)!
+              .notificationsReminderTitle(getPrayerTranslation(prayer.label, context), reminderValue);
           if (reminderValue <= 10) {
-            reminderTitle = AppLocalizations.of(context)!.notificationsReminderTitleMinutes(
-                getPrayerTranslation(prayer.label, context), reminderValue);
+            reminderTitle = AppLocalizations.of(context)!
+                .notificationsReminderTitleMinutes(getPrayerTranslation(prayer.label, context), reminderValue);
           }
         }
 
@@ -289,8 +284,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
         NotificationsStatusNotifier>(
-      builder: (context, theme, daylightSaving, reminder, localeProvider, notifications, child) =>
-          Directionality(
+      builder: (context, theme, daylightSaving, reminder, localeProvider, notifications, child) => Directionality(
         textDirection: ui.TextDirection.ltr,
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -315,8 +309,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 timeDiff = localeProvider.timeDiff;
                 return Container(
                   decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
+                      image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
                   child: Column(
                     children: <Widget>[
                       MyCard(
@@ -331,8 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          DateFormat(
-                                                  'dd MMM yyyy', localeProvider.locale.toString())
+                                          DateFormat('dd MMM yyyy', localeProvider.locale.toString())
                                               .format(DateTime.now()),
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
                                           style: const TextStyle(fontSize: 16),
@@ -350,8 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       ],
                                     ),
                                     const Padding(
-                                        padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                        child: ClockWidget()),
+                                        padding: EdgeInsets.only(top: 5.0, bottom: 5.0), child: ClockWidget()),
                                     PrayerClockWidget(
                                       prayersToday: prayersToday,
                                       summerTime: summerTime,
@@ -553,8 +544,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _contactUs() async {
     String mailAddress = 'mailto:oth1998@gmail.com';
-    String urlAddress =
-        '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    String urlAddress = '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
