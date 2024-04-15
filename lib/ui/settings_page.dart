@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
 import '../services/notifications_service.dart';
@@ -98,146 +99,233 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Directionality(
         textDirection: TextDirection.ltr,
         child: Scaffold(
-          appBar: AppBar(
-            title: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w500),
+            appBar: AppBar(
+              title: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
               ),
             ),
-          ),
-          body: SettingsList(
-            contentPadding: const EdgeInsets.all(0),
-            lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
-            sections: [
-              SettingsSection(
-                title: Text(generalSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                tiles: [
-                  SettingsTile.navigation(
-                    leading: const Icon(Icons.language),
-                    title: Text(
-                      languageString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                      style: TextStyle(fontFamily: fontFamily),
-                    ),
-                    value: Text(localeMap[localeProvider.locale.toString()]!,
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    onPressed: (context) {
-                      showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text(darkModeString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.dark_mode_outlined),
-                    initialValue: theme.getTheme() == theme.darkTheme,
-                    onToggle: (value) {
-                      if (value) {
-                        theme.setDarkMode();
-                      } else {
-                        theme.setLightMode();
-                      }
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text(dstString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    description: Text(summerTimeDescription,
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.access_time),
-                    initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
-                    onToggle: (value) {
-                      if (value) {
-                        daylightSaving.setSummerTime();
-                        summerTimeDescription = summerTimeString;
-                        widget.updatePrayers!();
-                      } else {
-                        daylightSaving.setWinterTime();
-                        summerTimeDescription = winterTimeString;
-                        widget.updatePrayers!();
-                      }
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    leading: const Icon(Icons.location_city),
-                    title: Text(
-                      citySlecetionString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                      style: TextStyle(fontFamily: fontFamily),
-                    ),
-                    value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    onPressed: (context) {
-                      showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text(notificationsSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                tiles: [
-                  SettingsTile.switchTile(
-                    title: Text(sendNotificationsString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.notifications),
-                    initialValue: notifications.getNotificationsStatus() == true,
-                    onToggle: (value) {
-                      if (value) {
-                        notifications.setNotificationsOn();
-                        notifications.requestNotification();
-                        widget.updatePrayers!();
-                      } else {
-                        notifications.setNotificationsOff();
-                        reminder.setReminderStatus(false);
-                        widget.cancelNotifications!();
-                      }
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    title: Text(prayerReminderString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.notification_important_sharp),
-                    value: reminder.getReminderStatus()
-                        ? Text(
-                            AppLocalizations.of(context)!.settingsPrayerReminderDescription(reminder.getReminderTime()),
-                            strutStyle: const StrutStyle(forceStrutHeight: true),
-                            style: TextStyle(fontFamily: fontFamily))
-                        : Text(prayerReminderOffString,
+            body: isAndroid
+                ? SettingsList(
+                    contentPadding: const EdgeInsets.all(0),
+                    lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
+                    sections: [
+                      SettingsSection(
+                        title: Text(generalSection,
                             strutStyle: const StrutStyle(forceStrutHeight: true),
                             style: TextStyle(fontFamily: fontFamily)),
-                    onPressed: (context) async {
-                      await showReminderDialog(
-                        context,
-                        reminder.getReminderStatus(),
-                        reminder.getReminderTime(),
-                        widget.updateReminder!,
-                        widget.updateAppBar!,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                  title: Text(helpSection,
-                      strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
-                  tiles: [
-                    SettingsTile.navigation(
-                      title: Text(resetNotificationsString,
-                          strutStyle: const StrutStyle(forceStrutHeight: true),
-                          style: TextStyle(fontFamily: fontFamily)),
-                      leading: const Icon(Icons.restart_alt),
-                      onPressed: (context) async {
-                        widget.updatePrayers!();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ]),
-            ],
-          ),
-        ),
+                        tiles: [
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.language),
+                            title: Text(
+                              languageString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text(localeMap[localeProvider.locale.toString()]!,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(darkModeString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.dark_mode_outlined),
+                            initialValue: theme.getTheme() == theme.darkTheme,
+                            onToggle: (value) {
+                              if (value) {
+                                theme.setDarkMode();
+                              } else {
+                                theme.setLightMode();
+                              }
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(dstString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            description: Text(summerTimeDescription,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.access_time),
+                            initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                            onToggle: (value) {
+                              if (value) {
+                                daylightSaving.setSummerTime();
+                                summerTimeDescription = summerTimeString;
+                                widget.updatePrayers!();
+                              } else {
+                                daylightSaving.setWinterTime();
+                                summerTimeDescription = winterTimeString;
+                                widget.updatePrayers!();
+                              }
+                            },
+                          ),
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.location_city),
+                            title: Text(
+                              citySlecetionString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
+                            },
+                          ),
+                        ],
+                      ),
+                      SettingsSection(
+                        title: Text(notificationsSection,
+                            strutStyle: const StrutStyle(forceStrutHeight: true),
+                            style: TextStyle(fontFamily: fontFamily)),
+                        tiles: [
+                          SettingsTile.switchTile(
+                            title: Text(sendNotificationsString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.notifications),
+                            initialValue: notifications.getNotificationsStatus() == true,
+                            onToggle: (value) {
+                              if (value) {
+                                notifications.setNotificationsOn();
+                                notifications.requestNotification();
+                                widget.updatePrayers!();
+                              } else {
+                                notifications.setNotificationsOff();
+                                reminder.setReminderStatus(false);
+                                widget.cancelNotifications!();
+                              }
+                            },
+                          ),
+                          SettingsTile.navigation(
+                            title: Text(prayerReminderString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.notification_important_sharp),
+                            value: reminder.getReminderStatus()
+                                ? Text(
+                                    AppLocalizations.of(context)!
+                                        .settingsPrayerReminderDescription(reminder.getReminderTime()),
+                                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                                    style: TextStyle(fontFamily: fontFamily))
+                                : Text(prayerReminderOffString,
+                                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                                    style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) async {
+                              await showReminderDialog(
+                                context,
+                                reminder.getReminderStatus(),
+                                reminder.getReminderTime(),
+                                widget.updateReminder!,
+                                widget.updateAppBar!,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      SettingsSection(
+                          title: Text(helpSection,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily)),
+                          tiles: [
+                            SettingsTile.navigation(
+                              title: Text(resetNotificationsString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.restart_alt),
+                              onPressed: (context) async {
+                                widget.updatePrayers!();
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ]),
+                    ],
+                  )
+                : SettingsList(
+                    contentPadding: const EdgeInsets.all(0),
+                    lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
+                    sections: [
+                      SettingsSection(
+                        title: Text(generalSection,
+                            strutStyle: const StrutStyle(forceStrutHeight: true),
+                            style: TextStyle(fontFamily: fontFamily)),
+                        tiles: [
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.language),
+                            title: Text(
+                              languageString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text(localeMap[localeProvider.locale.toString()]!,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(darkModeString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.dark_mode_outlined),
+                            initialValue: theme.getTheme() == theme.darkTheme,
+                            onToggle: (value) {
+                              if (value) {
+                                theme.setDarkMode();
+                              } else {
+                                theme.setLightMode();
+                              }
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(dstString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            description: Text(summerTimeDescription,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.access_time),
+                            initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                            onToggle: (value) {
+                              if (value) {
+                                daylightSaving.setSummerTime();
+                                summerTimeDescription = summerTimeString;
+                                widget.updatePrayers!();
+                              } else {
+                                daylightSaving.setWinterTime();
+                                summerTimeDescription = winterTimeString;
+                                widget.updatePrayers!();
+                              }
+                            },
+                          ),
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.location_city),
+                            title: Text(
+                              citySlecetionString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
       )),
     );
   }

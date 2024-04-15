@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:wakelock/wakelock.dart';
 import '../data/prayer_times.dart';
+import '../main.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
@@ -72,6 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   updatePrayers() {
+    if (!isAndroid) {
+      return;
+    }
     Future.delayed(Duration.zero, () {
       cancelAllPrayers().whenComplete(() => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
     });
@@ -90,6 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> scheduleNextPrayers(DateTime time) async {
+    if (!isAndroid) {
+      return;
+    }
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
     _scheduledPrayers = await getScheduledPrayers();
@@ -208,8 +215,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    checkForUpdate();
-    Wakelock.enable();
+    if (isAndroid) {
+      checkForUpdate();
+      Wakelock.enable();
+    }
     updateAppBar(false);
     NotificationsService.init();
     readJson();
@@ -430,42 +439,46 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.pushNamed(context, '/calendar');
                   },
                 ),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Image.asset(
-                    'images/misbaha.png',
-                    height: 24,
-                  ),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.dhikrString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/counter');
-                  },
-                ),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Image.asset(
-                    'images/salah.png',
-                    height: 24,
-                  ),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.missedPrayersString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/missed_prayer');
-                  },
-                ),
+                isAndroid
+                    ? ListTile(
+                        minLeadingWidth: 0,
+                        leading: Image.asset(
+                          'images/misbaha.png',
+                          height: 24,
+                        ),
+                        title: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            AppLocalizations.of(context)!.dhikrString,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/counter');
+                        },
+                      )
+                    : Container(),
+                isAndroid
+                    ? ListTile(
+                        minLeadingWidth: 0,
+                        leading: Image.asset(
+                          'images/salah.png',
+                          height: 24,
+                        ),
+                        title: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            AppLocalizations.of(context)!.missedPrayersString,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/missed_prayer');
+                        },
+                      )
+                    : Container(),
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.mosque, color: iconColor),

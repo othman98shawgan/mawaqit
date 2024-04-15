@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:alfajr/l10n/l10n.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/store_manager.dart';
@@ -22,8 +23,16 @@ import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
+bool isWeb = false;
+bool isAndroid = false;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    isWeb = true;
+  } else if (Platform.isAndroid) {
+    isAndroid = true;
+  }
 
   if (!kIsWeb) {
     await Permission.notification.isDenied.then((value) {
