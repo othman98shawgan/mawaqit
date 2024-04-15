@@ -20,14 +20,18 @@ import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Permission.notification.isDenied.then((value) {
-    if (value) {
-      Permission.notification.request();
-    }
-  });
+
+  if (!kIsWeb) {
+    await Permission.notification.isDenied.then((value) {
+      if (value) {
+        Permission.notification.request();
+      }
+    });
+  }
 
   StorageManager.init().then((value) {
     var prefs = value;
