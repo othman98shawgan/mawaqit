@@ -45,16 +45,14 @@ class _SettingsPageState extends State<SettingsPage> {
     var notificationsSection = AppLocalizations.of(context)!.settingsNotificationsSection;
     var sendNotificationsString = AppLocalizations.of(context)!.settingsSendNotifications;
     var prayerReminderString = AppLocalizations.of(context)!.settingsPrayerReminder;
-    var prayerReminderOffString =
-        AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
+    var prayerReminderOffString = AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
     var helpSection = AppLocalizations.of(context)!.settingsHelpSection;
     var resetNotificationsString = AppLocalizations.of(context)!.settingsResetNotifications;
     var citySlecetionString = AppLocalizations.of(context)!.citySelect;
     var cityDescriptionString = AppLocalizations.of(context)!.cityCurrnet;
-    var summerTimeDescription =
-        Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
-            ? summerTimeString
-            : winterTimeString;
+    var summerTimeDescription = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
+        ? summerTimeString
+        : winterTimeString;
 
     var fontFamily = 'Tajawal';
 
@@ -96,10 +94,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
         NotificationsStatusNotifier, LocaleNotifier>(
-      builder:
-          (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) =>
-              Center(
-                  child: Directionality(
+      builder: (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) => Center(
+          child: Directionality(
         textDirection: TextDirection.ltr,
         child: Scaffold(
           appBar: AppBar(
@@ -117,8 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
             sections: [
               SettingsSection(
                 title: Text(generalSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                    style: TextStyle(fontFamily: fontFamily)),
+                    strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                 tiles: [
                   SettingsTile.navigation(
                     leading: const Icon(Icons.language),
@@ -128,16 +123,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(fontFamily: fontFamily),
                     ),
                     value: Text(localeMap[localeProvider.locale.toString()]!,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     onPressed: (context) {
                       showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
                     },
                   ),
                   SettingsTile.switchTile(
                     title: Text(darkModeString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.dark_mode_outlined),
                     initialValue: theme.getTheme() == theme.darkTheme,
                     onToggle: (value) {
@@ -150,11 +143,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SettingsTile.switchTile(
                     title: Text(dstString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     description: Text(summerTimeDescription,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.access_time),
                     initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
                     onToggle: (value) {
@@ -177,24 +168,20 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(fontFamily: fontFamily),
                     ),
                     value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     onPressed: (context) {
-                      showCitiesDialog(
-                          context, localeProvider.city, citiesList, widget.updatePrayers!);
+                      showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
                     },
                   ),
                 ],
               ),
               SettingsSection(
                 title: Text(notificationsSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                    style: TextStyle(fontFamily: fontFamily)),
+                    strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                 tiles: [
                   SettingsTile.switchTile(
                     title: Text(sendNotificationsString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.notifications),
                     initialValue: notifications.getNotificationsStatus() == true,
                     onToggle: (value) {
@@ -211,13 +198,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SettingsTile.navigation(
                     title: Text(prayerReminderString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
+                        strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                     leading: const Icon(Icons.notification_important_sharp),
                     value: reminder.getReminderStatus()
                         ? Text(
-                            AppLocalizations.of(context)!
-                                .settingsPrayerReminderDescription(reminder.getReminderTime()),
+                            AppLocalizations.of(context)!.settingsPrayerReminderDescription(reminder.getReminderTime()),
                             strutStyle: const StrutStyle(forceStrutHeight: true),
                             style: TextStyle(fontFamily: fontFamily))
                         : Text(prayerReminderOffString,
@@ -237,8 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               SettingsSection(
                   title: Text(helpSection,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                      style: TextStyle(fontFamily: fontFamily)),
+                      strutStyle: const StrutStyle(forceStrutHeight: true), style: TextStyle(fontFamily: fontFamily)),
                   tiles: [
                     SettingsTile.navigation(
                       title: Text(resetNotificationsString,
@@ -259,11 +243,9 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMap,
-    Function updatePrayers) async {
+showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
   String currentCity = city;
-  var currentCityValue =
-      citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
+  var currentCityValue = citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
 
   int selected = 0;
 
@@ -292,8 +274,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
 
   var confirmMethod = (() async {
     Navigator.pop(context);
-    currentCity =
-        citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[selected]);
+    currentCity = citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[selected]);
     Provider.of<LocaleNotifier>(context, listen: false).setCity(currentCity);
     updatePrayers();
   });
@@ -385,8 +366,7 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                 RadioListTile(
                     contentPadding: EdgeInsets.zero,
                     visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
+                        horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('ar'),
                     title: Text(localeMap['ar']!),
                     groupValue: currentLocale,
@@ -398,8 +378,7 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                 RadioListTile(
                     contentPadding: EdgeInsets.zero,
                     visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
+                        horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('en'),
                     title: Text(localeMap['en']!),
                     groupValue: currentLocale,
