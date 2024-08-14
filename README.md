@@ -18,19 +18,9 @@ In addition to the prayer times, the app includes a calendar page where users ca
 -   Localization (English/Arabic)
 
 ## Screenshots
-
-
- <img src="/images/screenshots/home-view-light-ar.jpg" width="180"> <img src="/images/screenshots/home-view-light-en.jpg" width="180"> <img src="/images/screenshots/home-view-light-en.jpg" width="180"> <img src="/images/screenshots/calender-view.png" width="180"> <img src="/images/screenshots/reminders-dialog.jpg" width="180"> <img src="/images/screenshots/settings-view-dark-en.jpg" width="180"> <img src="/images/screenshots/settings-view-light-ar.jpg" width="180"> 
-
-
-
-
-
-
-
+ <img src="/images/screenshots/home-view-light-ar.jpg" width="180"> <img src="/images/screenshots/home-view-light-en.jpg" width="180"> <img src="/images/screenshots/home-view-dark-en.jpg" width="180"> <img src="/images/screenshots/calender-view.png" width="180"> <img src="/images/screenshots/reminders-dialog.jpg" width="180"> <img src="/images/screenshots/settings-view-dark-en.jpg" width="180"> <img src="/images/screenshots/settings-view-light-ar.jpg" width="180"> <img src="/images/screenshots/navigation-drawer-view.jpg" width="180"> 
 
 ## Installation
-
 To use the Mawaqit App, simply download and install it on your mobile device from the Google Play Store: [Google Play Store](https://play.google.com/store/apps/details?id=com.othman.mawaqitquds)
 
 <a href='https://play.google.com/store/apps/details?id=com.othman.mawaqitquds'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width='258.5' height='100'/></a>
