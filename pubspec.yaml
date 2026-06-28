@@ -44,6 +44,13 @@ dependencies:
   jiffy: ^6.4.5
   hijri: ^3.0.1
   wakelock_plus: ^1.6.1
+  permission_handler: ^11.3.1
+  flutter_localizations:
+    sdk: flutter
+  flutter_local_notifications: 19.0.0
+  timezone: 0.10.1
+  rxdart: ^0.28.0
+  app_settings: ^7.0.0
 
 dev_dependencies:
   flutter_test:
