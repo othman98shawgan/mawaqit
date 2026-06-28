@@ -1,61 +1,53 @@
 import 'dart:io';
-
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../services/store_manager.dart';
+class NotificationsStatusNotifier extends ChangeNotifier {
+  bool _isAllowed = false;
+  bool get isAllowed => _isAllowed;
 
-class NotificationsStatusNotifier with ChangeNotifier {
-  late bool _notificationsStatus;
-  bool _notificationsAlreadyRequested = false;
-
-  bool getNotificationsStatus() => _notificationsStatus;
-
+  // 1. FIXED: Initialize state immediately upon creation
   NotificationsStatusNotifier() {
-    StorageManager.readData('NotificationsStatus').then((value) {
-      _notificationsStatus = value ?? false;
-      notifyListeners();
-    });
+    checkPermissions();
   }
 
-  void setNotificationsOn() async {
-    _notificationsStatus = true;
-    StorageManager.saveData('NotificationsStatus', true);
-    notifyListeners();
-  }
-
-  void setNotificationsOff() async {
-    _notificationsStatus = false;
-    StorageManager.saveData('NotificationsStatus', false);
-    notifyListeners();
-  }
-
-  void requestNotification() async {
-    if (_notificationsAlreadyRequested) {
-      AppSettings.openAppSettings(type: AppSettingsType.notification);
-    }
-
-    // Request basic notification permissions
-    final status = await Permission.notification.request();
-    
-    // For Android 14+ we also explicitly need to request exact alarms permission via flutter_local_notifications
+  Future<void> checkPermissions() async {
     if (Platform.isAndroid) {
-      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-          FlutterLocalNotificationsPlugin();
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+      final status = await Permission.notification.status;
+
+      // FIXED: The correct method name is canScheduleExactNotifications()
+      final androidPlugin = FlutterLocalNotificationsPlugin()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final canScheduleExact = await androidPlugin?.canScheduleExactNotifications() ?? false;
+
+      _isAllowed = status.isGranted && canScheduleExact;
+    } else if (Platform.isIOS) {
+      final status = await Permission.notification.status;
+      _isAllowed = status.isGranted;
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> requestPermissions() async {
+    if (Platform.isAndroid) {
+      // Android: Request standard notifications
+      await Permission.notification.request();
+
+      // Android 14+: Request exact alarm permission via native plugin implementation
+      // This will redirect the user to the native system settings toggle page
+      await FlutterLocalNotificationsPlugin()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestExactAlarmsPermission();
+    } else if (Platform.isIOS) {
+      // iOS: Request alert, badge, and sound via native plugin implementation
+      await FlutterLocalNotificationsPlugin()
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
     }
 
-    _notificationsAlreadyRequested = true;
-
-    if (status.isGranted) {
-      setNotificationsOn();
-    } else {
-      setNotificationsOff();
-    }
+    // FIXED: Instead of guessing the outcome, run the unified verification check
+    await checkPermissions();
   }
 }

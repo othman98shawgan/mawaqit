@@ -23,6 +23,9 @@ class TestNotificationsPage extends StatelessWidget {
                 title: 'Adhan: Fajr',
                 body: 'It is time for Fajr prayer in Al-Quds.',
                 payload: 'prayer_fajr',
+                channelId: 'prayer_channel',
+                channelName: 'Prayer Alerts',
+                channelDescription: 'Notifications for prayer times and Athan',
               );
             },
             child: const Text('Test Prayer Adhan (Immediate)'),
@@ -33,10 +36,12 @@ class TestNotificationsPage extends StatelessWidget {
               NotificationsService.scheduleNotifications(
                 id: 2,
                 channelId: 'prayer_channel',
+                channelName: 'Prayer Alerts',
+                channelDescription: 'Notifications for prayer times and Athan',
                 title: 'Adhan: Dhuhr (Scheduled)',
                 body: 'It is time for Dhuhr prayer. (Triggered after 3s)',
                 payload: 'prayer_dhuhr',
-                sheduledDate: DateTime.now().add(const Duration(seconds: 3)),
+                scheduledDate: DateTime.now().add(const Duration(seconds: 3)),
               );
             },
             child: const Text('Test Prayer Adhan (Scheduled 3s)'),
@@ -49,6 +54,9 @@ class TestNotificationsPage extends StatelessWidget {
                 title: 'Mathurat Reminder',
                 body: 'Have you read your Morning Mathurat today?',
                 payload: 'mathurat',
+                channelId: 'reminders_channel',
+                channelName: 'Daily Reminders',
+                channelDescription: 'Reminders for Mathurat and general tracking',
               );
             },
             child: const Text('Test Mathurat Reminder'),
@@ -61,6 +69,9 @@ class TestNotificationsPage extends StatelessWidget {
                 title: 'Dhikr Target Reached',
                 body: 'MashaAllah, you have reached your Dhikr target!',
                 payload: 'dhikr',
+                channelId: 'reminders_channel',
+                channelName: 'Daily Reminders',
+                channelDescription: 'Reminders for Mathurat and general tracking',
               );
             },
             child: const Text('Test Dhikr Target Reached'),
@@ -73,6 +84,9 @@ class TestNotificationsPage extends StatelessWidget {
                 title: 'Missed Prayer Reminder',
                 body: 'You have a missed Asr prayer to make up.',
                 payload: 'missed_prayer',
+                channelId: 'reminders_channel',
+                channelName: 'Daily Reminders',
+                channelDescription: 'Reminders for Mathurat and general tracking',
               );
             },
             child: const Text('Test Missed Prayer Reminder'),
@@ -93,30 +107,36 @@ class TestNotificationsPage extends StatelessWidget {
               NotificationsService.scheduleNotifications(
                 id: 101,
                 channelId: 'test_channel_1',
+                channelName: 'Testing Channel',
+                channelDescription: 'For background tests',
                 title: 'Test 1/3 (10s)',
                 body: 'This is the first background test notification.',
                 payload: 'bg_test_1',
-                sheduledDate: now.add(const Duration(seconds: 10)),
+                scheduledDate: now.add(const Duration(seconds: 10)),
               );
 
               // Schedule 2: 30 seconds from now
               NotificationsService.scheduleNotifications(
                 id: 102,
                 channelId: 'test_channel_2',
+                channelName: 'Testing Channel',
+                channelDescription: 'For background tests',
                 title: 'Test 2/3 (30s)',
                 body: 'This is the second background test notification.',
                 payload: 'bg_test_2',
-                sheduledDate: now.add(const Duration(seconds: 30)),
+                scheduledDate: now.add(const Duration(seconds: 30)),
               );
 
               // Schedule 3: 60 seconds from now
               NotificationsService.scheduleNotifications(
                 id: 103,
                 channelId: 'test_channel_3',
+                channelName: 'Testing Channel',
+                channelDescription: 'For background tests',
                 title: 'Test 3/3 (1m)',
                 body: 'This is the final background test notification.',
                 payload: 'bg_test_3',
-                sheduledDate: now.add(const Duration(seconds: 60)),
+                scheduledDate: now.add(const Duration(seconds: 60)),
               );
 
               ScaffoldMessenger.of(context).showSnackBar(
@@ -128,6 +148,54 @@ class TestNotificationsPage extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
             child: const Text('Schedule Multiple (10s, 30s, 1m)', style: TextStyle(color: Colors.white)),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () async {
+              final TimeOfDay? selectedTime = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+
+              if (selectedTime != null) {
+                if (!context.mounted) return;
+                final String formattedTime = selectedTime.format(context);
+
+                final now = DateTime.now();
+                var scheduledDate = DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                  selectedTime.hour,
+                  selectedTime.minute,
+                );
+
+                // If the selected time has already passed today, schedule for tomorrow
+                if (scheduledDate.isBefore(now)) {
+                  scheduledDate = scheduledDate.add(const Duration(days: 1));
+                }
+
+                NotificationsService.scheduleNotifications(
+                  id: 200,
+                  channelId: 'test_channel_time',
+                  channelName: 'Specific Time Test',
+                  channelDescription: 'Testing specific hardcoded times',
+                  title: 'Exact Time Test',
+                  body: 'This alarm was scheduled exactly for $formattedTime!',
+                  payload: 'exact_time',
+                  scheduledDate: scheduledDate,
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Notification scheduled for $formattedTime'),
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+            child: const Text('Test Specific/Hardcoded Time', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
