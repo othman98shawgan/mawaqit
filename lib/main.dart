@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mawaqit/ui/settings_page.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-// TODO: Replace these with your actual generated localization imports once migrated
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// import 'package:alfajr/l10n/l10n.dart';
+import 'package:mawaqit/l10n/app_localizations.dart';
+import 'package:mawaqit/l10n/l10n.dart';
 
 // TODO: Ensure these paths point to your newly migrated V2 files
 import 'services/store_manager.dart';
@@ -16,6 +16,7 @@ import 'services/theme_service.dart';
 import 'services/daylight_time_service.dart';
 import 'services/dhikr_service.dart';
 import 'services/locale_service.dart';
+import 'providers/notifications_status_notifier.dart';
 import 'services/reminder_service.dart';
 import 'services/notifications_service.dart';
 import 'ui/test_notifications_page.dart';
@@ -30,7 +31,7 @@ void main() async {
     if (status.isDenied) {
       await Permission.notification.request();
     }
-    
+
     // Specifically request Exact Alarms permission for Android 14+
     await FlutterLocalNotificationsPlugin()
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -56,7 +57,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DaylightSavingNotifier()),
         ChangeNotifierProvider(create: (_) => ReminderNotifier()),
         ChangeNotifierProvider(create: (_) => DhikrNotifier()),
-        // ChangeNotifierProvider(create: (_) => NotificationsStatusNotifier()),
+        ChangeNotifierProvider(create: (_) => NotificationsStatusNotifier()),
         ChangeNotifierProvider(create: (_) => LocaleNotifier(Locale(language), city)),
       ],
       child: const MawaqitApp(),
@@ -80,8 +81,6 @@ class MawaqitApp extends StatelessWidget {
           theme: themeNotifier.getTheme(),
           locale: localeNotifier.locale,
 
-          // Localization Wiring (Uncomment when l10n is migrated)
-          /*
           supportedLocales: L10n.all,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -89,7 +88,6 @@ class MawaqitApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          */
 
           // Hardcoded to placeholder until we migrate the UI views
           home: const V2PlaceholderHome(),
@@ -101,7 +99,7 @@ class MawaqitApp extends StatelessWidget {
             // '/missed_prayer': (context) => const MissedPrayerPage(),
             // '/calendar': (context) => const CalendarPage(),
             // '/mathurat': (context) => const MathuratPage(),
-            // '/settings': (context) => const SettingsPage(),
+            '/settings': (context) => const SettingsPage(),
             // '/notifications': (context) => const NotificationsPage(),
             // '/apps': (context) => const OurAppsPage(),
           },
@@ -121,20 +119,28 @@ class V2PlaceholderHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Engine Test')),
-      body: const Center(
-        child: Text(
-          'Providers Initialized. Ready for UI.',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Providers Initialized. Ready for UI.',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(context, '/settings');
+              },
+              icon: const Icon(Icons.settings),
+              label: const Text('Open Settings Page'),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TestNotificationsPage(),
-            ),
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const TestNotificationsPage()));
         },
         child: const Icon(Icons.notifications_active),
       ),
