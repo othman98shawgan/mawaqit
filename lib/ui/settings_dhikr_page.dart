@@ -4,7 +4,7 @@ import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
@@ -121,7 +121,7 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
   }
 }
 
-showTargetDialog(BuildContext context, int target) async {
+Future<void> showTargetDialog(BuildContext context, int target) async {
   int? currentTarget = target;
 
   var confirmMethod = (() {

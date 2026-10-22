@@ -4,8 +4,7 @@ import '../../services/prayer_methods.dart';
 import 'card_widget.dart';
 
 class PrayerWidget extends StatefulWidget {
-  const PrayerWidget({Key? key, required this.label, required this.time, this.height = 0})
-      : super(key: key);
+  const PrayerWidget({super.key, required this.label, required this.time, this.height = 0});
 
   final String label;
   final String time;
@@ -21,15 +20,19 @@ class PrayerState extends State<PrayerWidget> {
     var labelStyle = const TextStyle(
       fontWeight: FontWeight.w400,
       fontSize: 28,
+      color: Colors.white,
     );
     var timeStyle = GoogleFonts.roboto(
       fontWeight: FontWeight.w300,
       fontSize: 28,
+      color: Colors.white,
     );
 
     return MyCard(
       height: widget.height,
       widget: ListTile(
+        textColor: Colors.white,
+        iconColor: Colors.white,
         leading: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(

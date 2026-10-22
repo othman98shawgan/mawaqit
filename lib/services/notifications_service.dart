@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 // ignore: depend_on_referenced_packages
@@ -36,13 +37,40 @@ class NotificationsService {
     await _notifications.cancelAll();
   }
 
+  static Future<void> cancelNotification(int id) async {
+    await _notifications.cancel(id: id);
+  }
+
+  static Future<List<PendingNotificationRequest>> getPendingNotificationRequests() async {
+    return await _notifications.pendingNotificationRequests();
+  }
+
+  static Future<bool> canScheduleExactNotifications() async {
+    final android = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    return (await android?.canScheduleExactNotifications()) ?? false;
+  }
+
+  static Future<bool?> requestExactAlarmsPermission() async {
+    final android = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    return await android?.requestExactAlarmsPermission();
+  }
+
   static Future init({bool initSheduled = false}) async {
     tz.initializeTimeZones();
+    try {
+      final timeZoneInfo = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
+    } catch (_) {}
     const android = AndroidInitializationSettings('@drawable/launcher_icon');
     const settings = InitializationSettings(android: android);
-    await _notifications.initialize(settings, onSelectNotification: (payload) async {
-      onNotifications.add(payload);
-    });
+    await _notifications.initialize(
+      settings: settings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        onNotifications.add(response.payload);
+      },
+    );
   }
 
   static Future showNotifications({
@@ -51,26 +79,38 @@ class NotificationsService {
     String? body,
     String? payload,
   }) async =>
-      _notifications.show(id, title, body, await _notificationDetails(id.toString()),
-          payload: payload);
-
-  static void scheduleNotifications(
-          {int id = 0,
-          required String channelId,
-          String? title,
-          String? body,
-          String? payload,
-          required DateTime sheduledDate}) async =>
-      _notifications.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(sheduledDate, tz.local),
-        await _notificationDetails(channelId),
+      _notifications.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: await _notificationDetails(id.toString()),
         payload: payload,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
+
+  static Future<void> scheduleNotifications(
+      {int id = 0,
+      required String channelId,
+      String? title,
+      String? body,
+      String? payload,
+      required DateTime sheduledDate}) async {
+    final android = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    final canExact = (await android?.canScheduleExactNotifications()) ?? true;
+    final scheduleMode = canExact
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
+    await _notifications.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(sheduledDate, tz.local),
+      notificationDetails: await _notificationDetails(channelId),
+      payload: payload,
+      androidScheduleMode: scheduleMode,
+    );
+  }
 }
 
 class NotificationsStatusNotifier with ChangeNotifier {
@@ -100,7 +140,7 @@ class NotificationsStatusNotifier with ChangeNotifier {
 
   void requestNotification() async {
     if (_notificationsAlreadyRequested) {
-      AppSettings.openNotificationSettings();
+      AppSettings.openAppSettings(type: AppSettingsType.notification);
     }
 
     await Permission.notification.isDenied.then((value) {

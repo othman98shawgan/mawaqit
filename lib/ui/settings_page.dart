@@ -4,7 +4,7 @@ import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../main.dart';
 import '../resources/colors.dart';
@@ -111,7 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
             body: isAndroid
                 ? SettingsList(
                     contentPadding: const EdgeInsets.all(0),
-                    lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
+                    lightTheme: SettingsThemeData(settingsListBackground: color2.withValues(alpha: 0.2)),
                     sections: [
                       SettingsSection(
                         title: Text(generalSection,
@@ -230,6 +230,19 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                             },
                           ),
+                          SettingsTile.navigation(
+                            title: Text(
+                              Localizations.localeOf(context).languageCode == 'ar'
+                                  ? 'اختبار الإشعارات'
+                                  : 'Notification Testing',
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            leading: const Icon(Icons.bug_report_outlined),
+                            onPressed: (context) {
+                              Navigator.pushNamed(context, '/notification_test');
+                            },
+                          ),
                         ],
                       ),
                       SettingsSection(
@@ -252,7 +265,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   )
                 : SettingsList(
                     contentPadding: const EdgeInsets.all(0),
-                    lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
+                    lightTheme: SettingsThemeData(settingsListBackground: color2.withValues(alpha: 0.2)),
                     sections: [
                       SettingsSection(
                         title: Text(generalSection,
@@ -331,7 +344,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
+Future<void> showCitiesDialog(
+    BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
   String currentCity = city;
   var currentCityValue = citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
 
@@ -421,7 +435,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
   );
 }
 
-showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
+Future<void> showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
   Locale? currentLocale = locale;
 
   var confirmMethod = (() async {
@@ -460,7 +474,7 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentLocale = val as Locale?;
+                        currentLocale = val;
                       });
                     }),
                 RadioListTile(
@@ -472,7 +486,7 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentLocale = val as Locale?;
+                        currentLocale = val;
                       });
                     }),
               ],

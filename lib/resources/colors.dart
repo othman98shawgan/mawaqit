@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 const Color backgroudColor = Color.fromARGB(170, 255, 255, 255);
 const Color appBarColor = Color(0xff2C363F);
-Color colorTextLight = Colors.white.withOpacity(0.9);
+Color colorTextLight = Colors.white.withValues(alpha: 0.9);
 const Color colorTextDark = Colors.white;
 
 const MaterialColor darkThemeSwatch = Colors.teal;
@@ -16,7 +16,7 @@ const Color color5 = Color.fromRGBO(52, 78, 65, 1);
 
 const Color prayerBgColorDark = Color.fromRGBO(0, 0, 0, 0.7);
 // const Color prayerBgColorLight = Color.fromRGBO(88, 129, 87, 0.7);
-Color prayerBgColorLight = color3.withOpacity(.7);
+Color prayerBgColorLight = color3.withValues(alpha: .7);
 
 Map<int, Color> color = {
   50: const Color.fromRGBO(88, 129, 87, .1),
@@ -31,4 +31,4 @@ Map<int, Color> color = {
   900: const Color.fromRGBO(88, 129, 87, 1),
 };
 
-MaterialColor greenMaterialColor = MaterialColor(color3.value, color);
+MaterialColor greenMaterialColor = MaterialColor(color3.toARGB32(), color);

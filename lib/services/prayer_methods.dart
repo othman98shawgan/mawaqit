@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -312,7 +312,7 @@ String adjustTime(BuildContext context, String time) {
   return time;
 }
 
-sharePrayerTimes(BuildContext context, LocaleNotifier localeNotifier, PrayersModel prayersToday,DateTime date) {
+void sharePrayerTimes(BuildContext context, LocaleNotifier localeNotifier, PrayersModel prayersToday,DateTime date) {
   var locale = localeNotifier.locale;
   var localization = AppLocalizations.of(context)!;
 

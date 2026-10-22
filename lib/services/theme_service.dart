@@ -56,8 +56,28 @@ class ThemeNotifier with ChangeNotifier {
     fontFamily: 'Tajawal',
     appBarTheme: const AppBarTheme(backgroundColor: appBarColor, foregroundColor: Colors.white),
     brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSwatch(primarySwatch: darkThemeSwatch).copyWith(
+    colorScheme: ColorScheme.fromSwatch(
+      primarySwatch: darkThemeSwatch,
       brightness: Brightness.dark,
+    ).copyWith(
+      brightness: Brightness.dark,
+      onSurface: Colors.white,
+      onSurfaceVariant: Colors.white70,
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
+    cardTheme: const CardThemeData(
+      color: prayerBgColorDark,
+    ),
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(color: colorTextDark),
+      bodyMedium: TextStyle(color: colorTextDark),
+      bodySmall: TextStyle(color: colorTextDark),
+    ).apply(
+      bodyColor: colorTextDark,
+      displayColor: colorTextDark,
     ),
     toggleButtonsTheme: const ToggleButtonsThemeData(
       selectedColor: Colors.white,
@@ -73,9 +93,16 @@ class ThemeNotifier with ChangeNotifier {
       backgroundColor: color3,
     ),
     scaffoldBackgroundColor: color1,
-    dialogBackgroundColor: color1,
+    dialogTheme: const DialogThemeData(backgroundColor: color1),
     dividerColor: Colors.black26,
     focusColor: lightThemeSwatch,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
+    cardTheme: CardThemeData(
+      color: prayerBgColorLight,
+    ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(),
       bodyMedium: TextStyle(),
@@ -86,10 +113,13 @@ class ThemeNotifier with ChangeNotifier {
     ),
     iconButtonTheme: const IconButtonThemeData(
       style: ButtonStyle(
-        iconColor: MaterialStatePropertyAll(Colors.white),
+        iconColor: WidgetStatePropertyAll(Colors.white),
       ),
     ),
     iconTheme: const IconThemeData(color: Colors.white),
-    colorScheme: ColorScheme.fromSwatch(primarySwatch: greenMaterialColor).copyWith(),
+    colorScheme: ColorScheme.fromSwatch(primarySwatch: greenMaterialColor).copyWith(
+      onSurface: Colors.white,
+      onSurfaceVariant: Colors.white70,
+    ),
   );
 }

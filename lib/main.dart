@@ -3,7 +3,7 @@ import 'package:alfajr/l10n/l10n.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/store_manager.dart';
 import 'package:alfajr/ui/our_apps_page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/dhikr_service.dart';
 import 'package:alfajr/services/notifications_service.dart';
@@ -19,6 +19,7 @@ import 'services/reminder_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
+import 'ui/notification_test_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -40,6 +41,7 @@ Future<void> main() async {
         Permission.notification.request();
       }
     });
+    await NotificationsService.init();
   }
 
   StorageManager.init().then((value) {
@@ -71,7 +73,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +92,11 @@ class MyApp extends StatelessWidget {
                 '/mathurat': (context) => const MathuratPage(),
                 '/settings': (context) => const SettingsPage(),
                 '/notifications': (context) => const NotificationsPage(),
+                '/notification_test': (context) => const NotificationTestPage(),
                 '/apps': (context) => const OurAppsPage(),
               },
               supportedLocales: L10n.all,
-              localizationsDelegates: const [
+              localizationsDelegates: [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,

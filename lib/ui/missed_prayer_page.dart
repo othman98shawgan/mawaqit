@@ -3,12 +3,12 @@ import 'package:alfajr/services/prayer_methods.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'widgets/card_widget.dart';
 import 'dart:ui' as ui;
 
 class MissedPrayerPage extends StatefulWidget {
-  const MissedPrayerPage({Key? key}) : super(key: key);
+  const MissedPrayerPage({super.key});
 
   @override
   State<MissedPrayerPage> createState() => _MissedPrayerPageState();
@@ -250,7 +250,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     );
   }
 
-  showAddMissedPrayersDialog(BuildContext context) async {
+  Future<void> showAddMissedPrayersDialog(BuildContext context) async {
     double height = MediaQuery.of(context).size.height;
 
     AlertDialog alert = AlertDialog(
@@ -279,7 +279,7 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     );
   }
 
-  showClearAllDialog(BuildContext context) async {
+  Future<void> showClearAllDialog(BuildContext context) async {
     var clearAllString = AppLocalizations.of(context)!.missedPrayersClearAll;
     var clearAllMessageString = AppLocalizations.of(context)!.missedPrayersClearAllMessage;
     var confirmString = AppLocalizations.of(context)!.confirmString;

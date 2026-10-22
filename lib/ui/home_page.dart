@@ -11,8 +11,8 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../data/prayer_times.dart';
 import '../main.dart';
 import '../models/prayer.dart';
@@ -31,7 +31,7 @@ import 'dart:ui' as ui;
 //     PrayersModel("31.12", "00:11", "00:12", "00:13", "14:45", "21:32", "22:33"); //TODO: FOR TESTING
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -52,16 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
         InAppUpdate.startFlexibleUpdate().then((_) {
           InAppUpdate.completeFlexibleUpdate().then((_) {
-            printSnackBar("Success!", context);
+            if (mounted) printSnackBar("Success!", context);
           }).catchError((e) {
-            printSnackBar(e.toString(), context);
+            if (mounted) printSnackBar(e.toString(), context);
           });
         }).catchError((e) {
-          printSnackBar(e.toString(), context);
+          if (mounted) printSnackBar(e.toString(), context);
         });
       }
     }).catchError((e) {
-      printSnackBar(e.toString(), context);
+      if (mounted) printSnackBar(e.toString(), context);
     });
   }
 
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  updatePrayers() {
+  void updatePrayers() {
     if (!isAndroid) {
       return;
     }
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  updateReminder(int newReminderTime) {
+  void updateReminder(int newReminderTime) {
     cancelAllPrayers();
     updateReminderValue(newReminderTime);
     scheduleNextPrayers(DateTime.now());
@@ -217,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     if (isAndroid) {
       checkForUpdate();
-      Wakelock.enable();
+      WakelockPlus.enable();
     }
     updateAppBar(false);
     NotificationsService.init();
@@ -336,17 +336,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                           DateFormat('dd MMM yyyy', localeProvider.locale.toString())
                                               .format(DateTime.now()),
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 16, color: Colors.white),
                                         ),
                                         const Text(
                                           "  -  ",
-                                          style: TextStyle(fontSize: 16),
+                                          style: TextStyle(fontSize: 16, color: Colors.white),
                                         ),
                                         Text(
                                           (HijriCalendar.now().toFormat('dd MMMM yyyy')),
                                           locale: localeProvider.locale,
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 16, color: Colors.white),
                                         ),
                                       ],
                                     ),
@@ -413,7 +413,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)!.appName),
+                      Text(AppLocalizations.of(context)!.appName, style: const TextStyle(color: Colors.white)),
                       Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: Image.asset(
@@ -537,7 +537,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onTap: () async {
                     Navigator.pop(context);
-                    await sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());
+                    sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());
                   },
                 ),
               ],
@@ -548,16 +548,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _launchURL(String urlAddress) async {
+  Future<void> _launchURL(String urlAddress) async {
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
   }
 
-  _contactUs() async {
+  Future<void> _contactUs() async {
     String mailAddress = 'mailto:oth1998@gmail.com';
-    String urlAddress = '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    String urlAddress = '$mailAddress?subject=ØªØ·Ø¨ÙŠÙ‚ Ù…ÙˆØ§Ù‚ÙŠØª Ø¨ÙŠØª Ø§Ù„Ù…Ù‚Ø¯Ø³&body=Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÙŠÙƒÙ… ÙˆØ±Ø­Ù…Ø© Ø§Ù„Ù„Ù‡ØŒ \n';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
