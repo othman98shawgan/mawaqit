@@ -4,13 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../../resources/colors.dart';
-import '../../services/prayer_methods.dart';
 
-Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue, Function updateReminder,
-    Function updateAppBar) async {
+Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue, Function updateReminder) async {
   var currentReminderValue = reminderValue;
   var currentReminderStatus = reminderStatus;
-  var longPressCount = 0;
 
   var confirmMethod = (() {
     Navigator.pop(context);
@@ -31,12 +28,6 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
         TextButton(
-          onLongPress: () {
-            if (++longPressCount == 5) {
-              updateAppBar(true);
-              printSnackBar("Developer options available", context);
-            }
-          },
           onPressed: () => Navigator.pop(context),
           child: Text(cancelString),
         ),

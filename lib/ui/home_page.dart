@@ -44,7 +44,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _scheduledPrayers = [];
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
-  List<IconButton> appBarActions = [];
   int timeDiff = 0;
 
   Future<void> checkForUpdate() async {
@@ -219,56 +218,11 @@ class _MyHomePageState extends State<MyHomePage> {
       checkForUpdate();
       WakelockPlus.enable();
     }
-    updateAppBar(false);
     NotificationsService.init();
     readJson();
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
-  }
-
-  void updateAppBar(bool added) {
-    appBarActions = [
-      IconButton(
-        icon: const Icon(Icons.settings),
-        tooltip: 'Settings',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsPage(
-                updatePrayers: updatePrayers,
-                updateReminder: updateReminder,
-                cancelNotifications: cancelAllPrayers,
-                updateAppBar: updateAppBar,
-              ),
-            ),
-          );
-        },
-      ),
-    ];
-    if (!added) {
-      return;
-    }
-    List<IconButton> newAppBarActions = [
-      IconButton(
-        icon: const Icon(Icons.notifications),
-        onPressed: () {
-          Navigator.pushNamed(context, '/notifications');
-        },
-        tooltip: 'Notifications',
-      ),
-      IconButton(
-        icon: const Icon(Icons.cancel),
-        onPressed: () {
-          cancelAllPrayers();
-        },
-        tooltip: 'Cancel Prayers',
-      ),
-    ];
-    appBarActions.addAll(newAppBarActions);
-    appBarActions = appBarActions.reversed.toList();
-    setState(() {});
   }
 
   @override
@@ -305,7 +259,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
-            actions: appBarActions,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                tooltip: 'Settings',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsPage(
+                        updatePrayers: updatePrayers,
+                        updateReminder: updateReminder,
+                        cancelNotifications: cancelAllPrayers,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           body: FutureBuilder<List>(
             future: Future.wait([

@@ -23,13 +23,11 @@ class SettingsPage extends StatefulWidget {
     this.updatePrayers,
     this.updateReminder,
     this.cancelNotifications,
-    this.updateAppBar,
   });
 
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
-  final Function? updateAppBar;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -321,7 +319,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                 reminder.getReminderStatus(),
                                 reminder.getReminderTime(),
                                 widget.updateReminder!,
-                                widget.updateAppBar!,
                               );
                             },
                           ),

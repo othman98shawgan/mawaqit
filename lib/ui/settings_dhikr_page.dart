@@ -17,13 +17,11 @@ class SettingsDhikrPage extends StatefulWidget {
     this.updatePrayers,
     this.updateReminder,
     this.cancelNotifications,
-    this.updateAppBar,
   });
 
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
-  final Function? updateAppBar;
 
   @override
   State<SettingsDhikrPage> createState() => _SettingsDhikrPageState();
