@@ -113,21 +113,45 @@ class DaylightSavingNotifier with ChangeNotifier {
     final autumnEnd = dstEndDate(from.year);
     final nextSpringStart = dstStartDate(from.year + 1);
 
-    final candidates = <({DateTime notificationTime, bool toSummerTime})>[
+    final springTransition = DateTime(springStart.year, springStart.month, springStart.day, 2, 0);
+    final autumnTransition = DateTime(autumnEnd.year, autumnEnd.month, autumnEnd.day, 2, 0);
+    final nextSpringTransition = DateTime(nextSpringStart.year, nextSpringStart.month, nextSpringStart.day, 2, 0);
+
+    final springEve = DateTime(springStart.year, springStart.month, springStart.day - 1, 20, 0);
+    final autumnEve = DateTime(autumnEnd.year, autumnEnd.month, autumnEnd.day - 1, 20, 0);
+    final nextSpringEve = DateTime(nextSpringStart.year, nextSpringStart.month, nextSpringStart.day - 1, 20, 0);
+
+    final candidates = <({DateTime transitionTime, DateTime eveTime, bool toSummerTime})>[
       (
-        notificationTime: DateTime(springStart.year, springStart.month, springStart.day - 1, 20, 0),
+        transitionTime: springTransition,
+        eveTime: springEve,
         toSummerTime: true,
       ),
       (
-        notificationTime: DateTime(autumnEnd.year, autumnEnd.month, autumnEnd.day - 1, 20, 0),
+        transitionTime: autumnTransition,
+        eveTime: autumnEve,
         toSummerTime: false,
       ),
       (
-        notificationTime: DateTime(nextSpringStart.year, nextSpringStart.month, nextSpringStart.day - 1, 20, 0),
+        transitionTime: nextSpringTransition,
+        eveTime: nextSpringEve,
         toSummerTime: true,
       ),
     ];
 
-    return candidates.firstWhere((c) => c.notificationTime.isAfter(from));
+    // Find the transition that hasn't occurred yet (clock change happens at 02:00 AM on the transition date)
+    final upcoming = candidates.firstWhere((c) => c.transitionTime.isAfter(from));
+
+    // If we are before the 20:00 eve time, schedule for 20:00.
+    // If it is already past 20:00 on the eve (e.g. 22:30), but before 02:00 AM tonight,
+    // schedule immediately so the user still receives the reminder tonight before sleeping!
+    final notificationTime = upcoming.eveTime.isAfter(from)
+        ? upcoming.eveTime
+        : from.add(const Duration(seconds: 5));
+
+    return (
+      notificationTime: notificationTime,
+      toSummerTime: upcoming.toSummerTime,
+    );
   }
 }

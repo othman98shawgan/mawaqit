@@ -4,7 +4,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 
+import 'package:intl/intl.dart';
 import '../services/notifications_service.dart';
+import '../services/prayer_methods.dart';
+import '../services/daylight_time_service.dart';
 
 class NotificationTestPage extends StatefulWidget {
   const NotificationTestPage({super.key});
@@ -20,6 +23,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool _canScheduleExact = true;
   List<PendingNotificationRequest> _pendingRequests = [];
+  List<String> _cachedScheduledPrayers = [];
   bool _isLoadingPending = false;
   int _selectedDelaySeconds = 5;
 
@@ -79,19 +83,166 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     }
   }
 
+  DateTime? _extractScheduledDate(PendingNotificationRequest req) {
+    if (req.payload != null && req.payload!.isNotEmpty) {
+      final parts = req.payload!.split('|');
+      for (final part in parts.reversed) {
+        final parsed = DateTime.tryParse(part);
+        if (parsed != null) return parsed;
+      }
+    }
+
+    if (req.id == 888000 || req.payload == 'dst_transition') {
+      try {
+        final now = DateTime.now();
+        final autumnEnd = DaylightSavingNotifier.dstEndDate(now.year);
+        final autumnEve = DateTime(autumnEnd.year, autumnEnd.month, autumnEnd.day - 1, 20, 0);
+        final springStart = DaylightSavingNotifier.dstStartDate(now.year);
+        final springEve = DateTime(springStart.year, springStart.month, springStart.day - 1, 20, 0);
+
+        if (now.difference(autumnEve).abs() < const Duration(days: 10)) {
+          return autumnEve;
+        }
+        if (now.difference(springEve).abs() < const Duration(days: 10)) {
+          return springEve;
+        }
+        return DaylightSavingNotifier.getNextDstTransitionEve(now).notificationTime;
+      } catch (_) {}
+    }
+
+    final idSuffix = req.id.toString().padLeft(6, '0');
+    for (final prayerId in _cachedScheduledPrayers) {
+      if (prayerId.endsWith(idSuffix)) {
+        try {
+          return getDateFromId(prayerId);
+        } catch (_) {}
+      }
+    }
+
+    if (req.id >= 10000 && req.id <= 312459) {
+      final s = req.id.toString().padLeft(6, '0');
+      final day = int.tryParse(s.substring(0, 2));
+      final hour = int.tryParse(s.substring(2, 4));
+      final min = int.tryParse(s.substring(4, 6));
+
+      if (day != null && hour != null && min != null &&
+          day >= 1 && day <= 31 &&
+          hour >= 0 && hour <= 24 &&
+          min >= 0 && min <= 59) {
+        final now = DateTime.now();
+        int year = now.year;
+        int month = now.month;
+
+        if (day < now.day && (now.day - day) > 7) {
+          month++;
+          if (month > 12) {
+            month = 1;
+            year++;
+          }
+        } else if (day > now.day && (day - now.day) > 20) {
+          month--;
+          if (month < 1) {
+            month = 12;
+            year--;
+          }
+        }
+
+        if (hour == 24) {
+          return DateTime(year, month, day + 1, 0, min);
+        }
+        return DateTime(year, month, day, hour, min);
+      }
+    }
+
+    return null;
+  }
+
+  String _formatScheduledDate(DateTime? date, bool isArabic) {
+    if (date == null) return isArabic ? 'تاريخ غير محدد' : 'Date not specified';
+    final locale = isArabic ? 'ar' : 'en';
+    final dayName = DateFormat('EEEE', locale).format(date);
+    final dateStr = DateFormat('d MMMM yyyy', locale).format(date);
+    return '$dayName، $dateStr';
+  }
+
+  String _formatScheduledHour(DateTime? date, bool isArabic) {
+    if (date == null) return '--:--';
+    final locale = isArabic ? 'ar' : 'en';
+    return DateFormat('hh:mm a', locale).format(date);
+  }
+
+  String _formatRelativeTime(DateTime? date, bool isArabic) {
+    if (date == null) return isArabic ? 'غير محدد' : 'Not specified';
+    final now = DateTime.now();
+    final difference = date.difference(now);
+
+    if (difference.isNegative) {
+      return isArabic ? 'حان وقته' : 'Due now';
+    } else if (difference.inDays > 0) {
+      final days = difference.inDays;
+      final hours = difference.inHours % 24;
+      return isArabic
+          ? (hours > 0 ? 'بعد $days يوم و $hours س' : 'بعد $days يوم')
+          : (hours > 0 ? 'in ${days}d ${hours}h' : 'in ${days}d');
+    } else if (difference.inHours > 0) {
+      final hours = difference.inHours;
+      final mins = difference.inMinutes % 60;
+      return isArabic
+          ? (mins > 0 ? 'بعد $hours س و $mins د' : 'بعد $hours س')
+          : (mins > 0 ? 'in ${hours}h ${mins}m' : 'in ${hours}h');
+    } else {
+      final mins = difference.inMinutes;
+      final secs = difference.inSeconds % 60;
+      return isArabic
+          ? (mins > 0 ? 'بعد $mins دقيقة' : 'بعد $secs ثانية')
+          : (mins > 0 ? 'in ${mins}m' : 'in ${secs}s');
+    }
+  }
+
+  int _comparePendingRequests(PendingNotificationRequest a, PendingNotificationRequest b) {
+    final timeA = _extractScheduledDate(a);
+    final timeB = _extractScheduledDate(b);
+
+    if (timeA != null && timeB != null) {
+      final diff = timeA.compareTo(timeB);
+      if (diff != 0) return diff;
+    } else if (timeA != null) {
+      return -1;
+    } else if (timeB != null) {
+      return 1;
+    }
+
+    // Tie-breaker: reminder before prayer
+    final titleA = a.title ?? '';
+    final titleB = b.title ?? '';
+    final aIsReminder = titleA.contains('بعد') || titleA.toLowerCase().contains('reminder') || titleA.contains('دقائق');
+    final bIsReminder = titleB.contains('بعد') || titleB.toLowerCase().contains('reminder') || titleB.contains('دقائق');
+    if (aIsReminder && !bIsReminder) return -1;
+    if (!aIsReminder && bIsReminder) return 1;
+
+    return a.id.compareTo(b.id);
+  }
+
   Future<void> _loadPendingNotifications() async {
     setState(() {
       _isLoadingPending = true;
     });
     try {
-      final list = await NotificationsService.getPendingNotificationRequests();
+      final rawList = await NotificationsService.getPendingNotificationRequests();
+      final prayers = await getScheduledPrayers();
+      final list = List<PendingNotificationRequest>.from(rawList);
+
+      _cachedScheduledPrayers = prayers;
+      list.sort(_comparePendingRequests);
+
       if (mounted) {
         setState(() {
           _pendingRequests = list;
           _isLoadingPending = false;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('Error loading pending notifications: $e\n$stack');
       if (mounted) {
         setState(() {
           _isLoadingPending = false;
@@ -521,35 +672,158 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 ),
               )
             else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _pendingRequests.length,
-                separatorBuilder: (context, index) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final req = _pendingRequests[index];
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      radius: 16,
-                      child: Text('${req.id}', style: const TextStyle(fontSize: 10)),
+              Builder(
+                builder: (context) {
+                  final sortedList = List<PendingNotificationRequest>.from(_pendingRequests)
+                    ..sort(_comparePendingRequests);
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: sortedList.length,
+                    separatorBuilder: (context, index) => const Divider(height: 12),
+                    itemBuilder: (context, index) {
+                      final req = sortedList[index];
+                  final scheduledDate = _extractScheduledDate(req);
+                  final isDue = scheduledDate != null && scheduledDate.isBefore(DateTime.now());
+
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
                     ),
-                    title: Text(
-                      req.title ?? (isArabic ? 'بدون عنوان' : 'Untitled'),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      req.body ?? '',
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                      tooltip: isArabic ? 'حذف' : 'Cancel',
-                      onPressed: () => _cancelNotification(req.id),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                              child: Text(
+                                '${req.id}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    req.title ?? (isArabic ? 'بدون عنوان' : 'Untitled'),
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                  ),
+                                  if (req.body != null && req.body!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: Text(
+                                        req.body!,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context).textTheme.bodySmall?.color,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                              tooltip: isArabic ? 'حذف' : 'Cancel',
+                              onPressed: () => _cancelNotification(req.id),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isDue
+                                ? Colors.orange.withValues(alpha: 0.08)
+                                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDue
+                                  ? Colors.orange.withValues(alpha: 0.3)
+                                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: 14,
+                                    color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _formatScheduledDate(scheduledDate, isArabic),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 15,
+                                    color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _formatScheduledHour(scheduledDate, isArabic),
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isDue
+                                          ? Colors.orange.withValues(alpha: 0.2)
+                                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      _formatRelativeTime(scheduledDate, isArabic),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   );
+                },
+              );
                 },
               ),
             const SizedBox(height: 12),

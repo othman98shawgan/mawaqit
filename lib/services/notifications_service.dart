@@ -111,13 +111,18 @@ class NotificationsService {
       sheduledDate.second,
     );
 
+    final isoDate = sheduledDate.toIso8601String();
+    final effectivePayload = (payload == null || payload.isEmpty)
+        ? isoDate
+        : (payload.contains(isoDate) ? payload : '$payload|$isoDate');
+
     await _notifications.zonedSchedule(
       id: id,
       title: title,
       body: body,
       scheduledDate: scheduledTzDate,
       notificationDetails: await _notificationDetails(channelId),
-      payload: payload,
+      payload: effectivePayload,
       androidScheduleMode: scheduleMode,
     );
   }
