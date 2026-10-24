@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 
+import '../../resources/colors.dart';
 import '../../services/prayer_methods.dart';
 
-Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue,
-    Function updateReminder, Function updateAppBar) async {
+Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue, Function updateReminder,
+    Function updateAppBar) async {
   var currentReminderValue = reminderValue;
   var currentReminderStatus = reminderStatus;
   var longPressCount = 0;
@@ -21,13 +22,15 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
   var reminderSetMessage = AppLocalizations.of(context)!.reminderDialogMessage;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(dialogTitle),
+      title: Text(dialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(
+        TextButton(
           onLongPress: () {
             if (++longPressCount == 5) {
               updateAppBar(true);
@@ -37,7 +40,7 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
           onPressed: () => Navigator.pop(context),
           child: Text(cancelString),
         ),
-        TextButton(
+        ElevatedButton(
           onPressed: confirmMethod,
           child: Text(confirmString),
         ),
@@ -47,8 +50,24 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: SwitchListTile(
-              title: Text(reminderSetMessage),
+              title: Text(reminderSetMessage, style: TextStyle(color: textColor)),
               value: currentReminderStatus,
+              activeThumbColor: Colors.white,
+              activeTrackColor: isLight ? color3 : darkThemeSwatch,
+              inactiveThumbColor: isLight ? const Color(0xFF72796F) : Colors.grey.shade400,
+              inactiveTrackColor: isLight ? const Color(0xFFE0E3DC) : Colors.grey.shade800,
+              trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.transparent;
+                }
+                return isLight ? const Color(0xFF72796F) : Colors.grey.shade500;
+              }),
+              thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Icon(Icons.check, color: isLight ? color3 : darkThemeSwatch);
+                }
+                return Icon(Icons.close, color: isLight ? const Color(0xFFE0E3DC) : Colors.grey.shade800);
+              }),
               onChanged: (bool value) {
                 setState(() {
                   currentReminderStatus = value;
@@ -63,7 +82,7 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
                 Text(
                   AppLocalizations.of(context)!.reminderPrayerMessage(currentReminderValue.toInt()),
                   textAlign: TextAlign.start,
-                  style: TextStyle(color: currentReminderStatus ? null : Colors.grey),
+                  style: TextStyle(color: currentReminderStatus ? textColor : Colors.grey),
                 ),
               ],
             ),

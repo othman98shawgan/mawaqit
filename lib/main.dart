@@ -13,6 +13,8 @@ import 'package:alfajr/ui/mathurat_page.dart';
 import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+// ignore: depend_on_referenced_packages
+import 'package:material_ui/material_ui.dart' as mui;
 import 'package:provider/provider.dart';
 
 import 'services/reminder_service.dart';
@@ -82,6 +84,10 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'Mawaqit Al-Quds',
               theme: theme.getTheme(),
+              builder: (context, child) => mui.Theme(
+                data: theme.getMaterialUiTheme(),
+                child: child!,
+              ),
               locale: localeProvider.locale,
               initialRoute: '/home',
               routes: {

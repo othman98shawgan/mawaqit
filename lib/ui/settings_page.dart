@@ -10,6 +10,8 @@ import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
 import '../services/notifications_service.dart';
+import 'package:flutter/foundation.dart';
+import '../services/store_manager.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 
@@ -34,6 +36,96 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _isDevMode = false;
+  int _devTapCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDevMode();
+  }
+
+  void _loadDevMode() async {
+    final dev = await StorageManager.readData('isDevMode');
+    if (dev is bool && dev) {
+      if (mounted) setState(() => _isDevMode = true);
+    }
+  }
+
+  void _onVersionTap() {
+    if (_isDevMode) return;
+    _devTapCount++;
+    final remaining = 7 - _devTapCount;
+    if (remaining <= 3 && remaining > 0) {
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isAr
+                ? 'أنت على بعد $remaining نقرات من تفعيل وضع المطور'
+                : 'You are $remaining steps away from developer mode',
+          ),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } else if (remaining <= 0) {
+      setState(() {
+        _isDevMode = true;
+      });
+      StorageManager.saveData('isDevMode', true);
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isAr ? 'تم تفعيل وضع المطور!' : 'Developer mode enabled!'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _onVersionLongPress() {
+    if (!_isDevMode) return;
+    setState(() {
+      _isDevMode = false;
+      _devTapCount = 0;
+    });
+    StorageManager.saveData('isDevMode', false);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isAr ? 'تم تعطيل وضع المطور' : 'Developer mode disabled'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+  CustomSettingsSection _buildVersionSection(String fontFamily) {
+    return CustomSettingsSection(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _onVersionTap,
+        onLongPress: _onVersionLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'الإصدار 1.0.6'
+                  : 'Version 1.0.6',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                fontFamily: fontFamily,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var title = AppLocalizations.of(context)!.settingsString;
@@ -111,7 +203,10 @@ class _SettingsPageState extends State<SettingsPage> {
             body: isAndroid
                 ? SettingsList(
                     contentPadding: const EdgeInsets.all(0),
-                    lightTheme: SettingsThemeData(settingsListBackground: color2.withValues(alpha: 0.2)),
+                    lightTheme: SettingsThemeData(
+                      settingsListBackground: color2.withValues(alpha: 0.2),
+                      titleTextColor: color3,
+                    ),
                     sections: [
                       SettingsSection(
                         title: Text(generalSection,
@@ -230,19 +325,20 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                             },
                           ),
-                          SettingsTile.navigation(
-                            title: Text(
-                              Localizations.localeOf(context).languageCode == 'ar'
-                                  ? 'اختبار الإشعارات'
-                                  : 'Notification Testing',
-                              strutStyle: const StrutStyle(forceStrutHeight: true),
-                              style: TextStyle(fontFamily: fontFamily),
+                          if (_isDevMode)
+                            SettingsTile.navigation(
+                              title: Text(
+                                Localizations.localeOf(context).languageCode == 'ar'
+                                    ? 'اختبار الإشعارات'
+                                    : 'Notification Testing',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              leading: const Icon(Icons.bug_report_outlined),
+                              onPressed: (context) {
+                                Navigator.pushNamed(context, '/notification_test');
+                              },
                             ),
-                            leading: const Icon(Icons.bug_report_outlined),
-                            onPressed: (context) {
-                              Navigator.pushNamed(context, '/notification_test');
-                            },
-                          ),
                         ],
                       ),
                       SettingsSection(
@@ -261,11 +357,15 @@ class _SettingsPageState extends State<SettingsPage> {
                               },
                             ),
                           ]),
+                      _buildVersionSection(fontFamily),
                     ],
                   )
                 : SettingsList(
                     contentPadding: const EdgeInsets.all(0),
-                    lightTheme: SettingsThemeData(settingsListBackground: color2.withValues(alpha: 0.2)),
+                    lightTheme: SettingsThemeData(
+                      settingsListBackground: color2.withValues(alpha: 0.2),
+                      titleTextColor: color3,
+                    ),
                     sections: [
                       SettingsSection(
                         title: Text(generalSection,
@@ -337,6 +437,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ],
                       ),
+                      _buildVersionSection(fontFamily),
                     ],
                   )),
       )),
@@ -383,17 +484,16 @@ Future<void> showCitiesDialog(
   var cityDialogTitle = AppLocalizations.of(context)!.citySelect;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(cityDialogTitle),
+      title: Text(cityDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return SingleChildScrollView(
@@ -411,7 +511,8 @@ Future<void> showCitiesDialog(
                       itemCount: citiesList.length,
                       itemBuilder: (BuildContext context, int index) {
                         return RadioListTile(
-                            title: Text(citiesList.elementAt(index)),
+                            title: Text(citiesList.elementAt(index), style: TextStyle(color: textColor)),
+                            activeColor: isLight ? color3 : darkThemeSwatch,
                             value: index,
                             groupValue: selected,
                             onChanged: (value) {
@@ -446,17 +547,16 @@ Future<void> showLocaleDialog(BuildContext context, Locale locale, Function upda
   var languageDialogTitle = AppLocalizations.of(context)!.languageDialogTitle;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(languageDialogTitle),
+      title: Text(languageDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return Column(mainAxisSize: MainAxisSize.min, children: [
@@ -470,7 +570,8 @@ Future<void> showLocaleDialog(BuildContext context, Locale locale, Function upda
                     visualDensity: const VisualDensity(
                         horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('ar'),
-                    title: Text(localeMap['ar']!),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(localeMap['ar']!, style: TextStyle(color: textColor)),
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
@@ -482,7 +583,8 @@ Future<void> showLocaleDialog(BuildContext context, Locale locale, Function upda
                     visualDensity: const VisualDensity(
                         horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('en'),
-                    title: Text(localeMap['en']!),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(localeMap['en']!, style: TextStyle(color: textColor)),
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {

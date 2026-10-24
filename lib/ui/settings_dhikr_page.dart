@@ -57,7 +57,10 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
           ),
           body: SettingsList(
             contentPadding: const EdgeInsets.all(0),
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor),
+            lightTheme: const SettingsThemeData(
+              settingsListBackground: backgroudColor,
+              titleTextColor: color3,
+            ),
             sections: [
               SettingsSection(
                 title: Text(
@@ -132,9 +135,11 @@ Future<void> showTargetDialog(BuildContext context, int target) async {
   var targetDialogTitle = AppLocalizations.of(context)!.targetDialogTitle;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(targetDialogTitle),
+      title: Text(targetDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
@@ -157,7 +162,8 @@ Future<void> showTargetDialog(BuildContext context, int target) async {
                         horizontal: VisualDensity.minimumDensity,
                         vertical: VisualDensity.minimumDensity),
                     value: 33,
-                    title: const Text('33'),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text('33', style: TextStyle(color: textColor)),
                     groupValue: currentTarget,
                     onChanged: (val) {
                       setState(() {
@@ -170,7 +176,8 @@ Future<void> showTargetDialog(BuildContext context, int target) async {
                         horizontal: VisualDensity.minimumDensity,
                         vertical: VisualDensity.minimumDensity),
                     value: 100,
-                    title: const Text('100'),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text('100', style: TextStyle(color: textColor)),
                     groupValue: currentTarget,
                     onChanged: (val) {
                       setState(() {
