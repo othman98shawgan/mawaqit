@@ -81,10 +81,12 @@ class _CalendarPageState extends State<CalendarPage> {
     var sunIcon = const Icon(Icons.light_mode);
     var moonIcon = const Icon(Icons.dark_mode);
     var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
-    var locale = Provider.of<LocaleNotifier>(context, listen: false).locale.toString();
+    var localeNotifier = Provider.of<LocaleNotifier>(context, listen: false);
+    var locale = localeNotifier.locale.toString();
 
     var dateTextWidget = Text(
       DateFormat('dd MMM yyyy', locale).format(pickedDate),
+      textDirection: localeNotifier.getTextDirection(localeNotifier.locale),
       style: TextStyle(
           fontWeight: FontWeight.w400,
           fontSize: 40,
@@ -147,8 +149,7 @@ class _CalendarPageState extends State<CalendarPage> {
               if (snapshot.hasData) {
                 return Container(
                   decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
+                      image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -159,11 +160,9 @@ class _CalendarPageState extends State<CalendarPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(DateFormat('EEEE', localeProvider.locale.toString())
-                                      .format(pickedDate)),
+                                  Text(DateFormat('EEEE', localeProvider.locale.toString()).format(pickedDate)),
                                   const Text('  -  '),
-                                  Text((HijriCalendar.fromDate(pickedDate)
-                                      .toFormat('dd MMMM yyyy'))),
+                                  Text((HijriCalendar.fromDate(pickedDate).toFormat('dd MMMM yyyy'))),
                                 ],
                               ),
                               Directionality(

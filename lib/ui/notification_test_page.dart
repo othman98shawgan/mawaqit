@@ -407,7 +407,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
               children: _delayOptions.map((seconds) {
                 final isSelected = _selectedDelaySeconds == seconds;
                 return ChoiceChip(
-                  color: WidgetStatePropertyAll(!isSelected ? Colors.grey.shade500 : color3),
                   label: Text(
                     isArabic ? (seconds >= 60 ? 'دقيقة' : '$seconds ثوانٍ') : (seconds >= 60 ? '1 min' : '${seconds}s'),
                   ),

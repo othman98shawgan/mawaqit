@@ -25,12 +25,14 @@ import 'ui/notification_test_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:intl/intl.dart' as intl;
 
 bool isWeb = false;
 bool isAndroid = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (kIsWeb) {
     isWeb = true;
   } else if (Platform.isAndroid) {
@@ -74,6 +76,51 @@ Future<void> main() async {
   });
 }
 
+class SundayMaterialLocalizationAr extends MaterialLocalizationAr {
+  const SundayMaterialLocalizationAr({
+    super.localeName = 'ar',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  int get firstDayOfWeekIndex => 0; // 0 = Sunday (الأحد)
+}
+
+class SundayStartLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const SundayStartLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ar';
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) async {
+    await GlobalMaterialLocalizations.delegate.load(locale);
+    const String localeName = 'ar';
+    return SundayMaterialLocalizationAr(
+      fullYearFormat: intl.DateFormat.y(localeName),
+      compactDateFormat: intl.DateFormat.yMd(localeName),
+      shortDateFormat: intl.DateFormat.yMMMd(localeName),
+      mediumDateFormat: intl.DateFormat.MMMEd(localeName),
+      longDateFormat: intl.DateFormat.yMMMMEEEEd(localeName),
+      yearMonthFormat: intl.DateFormat.yMMMM(localeName),
+      shortMonthDayFormat: intl.DateFormat.MMMd(localeName),
+      decimalFormat: intl.NumberFormat.decimalPattern(localeName),
+      twoDigitZeroPaddedFormat: intl.NumberFormat('00', localeName),
+    );
+  }
+
+  @override
+  bool shouldReload(covariant LocalizationsDelegate<MaterialLocalizations> old) => false;
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -103,6 +150,7 @@ class MyApp extends StatelessWidget {
               },
               supportedLocales: L10n.all,
               localizationsDelegates: [
+                const SundayStartLocalizationsDelegate(),
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,

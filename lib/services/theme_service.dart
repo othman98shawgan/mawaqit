@@ -89,6 +89,146 @@ class ThemeNotifier with ChangeNotifier {
     }),
   );
 
+  static final _darkChipTheme = ChipThemeData(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return darkThemeSwatch;
+      }
+      return Colors.grey.shade800;
+    }),
+    labelStyle: const TextStyle(color: Colors.white70, fontFamily: 'Tajawal'),
+    secondaryLabelStyle: const TextStyle(color: Colors.white, fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+    checkmarkColor: Colors.white,
+    side: BorderSide.none,
+  );
+
+  static final _lightChipTheme = ChipThemeData(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return color3;
+      }
+      return Colors.grey.shade300;
+    }),
+    labelStyle: const TextStyle(color: Colors.black87, fontFamily: 'Tajawal'),
+    secondaryLabelStyle: const TextStyle(color: Colors.white, fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+    checkmarkColor: Colors.white,
+    side: BorderSide.none,
+  );
+
+  static final _darkDatePickerTheme = DatePickerThemeData(
+    headerBackgroundColor: darkThemeSwatch,
+    headerForegroundColor: Colors.white,
+    headerHeadlineStyle:
+        const TextStyle(fontFamily: 'Tajawal', color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+    headerHelpStyle: const TextStyle(fontFamily: 'Tajawal', color: Colors.white70),
+    weekdayStyle: const TextStyle(fontFamily: 'Tajawal', color: Colors.white70, fontWeight: FontWeight.bold),
+    dayForegroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return Colors.grey.shade600;
+      }
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return Colors.white;
+    }),
+    dayBackgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return darkThemeSwatch;
+      }
+      return null;
+    }),
+    todayForegroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return darkThemeSwatch;
+    }),
+    todayBorder: const BorderSide(color: darkThemeSwatch, width: 1.5),
+    yearForegroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return Colors.grey.shade600;
+      }
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return Colors.white;
+    }),
+    yearBackgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return darkThemeSwatch;
+      }
+      return null;
+    }),
+    confirmButtonStyle: ElevatedButton.styleFrom(
+      backgroundColor: darkThemeSwatch,
+      foregroundColor: Colors.white,
+      elevation: 2,
+      textStyle: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+    ),
+    cancelButtonStyle: TextButton.styleFrom(
+      foregroundColor: darkThemeSwatch,
+      textStyle: const TextStyle(fontFamily: 'Tajawal'),
+    ),
+  );
+
+  static final _lightDatePickerTheme = DatePickerThemeData(
+    backgroundColor: color1,
+    headerBackgroundColor: color3,
+    headerForegroundColor: Colors.white,
+    headerHeadlineStyle:
+        const TextStyle(fontFamily: 'Tajawal', color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+    headerHelpStyle: const TextStyle(fontFamily: 'Tajawal', color: Colors.white70),
+    weekdayStyle: const TextStyle(fontFamily: 'Tajawal', color: Colors.black87, fontWeight: FontWeight.bold),
+    dayForegroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return Colors.grey.shade400;
+      }
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return Colors.black87;
+    }),
+    dayBackgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return color3;
+      }
+      return null;
+    }),
+    todayForegroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return color3;
+    }),
+    todayBorder: const BorderSide(color: color3, width: 1.5),
+    yearForegroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return Colors.grey.shade400;
+      }
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return Colors.black87;
+    }),
+    yearBackgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return color3;
+      }
+      return null;
+    }),
+    dividerColor: Colors.black12,
+    confirmButtonStyle: ElevatedButton.styleFrom(
+      backgroundColor: color3,
+      foregroundColor: Colors.white,
+      elevation: 2,
+      textStyle: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+    ),
+    cancelButtonStyle: TextButton.styleFrom(
+      foregroundColor: color3,
+      textStyle: const TextStyle(fontFamily: 'Tajawal'),
+    ),
+  );
+
   ThemeData get darkTheme => ThemeData(
         fontFamily: 'Tajawal',
         appBarTheme: const AppBarTheme(backgroundColor: appBarColor, foregroundColor: Colors.white),
@@ -119,7 +259,15 @@ class ThemeNotifier with ChangeNotifier {
         toggleButtonsTheme: const ToggleButtonsThemeData(
           selectedColor: Colors.white,
         ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: darkThemeSwatch,
+            foregroundColor: Colors.white,
+          ),
+        ),
         switchTheme: _darkSwitchTheme,
+        chipTheme: _darkChipTheme,
+        datePickerTheme: _darkDatePickerTheme,
       );
 
   //*** Light Theme ***/
@@ -207,7 +355,15 @@ class ThemeNotifier with ChangeNotifier {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color3,
+            foregroundColor: Colors.white,
+          ),
+        ),
         switchTheme: _lightSwitchTheme,
+        chipTheme: _lightChipTheme,
+        datePickerTheme: _lightDatePickerTheme,
         sliderTheme: SliderThemeData(
           activeTrackColor: color3,
           thumbColor: color3,
@@ -219,8 +375,8 @@ class ThemeNotifier with ChangeNotifier {
         colorScheme: ColorScheme.fromSwatch(primarySwatch: greenMaterialColor).copyWith(
           primary: color3,
           secondary: color3,
-          onSurface: Colors.white,
-          onSurfaceVariant: Colors.white70,
+          onSurface: Colors.black87,
+          onSurfaceVariant: Colors.black54,
         ),
       );
 

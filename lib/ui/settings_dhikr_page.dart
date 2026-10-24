@@ -141,8 +141,8 @@ Future<void> showTargetDialog(BuildContext context, int target) async {
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(
           onPressed: confirmMethod,
           child: Text(confirmString),
         ),

@@ -291,8 +291,8 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     AlertDialog alert = AlertDialog(
         title: Text(clearAllString),
         actions: [
-          ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-          TextButton(
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+          ElevatedButton(
             onPressed: confirmMethod,
             child: Text(confirmString),
           ),
