@@ -42,6 +42,9 @@
    "settingsLanguage": "اللغة",
    "settingsDarkMode": "الوضع الليلي",
    "settingsDaylightSaving": "التوقيت الصيفي",
+   "settingsAutoDst": "التوقيت الصيفي التلقائي",
+   "settingsAutoDstEnabled": "تلقائي",
+   "settingsAutoDstDisabled": "يدوي",
    "settingsSummerTime": "التوقيت الصيفي",
    "settingsWinterTime": "التوقيت الشتوي",
    "settingsNotificationsSection": "التنبيهات",
@@ -99,5 +102,9 @@
    "min3BeforeAlQuds": "3 دقائق قبل القدس",
    "min1AfterAlQuds": "1 دقائق بعد القدس",
    "min2AfterAlQuds": "2 دقائق بعد القدس",
-   "min3AfterAlQuds": "3 دقائق بعد القدس"
+   "min3AfterAlQuds": "3 دقائق بعد القدس",
+   "dstSummerNotificationTitle": "بدء التوقيت الصيفي غداً",
+   "dstSummerNotificationBody": "سيتم تقديم الساعة 60 دقيقة الليلة. يرجى الانتباه لموعد صلاة الفجر غداً.",
+   "dstWinterNotificationTitle": "بدء التوقيت الشتوي غداً",
+   "dstWinterNotificationBody": "سيتم تأخير الساعة 60 دقيقة الليلة. يرجى الانتباه لموعد صلاة الفجر غداً."
 }

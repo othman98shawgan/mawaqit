@@ -3,17 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timer_builder/timer_builder.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../../models/prayer.dart';
 import '../../models/prayers.dart';
 import '../../services/locale_service.dart';
 import '../../services/prayer_methods.dart';
+import '../../services/daylight_time_service.dart';
 
 class ClockWidget extends StatelessWidget {
   const ClockWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +26,7 @@ class ClockWidget extends StatelessWidget {
             style: GoogleFonts.roboto(
               fontWeight: FontWeight.w300,
               fontSize: 48,
+              color: Colors.white,
             ),
           ));
     });
@@ -33,12 +35,11 @@ class ClockWidget extends StatelessWidget {
 
 class PrayerClockWidget extends StatefulWidget {
   const PrayerClockWidget(
-      {Key? key,
+      {super.key,
       required this.prayersToday,
       required this.summerTime,
       required this.timeDiff,
-      required this.prayerList})
-      : super(key: key);
+      required this.prayerList});
 
   final PrayersModel prayersToday;
   final bool summerTime;
@@ -54,10 +55,13 @@ class _PrayerClockState extends State<PrayerClockWidget> {
   late Prayer prev;
 
   void updatePrayers() {
+    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
     next = getNextPrayer(
-        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList);
+        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList,
+        isAutoMode: dstNotifier.isAutoDst);
     prev = getPrevPrayer(
-        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList);
+        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList,
+        isAutoMode: dstNotifier.isAutoDst);
   }
 
   String printDuration(Duration duration) {
@@ -80,11 +84,13 @@ class _PrayerClockState extends State<PrayerClockWidget> {
     var prayerTextStyle = const TextStyle(
       fontWeight: FontWeight.w400,
       fontSize: 18,
+      color: Colors.white,
     );
 
     var prayerTimeStyle = GoogleFonts.roboto(
       fontWeight: FontWeight.w300,
       fontSize: 24,
+      color: Colors.white,
     );
 
     return TimerBuilder.periodic(const Duration(seconds: 1), builder: (context) {

@@ -1,9 +1,9 @@
 import 'package:alfajr/resources/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../services/dhikr_service.dart';
 import '../services/store_manager.dart';
@@ -12,7 +12,7 @@ import 'settings_dhikr_page.dart';
 import 'dart:ui' as ui;
 
 class CounterPage extends StatefulWidget {
-  const CounterPage({Key? key}) : super(key: key);
+  const CounterPage({super.key});
 
   @override
   State<CounterPage> createState() => _CounterPageState();
@@ -37,18 +37,18 @@ class _CounterPageState extends State<CounterPage> {
     if (_counter % dhikr.getDhikrTarget() != 0) {
       //vibrate on tap
       if (dhikr.getVibrateOnTap()) {
-        Vibrate.feedback(FeedbackType.medium);
+        HapticFeedback.lightImpact();
       }
     } else {
       //vibrate on target reach
       if (dhikr.getVibrateOnCountTarget()) {
-        Vibrate.feedback(FeedbackType.warning);
+        HapticFeedback.heavyImpact();
       }
     }
   }
 
   void _resetCounter() async {
-    Vibrate.feedback(FeedbackType.error);
+    HapticFeedback.vibrate();
     setState(() {
       _counter = 0;
       _currnetFontSize = _bigFontSize;
@@ -125,7 +125,7 @@ class _CounterPageState extends State<CounterPage> {
                     borderRadius: const BorderRadius.all(Radius.circular(50.0)),
                     color: theme.getTheme() == theme.darkTheme
                         ? Colors.black54
-                        : color3.withOpacity(0.5),
+                        : color3.withValues(alpha: 0.5),
                   ),
                   child: Center(
                     child: Text(_counter.toString().padLeft(4, '0'),

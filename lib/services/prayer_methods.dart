@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../models/prayer.dart';
 import '../models/prayers.dart';
@@ -19,7 +19,8 @@ void printSnackBar(String message, BuildContext context, {int durationInSeconds 
 }
 
 Prayer getNextPrayer(
-    DateTime time, PrayersModel today, bool summerTime, int timeDiff, List prayerList) {
+    DateTime time, PrayersModel today, bool summerTime, int timeDiff, List prayerList,
+    {bool isAutoMode = true}) {
   DateTime fajr =
       DateTime(time.year, time.month, time.day, getHour(today.fajr), getMinute(today.fajr));
   DateTime shuruq =
@@ -59,19 +60,23 @@ Prayer getNextPrayer(
   if (time.isBefore(isha)) return Prayer("Isha", isha);
 
   //after Isha
-  DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+  DateTime tomorrow = time.add(const Duration(days: 1));
   var dayInYear = dayOfYear(tomorrow);
 
   PrayersModel tomorrowPrayers = PrayersModel.fromJson(prayerList[dayInYear + 1]);
   DateTime fajrTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day,
       getHour(tomorrowPrayers.fajr), getMinute(tomorrowPrayers.fajr));
-  fajrTomorrow = summerTime ? fajrTomorrow.add(const Duration(hours: 1)) : fajrTomorrow;
+  bool tomorrowSummer = isAutoMode
+      ? DaylightSavingNotifier.isDstOnDate(tomorrow)
+      : summerTime;
+  fajrTomorrow = tomorrowSummer ? fajrTomorrow.add(const Duration(hours: 1)) : fajrTomorrow;
   fajrTomorrow = fajrTomorrow.add(Duration(minutes: timeDiff));
   return Prayer("Fajr", fajrTomorrow);
 }
 
 Prayer getPrevPrayer(
-    DateTime time, PrayersModel today, bool summerTime, int timeDiff, List prayerList) {
+    DateTime time, PrayersModel today, bool summerTime, int timeDiff, List prayerList,
+    {bool isAutoMode = true}) {
   DateTime fajr =
       DateTime(time.year, time.month, time.day, getHour(today.fajr), getMinute(today.fajr));
   DateTime shuruq =
@@ -111,14 +116,17 @@ Prayer getPrevPrayer(
   if (time.isAfter(fajr)) return Prayer("Fajr", fajr);
 
   //before Fajr
-  DateTime yesterday = DateTime.now().subtract(const Duration(days: 1));
+  DateTime yesterday = time.subtract(const Duration(days: 1));
   var dayInYear = dayOfYear(yesterday);
 
   PrayersModel yesterdayPrayers = PrayersModel.fromJson(prayerList[dayInYear - 1]);
 
   DateTime ishaYesterday = DateTime(yesterday.year, yesterday.month, yesterday.day,
       getHour(yesterdayPrayers.isha), getMinute(yesterdayPrayers.isha));
-  ishaYesterday = summerTime ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
+  bool yesterdaySummer = isAutoMode
+      ? DaylightSavingNotifier.isDstOnDate(yesterday)
+      : summerTime;
+  ishaYesterday = yesterdaySummer ? ishaYesterday.add(const Duration(hours: 1)) : ishaYesterday;
   ishaYesterday = ishaYesterday.add(Duration(minutes: timeDiff));
   return Prayer("Isha", ishaYesterday);
 }
@@ -206,28 +214,17 @@ List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime, int tim
 }
 
 List<Prayer> getNextWeekPrayers(
-    PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime, int timeDiff) {
+    PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime, int timeDiff,
+    {bool isAutoMode = true}) {
   List<Prayer> prayersList = [];
+  final now = DateTime.now();
 
-  var day1 = DateTime.now().add(const Duration(days: 1));
-  var day2 = DateTime.now().add(const Duration(days: 2));
-  var day3 = DateTime.now().add(const Duration(days: 3));
-  var day4 = DateTime.now().add(const Duration(days: 4));
-  var day5 = DateTime.now().add(const Duration(days: 5));
-  var day6 = DateTime.now().add(const Duration(days: 6));
-
-  prayersList.addAll(getDayPrayers(day1,
-      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day1)]), summerTime, timeDiff));
-  prayersList.addAll(getDayPrayers(day2,
-      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day2)]), summerTime, timeDiff));
-  prayersList.addAll(getDayPrayers(day3,
-      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day3)]), summerTime, timeDiff));
-  prayersList.addAll(getDayPrayers(day4,
-      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day4)]), summerTime, timeDiff));
-  prayersList.addAll(getDayPrayers(day5,
-      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day5)]), summerTime, timeDiff));
-  prayersList.addAll(getDayPrayers(day6,
-      prayersToday = PrayersModel.fromJson(prayerList[dayOfYear(day6)]), summerTime, timeDiff));
+  for (int i = 1; i <= 6; i++) {
+    final day = now.add(Duration(days: i));
+    final daySummer = isAutoMode ? DaylightSavingNotifier.isDstOnDate(day) : summerTime;
+    final dayPrayers = PrayersModel.fromJson(prayerList[dayOfYear(day)]);
+    prayersList.addAll(getDayPrayers(day, dayPrayers, daySummer, timeDiff));
+  }
 
   return prayersList;
 }
@@ -299,33 +296,34 @@ String getPrayerTranslation(String label, BuildContext context) {
   return map[label]!;
 }
 
-String adjustTime(BuildContext context, String time) {
+String adjustTime(BuildContext context, String time, [DateTime? forDate]) {
   var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
-  var summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).summer;
+  var dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+  var summerTime = forDate != null ? dstNotifier.getSummerTimeForDate(forDate) : dstNotifier.getSummerTime();
   if (!summerTime && currTimeDiff == 0) return time;
   int hour = int.parse(time.split(':')[0]);
   int minute = int.parse(time.split(':')[1]);
   var today = DateTime.now();
   var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
-  dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+  dateTime = dateTime.add(Duration(hours: summerTime ? 1 : 0, minutes: currTimeDiff));
   time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
   return time;
 }
 
-sharePrayerTimes(BuildContext context, LocaleNotifier localeNotifier, PrayersModel prayersToday,DateTime date) {
+void sharePrayerTimes(BuildContext context, LocaleNotifier localeNotifier, PrayersModel prayersToday, DateTime date) {
   var locale = localeNotifier.locale;
   var localization = AppLocalizations.of(context)!;
 
   var title = localization.shareMessageTitle;  
   var day = DateFormat('EEEE', locale.toString()).format(date);
   var dateFormatted = DateFormat('dd/MM/yyyy').format(date);
-  var fajrPryaer = '${localization.fajrString} - ${adjustTime(context, prayersToday.fajr)}';
-  var shuruqPryaer = '${localization.shuruqString} - ${adjustTime(context, prayersToday.shuruq)}';
-  var duhrPryaer = '${localization.duhrString} - ${adjustTime(context, prayersToday.duhr)}';
-  var asrPryaer = '${localization.asrString} - ${adjustTime(context, prayersToday.asr)}';
+  var fajrPryaer = '${localization.fajrString} - ${adjustTime(context, prayersToday.fajr, date)}';
+  var shuruqPryaer = '${localization.shuruqString} - ${adjustTime(context, prayersToday.shuruq, date)}';
+  var duhrPryaer = '${localization.duhrString} - ${adjustTime(context, prayersToday.duhr, date)}';
+  var asrPryaer = '${localization.asrString} - ${adjustTime(context, prayersToday.asr, date)}';
   var maghribPryaer =
-      '${localization.maghribString} - ${adjustTime(context, prayersToday.maghrib)}';
-  var ishaPryaer = '${localization.ishaString} - ${adjustTime(context, prayersToday.isha)}';
+      '${localization.maghribString} - ${adjustTime(context, prayersToday.maghrib, date)}';
+  var ishaPryaer = '${localization.ishaString} - ${adjustTime(context, prayersToday.isha, date)}';
   var downloadApp = localization.shareMessageDownload;
   var downloadLink = 'https://bit.ly/mawaqitquds';
   var newLine = '\n';

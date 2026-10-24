@@ -11,8 +11,8 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../data/prayer_times.dart';
 import '../main.dart';
 import '../models/prayer.dart';
@@ -21,6 +21,7 @@ import '../services/daylight_time_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
 import '../services/reminder_service.dart';
+import '../services/store_manager.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
@@ -31,7 +32,7 @@ import 'dart:ui' as ui;
 //     PrayersModel("31.12", "00:11", "00:12", "00:13", "14:45", "21:32", "22:33"); //TODO: FOR TESTING
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -44,7 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _scheduledPrayers = [];
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
-  List<IconButton> appBarActions = [];
   int timeDiff = 0;
 
   Future<void> checkForUpdate() async {
@@ -52,16 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
         InAppUpdate.startFlexibleUpdate().then((_) {
           InAppUpdate.completeFlexibleUpdate().then((_) {
-            printSnackBar("Success!", context);
+            if (mounted) printSnackBar("Success!", context);
           }).catchError((e) {
-            printSnackBar(e.toString(), context);
+            if (mounted) printSnackBar(e.toString(), context);
           });
         }).catchError((e) {
-          printSnackBar(e.toString(), context);
+          if (mounted) printSnackBar(e.toString(), context);
         });
       }
     }).catchError((e) {
-      printSnackBar(e.toString(), context);
+      if (mounted) printSnackBar(e.toString(), context);
     });
   }
 
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  updatePrayers() {
+  void updatePrayers() {
     if (!isAndroid) {
       return;
     }
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  updateReminder(int newReminderTime) {
+  void updateReminder(int newReminderTime) {
     cancelAllPrayers();
     updateReminderValue(newReminderTime);
     scheduleNextPrayers(DateTime.now());
@@ -93,11 +93,39 @@ class _MyHomePageState extends State<MyHomePage> {
     setScheduledPrayers([]);
   }
 
+  Future<void> _scheduleDstTransitionNotification() async {
+    final now = DateTime.now();
+    final nextTransition = DaylightSavingNotifier.getNextDstTransitionEve(now);
+    final eveTime = nextTransition.notificationTime;
+    final toSummer = nextTransition.toSummerTime;
+
+    const int dstNotificationId = 888000;
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final title = toSummer ? l10n.dstSummerNotificationTitle : l10n.dstWinterNotificationTitle;
+    final body = toSummer ? l10n.dstSummerNotificationBody : l10n.dstWinterNotificationBody;
+
+    await NotificationsService.scheduleNotifications(
+      id: dstNotificationId,
+      channelId: 'dst_transition_alert',
+      title: title,
+      body: body,
+      payload: 'dst_transition',
+      sheduledDate: eveTime,
+    );
+  }
+
   Future<void> scheduleNextPrayers(DateTime time) async {
     if (!isAndroid) {
       return;
     }
     // prayersToday = dummyDay; //TODO: FOR TESTING
+
+    final migrated = await StorageManager.readData('autoDstScheduleMigrated_v1');
+    if (migrated != true) {
+      await cancelAllPrayers();
+      StorageManager.saveData('autoDstScheduleMigrated_v1', true);
+    }
 
     _scheduledPrayers = await getScheduledPrayers();
     if (removePassedPrayers(_scheduledPrayers)) {
@@ -107,18 +135,31 @@ class _MyHomePageState extends State<MyHomePage> {
     var notifiactionsStatus = Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
     var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
-    if ((!notifiactionsStatus) ||
-        (reminderStatus && _scheduledPrayers.length > 71) ||
+    if (!notifiactionsStatus) {
+      return;
+    }
+
+    await _scheduleDstTransitionNotification();
+
+    if ((reminderStatus && _scheduledPrayers.length > 71) ||
         (!reminderStatus && _scheduledPrayers.length > 35)) {
       return;
     }
     List<Prayer> prayersToSchedule = [];
     reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
-    summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+    summerTime = dstNotifier.getSummerTime();
     timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
-    prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime, timeDiff));
+    prayersToSchedule.addAll(getNextWeekPrayers(
+      prayersToday,
+      _prayerList,
+      dayInYear,
+      summerTime,
+      timeDiff,
+      isAutoMode: dstNotifier.isAutoDst,
+    ));
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -187,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
     int minute = int.parse(time.split(':')[1]);
     var today = DateTime.now();
     var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
-    dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+    dateTime = dateTime.add(Duration(hours: summerTime ? 1 : 0, minutes: currTimeDiff));
     time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
     return time;
   }
@@ -217,58 +258,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     if (isAndroid) {
       checkForUpdate();
-      Wakelock.enable();
+      WakelockPlus.enable();
     }
-    updateAppBar(false);
     NotificationsService.init();
     readJson();
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
     //  listenNotifications();
-  }
-
-  void updateAppBar(bool added) {
-    appBarActions = [
-      IconButton(
-        icon: const Icon(Icons.settings),
-        tooltip: 'Settings',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsPage(
-                updatePrayers: updatePrayers,
-                updateReminder: updateReminder,
-                cancelNotifications: cancelAllPrayers,
-                updateAppBar: updateAppBar,
-              ),
-            ),
-          );
-        },
-      ),
-    ];
-    if (!added) {
-      return;
-    }
-    List<IconButton> newAppBarActions = [
-      IconButton(
-        icon: const Icon(Icons.notifications),
-        onPressed: () {
-          Navigator.pushNamed(context, '/notifications');
-        },
-        tooltip: 'Notifications',
-      ),
-      IconButton(
-        icon: const Icon(Icons.cancel),
-        onPressed: () {
-          cancelAllPrayers();
-        },
-        tooltip: 'Cancel Prayers',
-      ),
-    ];
-    appBarActions.addAll(newAppBarActions);
-    appBarActions = appBarActions.reversed.toList();
-    setState(() {});
   }
 
   @override
@@ -305,7 +301,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
-            actions: appBarActions,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                tooltip: 'Settings',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsPage(
+                        updatePrayers: updatePrayers,
+                        updateReminder: updateReminder,
+                        cancelNotifications: cancelAllPrayers,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           body: FutureBuilder<List>(
             future: Future.wait([
@@ -336,17 +349,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                           DateFormat('dd MMM yyyy', localeProvider.locale.toString())
                                               .format(DateTime.now()),
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 16, color: Colors.white),
                                         ),
                                         const Text(
                                           "  -  ",
-                                          style: TextStyle(fontSize: 16),
+                                          style: TextStyle(fontSize: 16, color: Colors.white),
                                         ),
                                         Text(
                                           (HijriCalendar.now().toFormat('dd MMMM yyyy')),
                                           locale: localeProvider.locale,
                                           strutStyle: const StrutStyle(forceStrutHeight: true),
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 16, color: Colors.white),
                                         ),
                                       ],
                                     ),
@@ -413,7 +426,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)!.appName),
+                      Text(AppLocalizations.of(context)!.appName, style: const TextStyle(color: Colors.white)),
                       Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: Image.asset(
@@ -537,7 +550,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onTap: () async {
                     Navigator.pop(context);
-                    await sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());
+                    sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());
                   },
                 ),
               ],
@@ -548,16 +561,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _launchURL(String urlAddress) async {
+  Future<void> _launchURL(String urlAddress) async {
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
   }
 
-  _contactUs() async {
+  Future<void> _contactUs() async {
     String mailAddress = 'mailto:oth1998@gmail.com';
-    String urlAddress = '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    String urlAddress = '$mailAddress?subject=ØªØ·Ø¨ÙŠÙ‚ Ù…ÙˆØ§Ù‚ÙŠØª Ø¨ÙŠØª Ø§Ù„Ù…Ù‚Ø¯Ø³&body=Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÙŠÙƒÙ… ÙˆØ±Ø­Ù…Ø© Ø§Ù„Ù„Ù‡ØŒ \n';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';

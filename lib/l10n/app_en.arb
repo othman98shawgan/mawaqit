@@ -185,6 +185,18 @@
    "@settingsDarkMode":{
       "description":"Dark Mode string in Settings page"
    },
+      "settingsAutoDst":"Automatic Daylight Saving",
+   "@settingsAutoDst":{
+      "description":"Settings automatic daylight saving string"
+   },
+   "settingsAutoDstEnabled":"Automatic",
+   "@settingsAutoDstEnabled":{
+      "description":"Settings automatic daylight saving enabled string"
+   },
+   "settingsAutoDstDisabled":"Manual",
+   "@settingsAutoDstDisabled":{
+      "description":"Settings automatic daylight saving disabled string"
+   },
    "settingsDaylightSaving":"Daylight Saving",
    "@settingsDaylightSaving":{
       "description":"Daylight Saving string in Settings page"
@@ -470,5 +482,21 @@
    "min3AfterAlQuds": "3 minutes after Al-Quds",
    "@min3AfterAlQuds": {
       "description": "City title for 3 minute after"
+   },
+   "dstSummerNotificationTitle": "Daylight Saving Time Starts Tomorrow",
+   "@dstSummerNotificationTitle": {
+      "description": "Notification title when summer time starts tomorrow"
+   },
+   "dstSummerNotificationBody": "Clocks will move forward 1 hour tonight. Please be mindful of tomorrow's Fajr prayer time.",
+   "@dstSummerNotificationBody": {
+      "description": "Notification body when summer time starts tomorrow"
+   },
+   "dstWinterNotificationTitle": "Winter Time Starts Tomorrow",
+   "@dstWinterNotificationTitle": {
+      "description": "Notification title when winter time starts tomorrow"
+   },
+   "dstWinterNotificationBody": "Clocks will move back 1 hour tonight. Please be mindful of tomorrow's Fajr prayer time.",
+   "@dstWinterNotificationBody": {
+      "description": "Notification body when winter time starts tomorrow"
    }   
 }

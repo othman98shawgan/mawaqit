@@ -3,7 +3,7 @@ import 'package:alfajr/l10n/l10n.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/store_manager.dart';
 import 'package:alfajr/ui/our_apps_page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:alfajr/services/dhikr_service.dart';
 import 'package:alfajr/services/notifications_service.dart';
@@ -13,21 +13,26 @@ import 'package:alfajr/ui/mathurat_page.dart';
 import 'package:alfajr/ui/missed_prayer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+// ignore: depend_on_referenced_packages
+import 'package:material_ui/material_ui.dart' as mui;
 import 'package:provider/provider.dart';
 
 import 'services/reminder_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
+import 'ui/notification_test_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:intl/intl.dart' as intl;
 
 bool isWeb = false;
 bool isAndroid = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (kIsWeb) {
     isWeb = true;
   } else if (Platform.isAndroid) {
@@ -40,6 +45,7 @@ Future<void> main() async {
         Permission.notification.request();
       }
     });
+    await NotificationsService.init();
   }
 
   StorageManager.init().then((value) {
@@ -70,8 +76,53 @@ Future<void> main() async {
   });
 }
 
+class SundayMaterialLocalizationAr extends MaterialLocalizationAr {
+  const SundayMaterialLocalizationAr({
+    super.localeName = 'ar',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  int get firstDayOfWeekIndex => 0; // 0 = Sunday (الأحد)
+}
+
+class SundayStartLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const SundayStartLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ar';
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) async {
+    await GlobalMaterialLocalizations.delegate.load(locale);
+    const String localeName = 'ar';
+    return SundayMaterialLocalizationAr(
+      fullYearFormat: intl.DateFormat.y(localeName),
+      compactDateFormat: intl.DateFormat.yMd(localeName),
+      shortDateFormat: intl.DateFormat.yMMMd(localeName),
+      mediumDateFormat: intl.DateFormat.MMMEd(localeName),
+      longDateFormat: intl.DateFormat.yMMMMEEEEd(localeName),
+      yearMonthFormat: intl.DateFormat.yMMMM(localeName),
+      shortMonthDayFormat: intl.DateFormat.MMMd(localeName),
+      decimalFormat: intl.NumberFormat.decimalPattern(localeName),
+      twoDigitZeroPaddedFormat: intl.NumberFormat('00', localeName),
+    );
+  }
+
+  @override
+  bool shouldReload(covariant LocalizationsDelegate<MaterialLocalizations> old) => false;
+}
+
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +131,10 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'Mawaqit Al-Quds',
               theme: theme.getTheme(),
+              builder: (context, child) => mui.Theme(
+                data: theme.getMaterialUiTheme(),
+                child: child!,
+              ),
               locale: localeProvider.locale,
               initialRoute: '/home',
               routes: {
@@ -90,10 +145,12 @@ class MyApp extends StatelessWidget {
                 '/mathurat': (context) => const MathuratPage(),
                 '/settings': (context) => const SettingsPage(),
                 '/notifications': (context) => const NotificationsPage(),
+                '/notification_test': (context) => const NotificationTestPage(),
                 '/apps': (context) => const OurAppsPage(),
               },
               supportedLocales: L10n.all,
-              localizationsDelegates: const [
+              localizationsDelegates: [
+                const SundayStartLocalizationsDelegate(),
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
