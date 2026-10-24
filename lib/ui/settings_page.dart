@@ -4,11 +4,14 @@ import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
+import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
 import '../services/notifications_service.dart';
+import 'package:flutter/foundation.dart';
+import '../services/store_manager.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 
@@ -20,19 +23,106 @@ class SettingsPage extends StatefulWidget {
     this.updatePrayers,
     this.updateReminder,
     this.cancelNotifications,
-    this.updateAppBar,
   });
 
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
-  final Function? updateAppBar;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _isDevMode = false;
+  int _devTapCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDevMode();
+  }
+
+  void _loadDevMode() async {
+    final dev = await StorageManager.readData('isDevMode');
+    if (dev is bool && dev) {
+      if (mounted) setState(() => _isDevMode = true);
+    }
+  }
+
+  void _onVersionTap() {
+    if (_isDevMode) return;
+    _devTapCount++;
+    final remaining = 7 - _devTapCount;
+    if (remaining <= 3 && remaining > 0) {
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isAr
+                ? 'أنت على بعد $remaining نقرات من تفعيل وضع المطور'
+                : 'You are $remaining steps away from developer mode',
+          ),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } else if (remaining <= 0) {
+      setState(() {
+        _isDevMode = true;
+      });
+      StorageManager.saveData('isDevMode', true);
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isAr ? 'تم تفعيل وضع المطور!' : 'Developer mode enabled!'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _onVersionLongPress() {
+    if (!_isDevMode) return;
+    setState(() {
+      _isDevMode = false;
+      _devTapCount = 0;
+    });
+    StorageManager.saveData('isDevMode', false);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isAr ? 'تم تعطيل وضع المطور' : 'Developer mode disabled'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  CustomSettingsSection _buildVersionSection(String fontFamily) {
+    return CustomSettingsSection(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _onVersionTap,
+        onLongPress: _onVersionLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: Text(
+              Localizations.localeOf(context).languageCode == 'ar' ? 'الإصدار 1.0.6' : 'Version 1.0.6',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                fontFamily: fontFamily,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var title = AppLocalizations.of(context)!.settingsString;
@@ -45,16 +135,14 @@ class _SettingsPageState extends State<SettingsPage> {
     var notificationsSection = AppLocalizations.of(context)!.settingsNotificationsSection;
     var sendNotificationsString = AppLocalizations.of(context)!.settingsSendNotifications;
     var prayerReminderString = AppLocalizations.of(context)!.settingsPrayerReminder;
-    var prayerReminderOffString =
-        AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
+    var prayerReminderOffString = AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
     var helpSection = AppLocalizations.of(context)!.settingsHelpSection;
     var resetNotificationsString = AppLocalizations.of(context)!.settingsResetNotifications;
     var citySlecetionString = AppLocalizations.of(context)!.citySelect;
     var cityDescriptionString = AppLocalizations.of(context)!.cityCurrnet;
-    var summerTimeDescription =
-        Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
-            ? summerTimeString
-            : winterTimeString;
+    var summerTimeDescription = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime()
+        ? summerTimeString
+        : winterTimeString;
 
     var fontFamily = 'Tajawal';
 
@@ -96,174 +184,303 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
         NotificationsStatusNotifier, LocaleNotifier>(
-      builder:
-          (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) =>
-              Center(
-                  child: Directionality(
+      builder: (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) => Center(
+          child: Directionality(
         textDirection: TextDirection.ltr,
         child: Scaffold(
-          appBar: AppBar(
-            title: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w500),
+            appBar: AppBar(
+              title: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
               ),
             ),
-          ),
-          body: SettingsList(
-            contentPadding: const EdgeInsets.all(0),
-            lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
-            sections: [
-              SettingsSection(
-                title: Text(generalSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                    style: TextStyle(fontFamily: fontFamily)),
-                tiles: [
-                  SettingsTile.navigation(
-                    leading: const Icon(Icons.language),
-                    title: Text(
-                      languageString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                      style: TextStyle(fontFamily: fontFamily),
+            body: isAndroid
+                ? SettingsList(
+                    contentPadding: const EdgeInsets.all(0),
+                    lightTheme: SettingsThemeData(
+                      settingsListBackground: color2.withValues(alpha: 0.2),
+                      titleTextColor: color3,
                     ),
-                    value: Text(localeMap[localeProvider.locale.toString()]!,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    onPressed: (context) {
-                      showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text(darkModeString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.dark_mode_outlined),
-                    initialValue: theme.getTheme() == theme.darkTheme,
-                    onToggle: (value) {
-                      if (value) {
-                        theme.setDarkMode();
-                      } else {
-                        theme.setLightMode();
-                      }
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text(dstString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    description: Text(summerTimeDescription,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.access_time),
-                    initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
-                    onToggle: (value) {
-                      if (value) {
-                        daylightSaving.setSummerTime();
-                        summerTimeDescription = summerTimeString;
-                        widget.updatePrayers!();
-                      } else {
-                        daylightSaving.setWinterTime();
-                        summerTimeDescription = winterTimeString;
-                        widget.updatePrayers!();
-                      }
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    leading: const Icon(Icons.location_city),
-                    title: Text(
-                      citySlecetionString,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                      style: TextStyle(fontFamily: fontFamily),
-                    ),
-                    value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    onPressed: (context) {
-                      showCitiesDialog(
-                          context, localeProvider.city, citiesList, widget.updatePrayers!);
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text(notificationsSection,
-                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                    style: TextStyle(fontFamily: fontFamily)),
-                tiles: [
-                  SettingsTile.switchTile(
-                    title: Text(sendNotificationsString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.notifications),
-                    initialValue: notifications.getNotificationsStatus() == true,
-                    onToggle: (value) {
-                      if (value) {
-                        notifications.setNotificationsOn();
-                        notifications.requestNotification();
-                        widget.updatePrayers!();
-                      } else {
-                        notifications.setNotificationsOff();
-                        reminder.setReminderStatus(false);
-                        widget.cancelNotifications!();
-                      }
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    title: Text(prayerReminderString,
-                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                        style: TextStyle(fontFamily: fontFamily)),
-                    leading: const Icon(Icons.notification_important_sharp),
-                    value: reminder.getReminderStatus()
-                        ? Text(
-                            AppLocalizations.of(context)!
-                                .settingsPrayerReminderDescription(reminder.getReminderTime()),
-                            strutStyle: const StrutStyle(forceStrutHeight: true),
-                            style: TextStyle(fontFamily: fontFamily))
-                        : Text(prayerReminderOffString,
+                    sections: [
+                      SettingsSection(
+                        title: Text(generalSection,
                             strutStyle: const StrutStyle(forceStrutHeight: true),
                             style: TextStyle(fontFamily: fontFamily)),
-                    onPressed: (context) async {
-                      await showReminderDialog(
-                        context,
-                        reminder.getReminderStatus(),
-                        reminder.getReminderTime(),
-                        widget.updateReminder!,
-                        widget.updateAppBar!,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                  title: Text(helpSection,
-                      strutStyle: const StrutStyle(forceStrutHeight: true),
-                      style: TextStyle(fontFamily: fontFamily)),
-                  tiles: [
-                    SettingsTile.navigation(
-                      title: Text(resetNotificationsString,
-                          strutStyle: const StrutStyle(forceStrutHeight: true),
-                          style: TextStyle(fontFamily: fontFamily)),
-                      leading: const Icon(Icons.restart_alt),
-                      onPressed: (context) async {
-                        widget.updatePrayers!();
-                        Navigator.pop(context);
-                      },
+                        tiles: [
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.language),
+                            title: Text(
+                              languageString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text(localeMap[localeProvider.locale.toString()]!,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(darkModeString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.dark_mode_outlined),
+                            initialValue: theme.getTheme() == theme.darkTheme,
+                            onToggle: (value) {
+                              if (value) {
+                                theme.setDarkMode();
+                              } else {
+                                theme.setLightMode();
+                              }
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(AppLocalizations.of(context)!.settingsAutoDst,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            description: Text(
+                                daylightSaving.isAutoDst
+                                    ? '${AppLocalizations.of(context)!.settingsAutoDstEnabled} (${daylightSaving.getSummerTime() ? summerTimeString : winterTimeString})'
+                                    : AppLocalizations.of(context)!.settingsAutoDstDisabled,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.update),
+                            initialValue: daylightSaving.isAutoDst,
+                            onToggle: (value) {
+                              daylightSaving.setAutoDst(value);
+                              widget.updatePrayers!();
+                            },
+                          ),
+                          if (!daylightSaving.isAutoDst)
+                            SettingsTile.switchTile(
+                              title: Text(dstString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              description: Text(summerTimeDescription,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.access_time),
+                              initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                              onToggle: (value) {
+                                if (value) {
+                                  daylightSaving.setSummerTime();
+                                  summerTimeDescription = summerTimeString;
+                                  widget.updatePrayers!();
+                                } else {
+                                  daylightSaving.setWinterTime();
+                                  summerTimeDescription = winterTimeString;
+                                  widget.updatePrayers!();
+                                }
+                              },
+                            ),
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.location_city),
+                            title: Text(
+                              citySlecetionString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
+                            },
+                          ),
+                        ],
+                      ),
+                      SettingsSection(
+                        title: Text(notificationsSection,
+                            strutStyle: const StrutStyle(forceStrutHeight: true),
+                            style: TextStyle(fontFamily: fontFamily)),
+                        tiles: [
+                          SettingsTile.switchTile(
+                            title: Text(sendNotificationsString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.notifications),
+                            initialValue: notifications.getNotificationsStatus() == true,
+                            onToggle: (value) {
+                              if (value) {
+                                notifications.setNotificationsOn();
+                                notifications.requestNotification();
+                                widget.updatePrayers!();
+                              } else {
+                                notifications.setNotificationsOff();
+                                reminder.setReminderStatus(false);
+                                widget.cancelNotifications!();
+                              }
+                            },
+                          ),
+                          SettingsTile.navigation(
+                            title: Text(prayerReminderString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.notification_important_sharp),
+                            value: reminder.getReminderStatus()
+                                ? Text(
+                                    AppLocalizations.of(context)!
+                                        .settingsPrayerReminderDescription(reminder.getReminderTime()),
+                                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                                    style: TextStyle(fontFamily: fontFamily))
+                                : Text(prayerReminderOffString,
+                                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                                    style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) async {
+                              await showReminderDialog(
+                                context,
+                                reminder.getReminderStatus(),
+                                reminder.getReminderTime(),
+                                widget.updateReminder!,
+                              );
+                            },
+                          ),
+                          if (_isDevMode)
+                            SettingsTile.navigation(
+                              title: Text(
+                                Localizations.localeOf(context).languageCode == 'ar'
+                                    ? 'اختبار الإشعارات'
+                                    : 'Notification Testing',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              leading: const Icon(Icons.bug_report_outlined),
+                              onPressed: (context) {
+                                Navigator.pushNamed(context, '/notification_test');
+                              },
+                            ),
+                        ],
+                      ),
+                      SettingsSection(
+                          title: Text(helpSection,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily)),
+                          tiles: [
+                            SettingsTile.navigation(
+                              title: Text(resetNotificationsString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.restart_alt),
+                              onPressed: (context) async {
+                                widget.updatePrayers!();
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ]),
+                      _buildVersionSection(fontFamily),
+                    ],
+                  )
+                : SettingsList(
+                    contentPadding: const EdgeInsets.all(0),
+                    lightTheme: SettingsThemeData(
+                      settingsListBackground: color2.withValues(alpha: 0.2),
+                      titleTextColor: color3,
                     ),
-                  ]),
-            ],
-          ),
-        ),
+                    sections: [
+                      SettingsSection(
+                        title: Text(generalSection,
+                            strutStyle: const StrutStyle(forceStrutHeight: true),
+                            style: TextStyle(fontFamily: fontFamily)),
+                        tiles: [
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.language),
+                            title: Text(
+                              languageString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text(localeMap[localeProvider.locale.toString()]!,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showLocaleDialog(context, localeProvider.locale, widget.updatePrayers!);
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(darkModeString,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.dark_mode_outlined),
+                            initialValue: theme.getTheme() == theme.darkTheme,
+                            onToggle: (value) {
+                              if (value) {
+                                theme.setDarkMode();
+                              } else {
+                                theme.setLightMode();
+                              }
+                            },
+                          ),
+                          SettingsTile.switchTile(
+                            title: Text(AppLocalizations.of(context)!.settingsAutoDst,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            description: Text(
+                                daylightSaving.isAutoDst
+                                    ? '${AppLocalizations.of(context)!.settingsAutoDstEnabled} (${daylightSaving.getSummerTime() ? summerTimeString : winterTimeString})'
+                                    : AppLocalizations.of(context)!.settingsAutoDstDisabled,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            leading: const Icon(Icons.update),
+                            initialValue: daylightSaving.isAutoDst,
+                            onToggle: (value) {
+                              daylightSaving.setAutoDst(value);
+                              widget.updatePrayers!();
+                            },
+                          ),
+                          if (!daylightSaving.isAutoDst)
+                            SettingsTile.switchTile(
+                              title: Text(dstString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              description: Text(summerTimeDescription,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.access_time),
+                              initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                              onToggle: (value) {
+                                if (value) {
+                                  daylightSaving.setSummerTime();
+                                  summerTimeDescription = summerTimeString;
+                                  widget.updatePrayers!();
+                                } else {
+                                  daylightSaving.setWinterTime();
+                                  summerTimeDescription = winterTimeString;
+                                  widget.updatePrayers!();
+                                }
+                              },
+                            ),
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.location_city),
+                            title: Text(
+                              citySlecetionString,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            value: Text('$cityDescriptionString: ${citiesList[localeProvider.city]!}',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily)),
+                            onPressed: (context) {
+                              showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
+                            },
+                          ),
+                        ],
+                      ),
+                      _buildVersionSection(fontFamily),
+                    ],
+                  )),
       )),
     );
   }
 }
 
-showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMap,
-    Function updatePrayers) async {
+Future<void> showCitiesDialog(
+    BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
   String currentCity = city;
-  var currentCityValue =
-      citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
+  var currentCityValue = citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
 
   int selected = 0;
 
@@ -292,25 +509,23 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
 
   var confirmMethod = (() async {
     Navigator.pop(context);
-    currentCity =
-        citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[selected]);
+    currentCity = citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[selected]);
     Provider.of<LocaleNotifier>(context, listen: false).setCity(currentCity);
     updatePrayers();
   });
   var cityDialogTitle = AppLocalizations.of(context)!.citySelect;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(cityDialogTitle),
+      title: Text(cityDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return SingleChildScrollView(
@@ -328,7 +543,8 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
                       itemCount: citiesList.length,
                       itemBuilder: (BuildContext context, int index) {
                         return RadioListTile(
-                            title: Text(citiesList.elementAt(index)),
+                            title: Text(citiesList.elementAt(index), style: TextStyle(color: textColor)),
+                            activeColor: isLight ? color3 : darkThemeSwatch,
                             value: index,
                             groupValue: selected,
                             onChanged: (value) {
@@ -352,7 +568,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
   );
 }
 
-showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
+Future<void> showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
   Locale? currentLocale = locale;
 
   var confirmMethod = (() async {
@@ -363,17 +579,16 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
   var languageDialogTitle = AppLocalizations.of(context)!.languageDialogTitle;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(languageDialogTitle),
+      title: Text(languageDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return Column(mainAxisSize: MainAxisSize.min, children: [
@@ -385,27 +600,27 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                 RadioListTile(
                     contentPadding: EdgeInsets.zero,
                     visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
+                        horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('ar'),
-                    title: Text(localeMap['ar']!),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(localeMap['ar']!, style: TextStyle(color: textColor)),
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentLocale = val as Locale?;
+                        currentLocale = val;
                       });
                     }),
                 RadioListTile(
                     contentPadding: EdgeInsets.zero,
                     visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
+                        horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('en'),
-                    title: Text(localeMap['en']!),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(localeMap['en']!, style: TextStyle(color: textColor)),
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentLocale = val as Locale?;
+                        currentLocale = val;
                       });
                     }),
               ],

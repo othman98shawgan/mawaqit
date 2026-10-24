@@ -4,7 +4,7 @@ import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
@@ -17,13 +17,11 @@ class SettingsDhikrPage extends StatefulWidget {
     this.updatePrayers,
     this.updateReminder,
     this.cancelNotifications,
-    this.updateAppBar,
   });
 
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
-  final Function? updateAppBar;
 
   @override
   State<SettingsDhikrPage> createState() => _SettingsDhikrPageState();
@@ -57,7 +55,10 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
           ),
           body: SettingsList(
             contentPadding: const EdgeInsets.all(0),
-            lightTheme: const SettingsThemeData(settingsListBackground: backgroudColor),
+            lightTheme: const SettingsThemeData(
+              settingsListBackground: backgroudColor,
+              titleTextColor: color3,
+            ),
             sections: [
               SettingsSection(
                 title: Text(
@@ -121,7 +122,7 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
   }
 }
 
-showTargetDialog(BuildContext context, int target) async {
+Future<void> showTargetDialog(BuildContext context, int target) async {
   int? currentTarget = target;
 
   var confirmMethod = (() {
@@ -132,14 +133,16 @@ showTargetDialog(BuildContext context, int target) async {
   var targetDialogTitle = AppLocalizations.of(context)!.targetDialogTitle;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(targetDialogTitle),
+      title: Text(targetDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(
           onPressed: confirmMethod,
           child: Text(confirmString),
         ),
@@ -157,7 +160,8 @@ showTargetDialog(BuildContext context, int target) async {
                         horizontal: VisualDensity.minimumDensity,
                         vertical: VisualDensity.minimumDensity),
                     value: 33,
-                    title: const Text('33'),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text('33', style: TextStyle(color: textColor)),
                     groupValue: currentTarget,
                     onChanged: (val) {
                       setState(() {
@@ -170,7 +174,8 @@ showTargetDialog(BuildContext context, int target) async {
                         horizontal: VisualDensity.minimumDensity,
                         vertical: VisualDensity.minimumDensity),
                     value: 100,
-                    title: const Text('100'),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text('100', style: TextStyle(color: textColor)),
                     groupValue: currentTarget,
                     onChanged: (val) {
                       setState(() {
