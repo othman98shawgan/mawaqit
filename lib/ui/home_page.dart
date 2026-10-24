@@ -570,7 +570,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _contactUs() async {
     String mailAddress = 'mailto:oth1998@gmail.com';
-    String urlAddress = '$mailAddress?subject=ØªØ·Ø¨ÙŠÙ‚ Ù…ÙˆØ§Ù‚ÙŠØª Ø¨ÙŠØª Ø§Ù„Ù…Ù‚Ø¯Ø³&body=Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÙŠÙƒÙ… ÙˆØ±Ø­Ù…Ø© Ø§Ù„Ù„Ù‡ØŒ \n';
+    String urlAddress = '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
