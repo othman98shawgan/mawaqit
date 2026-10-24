@@ -38,7 +38,7 @@ class _CalendarPageState extends State<CalendarPage> {
     int minute = int.parse(time.split(':')[1]);
     var today = DateTime.now();
     var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
-    dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+    dateTime = dateTime.add(Duration(hours: summerTime ? 1 : 0, minutes: currTimeDiff));
     time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
     return time;
   }
@@ -78,8 +78,6 @@ class _CalendarPageState extends State<CalendarPage> {
     double height3 = height - padding.top - kToolbarHeight;
     double prayerCardHeight = height3 * 0.11;
     double mainCardHeight = height3 * 0.20;
-    var sunIcon = const Icon(Icons.light_mode);
-    var moonIcon = const Icon(Icons.dark_mode);
     var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
     var localeNotifier = Provider.of<LocaleNotifier>(context, listen: false);
     var locale = localeNotifier.locale.toString();
@@ -101,6 +99,7 @@ class _CalendarPageState extends State<CalendarPage> {
             if (date != null && date != pickedDate) {
               setState(() {
                 pickedDate = date;
+                summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTimeForDate(pickedDate);
               });
             }
           },
@@ -124,20 +123,27 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.share),
+                icon: const Icon(Icons.today),
                 onPressed: () {
-                  sharePrayerTimes(context, localeProvider, prayersToday, pickedDate);
+                  final now = DateTime.now();
+                  final isSameDay = pickedDate.year == now.year &&
+                      pickedDate.month == now.month &&
+                      pickedDate.day == now.day;
+                  if (!isSameDay) {
+                    setState(() {
+                      pickedDate = now;
+                      summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
+                    });
+                  }
                 },
                 tooltip: AppLocalizations.of(context)!.todayTooltip,
               ),
               IconButton(
-                icon: summerTime ? sunIcon : moonIcon,
+                icon: const Icon(Icons.share),
                 onPressed: () {
-                  setState(() {
-                    summerTime = !summerTime;
-                  });
+                  sharePrayerTimes(context, localeProvider, prayersToday, pickedDate);
                 },
-                tooltip: AppLocalizations.of(context)!.dstTooltip,
+                tooltip: AppLocalizations.of(context)!.shareString,
               ),
             ],
           ),
@@ -177,6 +183,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       onPressed: () {
                                         setState(() {
                                           pickedDate = pickedDate.subtract(const Duration(days: 1));
+                                          summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
                                         });
                                       },
                                       tooltip: AppLocalizations.of(context)!.prevoiusDayTooltip,
@@ -189,6 +196,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       onPressed: () {
                                         setState(() {
                                           pickedDate = pickedDate.add(const Duration(days: 1));
+                                          summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
                                         });
                                       },
                                       tooltip: AppLocalizations.of(context)!.nextDayTooltip,

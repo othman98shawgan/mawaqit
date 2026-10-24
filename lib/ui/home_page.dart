@@ -21,6 +21,7 @@ import '../services/daylight_time_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
 import '../services/reminder_service.dart';
+import '../services/store_manager.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
@@ -92,11 +93,39 @@ class _MyHomePageState extends State<MyHomePage> {
     setScheduledPrayers([]);
   }
 
+  Future<void> _scheduleDstTransitionNotification() async {
+    final now = DateTime.now();
+    final nextTransition = DaylightSavingNotifier.getNextDstTransitionEve(now);
+    final eveTime = nextTransition.notificationTime;
+    final toSummer = nextTransition.toSummerTime;
+
+    const int dstNotificationId = 888000;
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final title = toSummer ? l10n.dstSummerNotificationTitle : l10n.dstWinterNotificationTitle;
+    final body = toSummer ? l10n.dstSummerNotificationBody : l10n.dstWinterNotificationBody;
+
+    await NotificationsService.scheduleNotifications(
+      id: dstNotificationId,
+      channelId: 'dst_transition_alert',
+      title: title,
+      body: body,
+      payload: 'dst_transition',
+      sheduledDate: eveTime,
+    );
+  }
+
   Future<void> scheduleNextPrayers(DateTime time) async {
     if (!isAndroid) {
       return;
     }
     // prayersToday = dummyDay; //TODO: FOR TESTING
+
+    final migrated = await StorageManager.readData('autoDstScheduleMigrated_v1');
+    if (migrated != true) {
+      await cancelAllPrayers();
+      StorageManager.saveData('autoDstScheduleMigrated_v1', true);
+    }
 
     _scheduledPrayers = await getScheduledPrayers();
     if (removePassedPrayers(_scheduledPrayers)) {
@@ -106,18 +135,31 @@ class _MyHomePageState extends State<MyHomePage> {
     var notifiactionsStatus = Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
     var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
-    if ((!notifiactionsStatus) ||
-        (reminderStatus && _scheduledPrayers.length > 71) ||
+    if (!notifiactionsStatus) {
+      return;
+    }
+
+    await _scheduleDstTransitionNotification();
+
+    if ((reminderStatus && _scheduledPrayers.length > 71) ||
         (!reminderStatus && _scheduledPrayers.length > 35)) {
       return;
     }
     List<Prayer> prayersToSchedule = [];
     reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
-    summerTime = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+    summerTime = dstNotifier.getSummerTime();
     timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
-    prayersToSchedule.addAll(getNextWeekPrayers(prayersToday, _prayerList, dayInYear, summerTime, timeDiff));
+    prayersToSchedule.addAll(getNextWeekPrayers(
+      prayersToday,
+      _prayerList,
+      dayInYear,
+      summerTime,
+      timeDiff,
+      isAutoMode: dstNotifier.isAutoDst,
+    ));
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -186,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
     int minute = int.parse(time.split(':')[1]);
     var today = DateTime.now();
     var dateTime = DateTime(today.year, today.month, today.day, hour, minute);
-    dateTime = dateTime.add(Duration(hours: 1, minutes: currTimeDiff));
+    dateTime = dateTime.add(Duration(hours: summerTime ? 1 : 0, minutes: currTimeDiff));
     time = "${dateTime.hour.toString()}:${dateTime.minute.toString().padLeft(2, '0')}";
     return time;
   }

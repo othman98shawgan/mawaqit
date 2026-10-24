@@ -99,6 +99,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
   CustomSettingsSection _buildVersionSection(String fontFamily) {
     return CustomSettingsSection(
       child: GestureDetector(
@@ -109,9 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Center(
             child: Text(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'الإصدار 1.0.6'
-                  : 'Version 1.0.6',
+              Localizations.localeOf(context).languageCode == 'ar' ? 'الإصدار 1.0.6' : 'Version 1.0.6',
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 14,
@@ -240,26 +239,44 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                           ),
                           SettingsTile.switchTile(
-                            title: Text(dstString,
+                            title: Text(AppLocalizations.of(context)!.settingsAutoDst,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            description: Text(summerTimeDescription,
+                            description: Text(
+                                daylightSaving.isAutoDst
+                                    ? '${AppLocalizations.of(context)!.settingsAutoDstEnabled} (${daylightSaving.getSummerTime() ? summerTimeString : winterTimeString})'
+                                    : AppLocalizations.of(context)!.settingsAutoDstDisabled,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            leading: const Icon(Icons.access_time),
-                            initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                            leading: const Icon(Icons.update),
+                            initialValue: daylightSaving.isAutoDst,
                             onToggle: (value) {
-                              if (value) {
-                                daylightSaving.setSummerTime();
-                                summerTimeDescription = summerTimeString;
-                                widget.updatePrayers!();
-                              } else {
-                                daylightSaving.setWinterTime();
-                                summerTimeDescription = winterTimeString;
-                                widget.updatePrayers!();
-                              }
+                              daylightSaving.setAutoDst(value);
+                              widget.updatePrayers!();
                             },
                           ),
+                          if (!daylightSaving.isAutoDst)
+                            SettingsTile.switchTile(
+                              title: Text(dstString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              description: Text(summerTimeDescription,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.access_time),
+                              initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                              onToggle: (value) {
+                                if (value) {
+                                  daylightSaving.setSummerTime();
+                                  summerTimeDescription = summerTimeString;
+                                  widget.updatePrayers!();
+                                } else {
+                                  daylightSaving.setWinterTime();
+                                  summerTimeDescription = winterTimeString;
+                                  widget.updatePrayers!();
+                                }
+                              },
+                            ),
                           SettingsTile.navigation(
                             leading: const Icon(Icons.location_city),
                             title: Text(
@@ -398,26 +415,44 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                           ),
                           SettingsTile.switchTile(
-                            title: Text(dstString,
+                            title: Text(AppLocalizations.of(context)!.settingsAutoDst,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            description: Text(summerTimeDescription,
+                            description: Text(
+                                daylightSaving.isAutoDst
+                                    ? '${AppLocalizations.of(context)!.settingsAutoDstEnabled} (${daylightSaving.getSummerTime() ? summerTimeString : winterTimeString})'
+                                    : AppLocalizations.of(context)!.settingsAutoDstDisabled,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            leading: const Icon(Icons.access_time),
-                            initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                            leading: const Icon(Icons.update),
+                            initialValue: daylightSaving.isAutoDst,
                             onToggle: (value) {
-                              if (value) {
-                                daylightSaving.setSummerTime();
-                                summerTimeDescription = summerTimeString;
-                                widget.updatePrayers!();
-                              } else {
-                                daylightSaving.setWinterTime();
-                                summerTimeDescription = winterTimeString;
-                                widget.updatePrayers!();
-                              }
+                              daylightSaving.setAutoDst(value);
+                              widget.updatePrayers!();
                             },
                           ),
+                          if (!daylightSaving.isAutoDst)
+                            SettingsTile.switchTile(
+                              title: Text(dstString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              description: Text(summerTimeDescription,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.access_time),
+                              initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                              onToggle: (value) {
+                                if (value) {
+                                  daylightSaving.setSummerTime();
+                                  summerTimeDescription = summerTimeString;
+                                  widget.updatePrayers!();
+                                } else {
+                                  daylightSaving.setWinterTime();
+                                  summerTimeDescription = winterTimeString;
+                                  widget.updatePrayers!();
+                                }
+                              },
+                            ),
                           SettingsTile.navigation(
                             leading: const Icon(Icons.location_city),
                             title: Text(

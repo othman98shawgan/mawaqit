@@ -147,6 +147,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDarkMode => 'Dark Mode';
 
   @override
+  String get settingsAutoDst => 'Automatic Daylight Saving';
+
+  @override
+  String get settingsAutoDstEnabled => 'Automatic';
+
+  @override
+  String get settingsAutoDstDisabled => 'Manual';
+
+  @override
   String get settingsDaylightSaving => 'Daylight Saving';
 
   @override
@@ -367,4 +376,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get min3AfterAlQuds => '3 minutes after Al-Quds';
+
+  @override
+  String get dstSummerNotificationTitle =>
+      'Daylight Saving Time Starts Tomorrow';
+
+  @override
+  String get dstSummerNotificationBody =>
+      'Clocks will move forward 1 hour tonight. Please be mindful of tomorrow\'s Fajr prayer time.';
+
+  @override
+  String get dstWinterNotificationTitle => 'Winter Time Starts Tomorrow';
+
+  @override
+  String get dstWinterNotificationBody =>
+      'Clocks will move back 1 hour tonight. Please be mindful of tomorrow\'s Fajr prayer time.';
 }

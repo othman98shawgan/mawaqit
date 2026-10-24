@@ -148,6 +148,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsDarkMode => 'الوضع الليلي';
 
   @override
+  String get settingsAutoDst => 'التوقيت الصيفي التلقائي';
+
+  @override
+  String get settingsAutoDstEnabled => 'تلقائي';
+
+  @override
+  String get settingsAutoDstDisabled => 'يدوي';
+
+  @override
   String get settingsDaylightSaving => 'التوقيت الصيفي';
 
   @override
@@ -368,4 +377,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get min3AfterAlQuds => '3 دقائق بعد القدس';
+
+  @override
+  String get dstSummerNotificationTitle => 'بدء التوقيت الصيفي غداً';
+
+  @override
+  String get dstSummerNotificationBody =>
+      'سيتم تقديم الساعة 60 دقيقة الليلة. يرجى الانتباه لموعد صلاة الفجر غداً.';
+
+  @override
+  String get dstWinterNotificationTitle => 'بدء التوقيت الشتوي غداً';
+
+  @override
+  String get dstWinterNotificationBody =>
+      'سيتم تأخير الساعة 60 دقيقة الليلة. يرجى الانتباه لموعد صلاة الفجر غداً.';
 }

@@ -101,11 +101,21 @@ class NotificationsService {
         ? AndroidScheduleMode.exactAllowWhileIdle
         : AndroidScheduleMode.inexactAllowWhileIdle;
 
+    final scheduledTzDate = tz.TZDateTime(
+      tz.local,
+      sheduledDate.year,
+      sheduledDate.month,
+      sheduledDate.day,
+      sheduledDate.hour,
+      sheduledDate.minute,
+      sheduledDate.second,
+    );
+
     await _notifications.zonedSchedule(
       id: id,
       title: title,
       body: body,
-      scheduledDate: tz.TZDateTime.from(sheduledDate, tz.local),
+      scheduledDate: scheduledTzDate,
       notificationDetails: await _notificationDetails(channelId),
       payload: payload,
       androidScheduleMode: scheduleMode,

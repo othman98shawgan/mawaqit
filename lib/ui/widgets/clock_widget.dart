@@ -9,6 +9,7 @@ import '../../models/prayer.dart';
 import '../../models/prayers.dart';
 import '../../services/locale_service.dart';
 import '../../services/prayer_methods.dart';
+import '../../services/daylight_time_service.dart';
 
 class ClockWidget extends StatelessWidget {
   const ClockWidget({
@@ -54,10 +55,13 @@ class _PrayerClockState extends State<PrayerClockWidget> {
   late Prayer prev;
 
   void updatePrayers() {
+    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
     next = getNextPrayer(
-        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList);
+        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList,
+        isAutoMode: dstNotifier.isAutoDst);
     prev = getPrevPrayer(
-        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList);
+        DateTime.now(), widget.prayersToday, widget.summerTime, widget.timeDiff, widget.prayerList,
+        isAutoMode: dstNotifier.isAutoDst);
   }
 
   String printDuration(Duration duration) {

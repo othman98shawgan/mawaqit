@@ -350,6 +350,24 @@ abstract class AppLocalizations {
   /// **'Dark Mode'**
   String get settingsDarkMode;
 
+  /// Settings automatic daylight saving string
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Daylight Saving'**
+  String get settingsAutoDst;
+
+  /// Settings automatic daylight saving enabled string
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get settingsAutoDstEnabled;
+
+  /// Settings automatic daylight saving disabled string
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get settingsAutoDstDisabled;
+
   /// Daylight Saving string in Settings page
   ///
   /// In en, this message translates to:
@@ -703,6 +721,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'3 minutes after Al-Quds'**
   String get min3AfterAlQuds;
+
+  /// Notification title when summer time starts tomorrow
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight Saving Time Starts Tomorrow'**
+  String get dstSummerNotificationTitle;
+
+  /// Notification body when summer time starts tomorrow
+  ///
+  /// In en, this message translates to:
+  /// **'Clocks will move forward 1 hour tonight. Please be mindful of tomorrow\'s Fajr prayer time.'**
+  String get dstSummerNotificationBody;
+
+  /// Notification title when winter time starts tomorrow
+  ///
+  /// In en, this message translates to:
+  /// **'Winter Time Starts Tomorrow'**
+  String get dstWinterNotificationTitle;
+
+  /// Notification body when winter time starts tomorrow
+  ///
+  /// In en, this message translates to:
+  /// **'Clocks will move back 1 hour tonight. Please be mindful of tomorrow\'s Fajr prayer time.'**
+  String get dstWinterNotificationBody;
 }
 
 class _AppLocalizationsDelegate
