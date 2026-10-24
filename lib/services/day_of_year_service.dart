@@ -1,7 +1,7 @@
 import 'package:jiffy/jiffy.dart';
 
 int dayOfYear(DateTime day) {
-  int dayOfYear = Jiffy(day).dayOfYear;
+  int dayOfYear = Jiffy.parseFromDateTime(day).dayOfYear;
   dayOfYear--;
 
   var marchFirst = DateTime(day.year, DateTime.march, 1);

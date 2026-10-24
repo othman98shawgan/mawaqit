@@ -4,12 +4,14 @@ import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
 import '../services/notifications_service.dart';
+import 'package:flutter/foundation.dart';
+import '../services/store_manager.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
 
@@ -21,19 +23,106 @@ class SettingsPage extends StatefulWidget {
     this.updatePrayers,
     this.updateReminder,
     this.cancelNotifications,
-    this.updateAppBar,
   });
 
   final Function? updatePrayers;
   final Function? updateReminder;
   final Function? cancelNotifications;
-  final Function? updateAppBar;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _isDevMode = false;
+  int _devTapCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDevMode();
+  }
+
+  void _loadDevMode() async {
+    final dev = await StorageManager.readData('isDevMode');
+    if (dev is bool && dev) {
+      if (mounted) setState(() => _isDevMode = true);
+    }
+  }
+
+  void _onVersionTap() {
+    if (_isDevMode) return;
+    _devTapCount++;
+    final remaining = 7 - _devTapCount;
+    if (remaining <= 3 && remaining > 0) {
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isAr
+                ? 'أنت على بعد $remaining نقرات من تفعيل وضع المطور'
+                : 'You are $remaining steps away from developer mode',
+          ),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } else if (remaining <= 0) {
+      setState(() {
+        _isDevMode = true;
+      });
+      StorageManager.saveData('isDevMode', true);
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isAr ? 'تم تفعيل وضع المطور!' : 'Developer mode enabled!'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _onVersionLongPress() {
+    if (!_isDevMode) return;
+    setState(() {
+      _isDevMode = false;
+      _devTapCount = 0;
+    });
+    StorageManager.saveData('isDevMode', false);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isAr ? 'تم تعطيل وضع المطور' : 'Developer mode disabled'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  CustomSettingsSection _buildVersionSection(String fontFamily) {
+    return CustomSettingsSection(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _onVersionTap,
+        onLongPress: _onVersionLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: Text(
+              Localizations.localeOf(context).languageCode == 'ar' ? 'الإصدار 1.0.6' : 'Version 1.0.6',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                fontFamily: fontFamily,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var title = AppLocalizations.of(context)!.settingsString;
@@ -111,7 +200,10 @@ class _SettingsPageState extends State<SettingsPage> {
             body: isAndroid
                 ? SettingsList(
                     contentPadding: const EdgeInsets.all(0),
-                    lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
+                    lightTheme: SettingsThemeData(
+                      settingsListBackground: color2.withValues(alpha: 0.2),
+                      titleTextColor: color3,
+                    ),
                     sections: [
                       SettingsSection(
                         title: Text(generalSection,
@@ -147,26 +239,44 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                           ),
                           SettingsTile.switchTile(
-                            title: Text(dstString,
+                            title: Text(AppLocalizations.of(context)!.settingsAutoDst,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            description: Text(summerTimeDescription,
+                            description: Text(
+                                daylightSaving.isAutoDst
+                                    ? '${AppLocalizations.of(context)!.settingsAutoDstEnabled} (${daylightSaving.getSummerTime() ? summerTimeString : winterTimeString})'
+                                    : AppLocalizations.of(context)!.settingsAutoDstDisabled,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            leading: const Icon(Icons.access_time),
-                            initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                            leading: const Icon(Icons.update),
+                            initialValue: daylightSaving.isAutoDst,
                             onToggle: (value) {
-                              if (value) {
-                                daylightSaving.setSummerTime();
-                                summerTimeDescription = summerTimeString;
-                                widget.updatePrayers!();
-                              } else {
-                                daylightSaving.setWinterTime();
-                                summerTimeDescription = winterTimeString;
-                                widget.updatePrayers!();
-                              }
+                              daylightSaving.setAutoDst(value);
+                              widget.updatePrayers!();
                             },
                           ),
+                          if (!daylightSaving.isAutoDst)
+                            SettingsTile.switchTile(
+                              title: Text(dstString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              description: Text(summerTimeDescription,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.access_time),
+                              initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                              onToggle: (value) {
+                                if (value) {
+                                  daylightSaving.setSummerTime();
+                                  summerTimeDescription = summerTimeString;
+                                  widget.updatePrayers!();
+                                } else {
+                                  daylightSaving.setWinterTime();
+                                  summerTimeDescription = winterTimeString;
+                                  widget.updatePrayers!();
+                                }
+                              },
+                            ),
                           SettingsTile.navigation(
                             leading: const Icon(Icons.location_city),
                             title: Text(
@@ -226,10 +336,23 @@ class _SettingsPageState extends State<SettingsPage> {
                                 reminder.getReminderStatus(),
                                 reminder.getReminderTime(),
                                 widget.updateReminder!,
-                                widget.updateAppBar!,
                               );
                             },
                           ),
+                          if (_isDevMode)
+                            SettingsTile.navigation(
+                              title: Text(
+                                Localizations.localeOf(context).languageCode == 'ar'
+                                    ? 'اختبار الإشعارات'
+                                    : 'Notification Testing',
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              leading: const Icon(Icons.bug_report_outlined),
+                              onPressed: (context) {
+                                Navigator.pushNamed(context, '/notification_test');
+                              },
+                            ),
                         ],
                       ),
                       SettingsSection(
@@ -248,11 +371,15 @@ class _SettingsPageState extends State<SettingsPage> {
                               },
                             ),
                           ]),
+                      _buildVersionSection(fontFamily),
                     ],
                   )
                 : SettingsList(
                     contentPadding: const EdgeInsets.all(0),
-                    lightTheme: SettingsThemeData(settingsListBackground: color2.withOpacity(0.2)),
+                    lightTheme: SettingsThemeData(
+                      settingsListBackground: color2.withValues(alpha: 0.2),
+                      titleTextColor: color3,
+                    ),
                     sections: [
                       SettingsSection(
                         title: Text(generalSection,
@@ -288,26 +415,44 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                           ),
                           SettingsTile.switchTile(
-                            title: Text(dstString,
+                            title: Text(AppLocalizations.of(context)!.settingsAutoDst,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            description: Text(summerTimeDescription,
+                            description: Text(
+                                daylightSaving.isAutoDst
+                                    ? '${AppLocalizations.of(context)!.settingsAutoDstEnabled} (${daylightSaving.getSummerTime() ? summerTimeString : winterTimeString})'
+                                    : AppLocalizations.of(context)!.settingsAutoDstDisabled,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily)),
-                            leading: const Icon(Icons.access_time),
-                            initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                            leading: const Icon(Icons.update),
+                            initialValue: daylightSaving.isAutoDst,
                             onToggle: (value) {
-                              if (value) {
-                                daylightSaving.setSummerTime();
-                                summerTimeDescription = summerTimeString;
-                                widget.updatePrayers!();
-                              } else {
-                                daylightSaving.setWinterTime();
-                                summerTimeDescription = winterTimeString;
-                                widget.updatePrayers!();
-                              }
+                              daylightSaving.setAutoDst(value);
+                              widget.updatePrayers!();
                             },
                           ),
+                          if (!daylightSaving.isAutoDst)
+                            SettingsTile.switchTile(
+                              title: Text(dstString,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              description: Text(summerTimeDescription,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: TextStyle(fontFamily: fontFamily)),
+                              leading: const Icon(Icons.access_time),
+                              initialValue: daylightSaving.getSummerTime() == daylightSaving.summer,
+                              onToggle: (value) {
+                                if (value) {
+                                  daylightSaving.setSummerTime();
+                                  summerTimeDescription = summerTimeString;
+                                  widget.updatePrayers!();
+                                } else {
+                                  daylightSaving.setWinterTime();
+                                  summerTimeDescription = winterTimeString;
+                                  widget.updatePrayers!();
+                                }
+                              },
+                            ),
                           SettingsTile.navigation(
                             leading: const Icon(Icons.location_city),
                             title: Text(
@@ -324,6 +469,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ],
                       ),
+                      _buildVersionSection(fontFamily),
                     ],
                   )),
       )),
@@ -331,7 +477,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
+Future<void> showCitiesDialog(
+    BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
   String currentCity = city;
   var currentCityValue = citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
 
@@ -369,17 +516,16 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
   var cityDialogTitle = AppLocalizations.of(context)!.citySelect;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(cityDialogTitle),
+      title: Text(cityDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return SingleChildScrollView(
@@ -397,7 +543,8 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
                       itemCount: citiesList.length,
                       itemBuilder: (BuildContext context, int index) {
                         return RadioListTile(
-                            title: Text(citiesList.elementAt(index)),
+                            title: Text(citiesList.elementAt(index), style: TextStyle(color: textColor)),
+                            activeColor: isLight ? color3 : darkThemeSwatch,
                             value: index,
                             groupValue: selected,
                             onChanged: (value) {
@@ -421,7 +568,7 @@ showCitiesDialog(BuildContext context, String city, Map<String, String> citiesMa
   );
 }
 
-showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
+Future<void> showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
   Locale? currentLocale = locale;
 
   var confirmMethod = (() async {
@@ -432,17 +579,16 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
   var languageDialogTitle = AppLocalizations.of(context)!.languageDialogTitle;
   var confirmString = AppLocalizations.of(context)!.confirmString;
   var cancelString = AppLocalizations.of(context)!.cancelString;
+  var isLight = Theme.of(context).brightness == Brightness.light;
+  var textColor = isLight ? Colors.black : Colors.white;
 
   AlertDialog alert = AlertDialog(
-      title: Text(languageDialogTitle),
+      title: Text(languageDialogTitle, style: TextStyle(color: textColor)),
       // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        TextButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
+        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return Column(mainAxisSize: MainAxisSize.min, children: [
@@ -456,11 +602,12 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                     visualDensity: const VisualDensity(
                         horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('ar'),
-                    title: Text(localeMap['ar']!),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(localeMap['ar']!, style: TextStyle(color: textColor)),
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentLocale = val as Locale?;
+                        currentLocale = val;
                       });
                     }),
                 RadioListTile(
@@ -468,11 +615,12 @@ showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) as
                     visualDensity: const VisualDensity(
                         horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
                     value: const Locale('en'),
-                    title: Text(localeMap['en']!),
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(localeMap['en']!, style: TextStyle(color: textColor)),
                     groupValue: currentLocale,
                     onChanged: (val) {
                       setState(() {
-                        currentLocale = val as Locale?;
+                        currentLocale = val;
                       });
                     }),
               ],

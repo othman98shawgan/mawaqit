@@ -1,6 +1,6 @@
 import 'package:alfajr/models/app_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
@@ -80,7 +80,7 @@ class _OurAppsPageState extends State<OurAppsPage> {
     );
   }
 
-  _launchURL(String urlString) async {
+  Future<void> _launchURL(String urlString) async {
     Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';

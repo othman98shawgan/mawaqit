@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../services/prayer_methods.dart';
 
@@ -17,6 +17,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.notificationsString),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report_outlined),
+            tooltip: 'Notification Testing',
+            onPressed: () {
+              Navigator.pushNamed(context, '/notification_test');
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<String>>(
           future: getScheduledPrayers(),

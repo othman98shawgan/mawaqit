@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MathuratPage extends StatefulWidget {
-  const MathuratPage({Key? key}) : super(key: key);
+  const MathuratPage({super.key});
 
   @override
   State<MathuratPage> createState() => _MathuratPageState();
@@ -33,7 +33,7 @@ class _MathuratPageState extends State<MathuratPage> {
     readJson();
   }
 
-  callback(String text) {
+  void callback(String text) {
     setState(() {
       items.removeWhere((item) => item.text == text);
     });
@@ -41,8 +41,6 @@ class _MathuratPageState extends State<MathuratPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ValueChanged<int> update;
-
     var list = ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.all(8),
@@ -89,18 +87,25 @@ class _MathuratPageState extends State<MathuratPage> {
 }
 
 class MathuratCard extends StatefulWidget {
-  MathuratCard({Key? key, required this.cardText, required this.count, required this.removeRow})
-      : super(key: key);
+  const MathuratCard({super.key, required this.cardText, required this.count, required this.removeRow});
 
   final String cardText;
-  int count;
-  Function removeRow;
+  final int count;
+  final Function removeRow;
 
   @override
   State<MathuratCard> createState() => _MathuratCardState();
 }
 
 class _MathuratCardState extends State<MathuratCard> {
+  late int _count;
+
+  @override
+  void initState() {
+    super.initState();
+    _count = widget.count;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -130,11 +135,11 @@ class _MathuratCardState extends State<MathuratCard> {
               ),
               FloatingActionButton.extended(
                 heroTag: widget.cardText,
-                label: Text("Count: ${widget.count}"),
+                label: Text("Count: $_count"),
                 onPressed: () {
                   setState(() {
-                    widget.count--;
-                    if (widget.count == 0) {
+                    _count--;
+                    if (_count == 0) {
                       widget.removeRow(widget.cardText);
                     }
                   });
