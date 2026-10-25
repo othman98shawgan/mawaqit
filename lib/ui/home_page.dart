@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void updatePrayers() {
-    if (!isAndroid) {
+    if (!isAndroid && !isWindows) {
       return;
     }
     Future.delayed(Duration.zero, () {
@@ -116,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> scheduleNextPrayers(DateTime time) async {
-    if (!isAndroid) {
+    if (!isAndroid && !isWindows) {
       return;
     }
     // prayersToday = dummyDay; //TODO: FOR TESTING
@@ -140,6 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     await _scheduleDstTransitionNotification();
+    if (!mounted) return;
 
     if ((reminderStatus && _scheduledPrayers.length > 71) ||
         (!reminderStatus && _scheduledPrayers.length > 35)) {
@@ -259,6 +260,9 @@ class _MyHomePageState extends State<MyHomePage> {
     if (isAndroid) {
       checkForUpdate();
       WakelockPlus.enable();
+    } else if (isWindows) {
+      WakelockPlus.enable();
+      setScheduledPrayers([]);
     }
     NotificationsService.init();
     readJson();
@@ -452,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.pushNamed(context, '/calendar');
                   },
                 ),
-                isAndroid
+                (isAndroid || isWindows)
                     ? ListTile(
                         minLeadingWidth: 0,
                         leading: Image.asset(
@@ -472,7 +476,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                       )
                     : Container(),
-                isAndroid
+                (isAndroid || isWindows)
                     ? ListTile(
                         minLeadingWidth: 0,
                         leading: Image.asset(
