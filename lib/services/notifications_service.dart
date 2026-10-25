@@ -60,9 +60,21 @@ class NotificationsService {
   static Future init({bool initSheduled = false}) async {
     tz.initializeTimeZones();
     try {
-      final timeZoneInfo = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
-    } catch (_) {}
+      final dynamic timeZoneInfo = await FlutterTimezone.getLocalTimezone();
+      String timeZoneName = 'Asia/Jerusalem';
+      if (timeZoneInfo is String) {
+        timeZoneName = timeZoneInfo;
+      } else if (timeZoneInfo != null) {
+        try {
+          timeZoneName = timeZoneInfo.identifier.toString();
+        } catch (_) {}
+      }
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (_) {
+      try {
+        tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
+      } catch (_) {}
+    }
     const android = AndroidInitializationSettings('@drawable/launcher_icon');
     const settings = InitializationSettings(android: android);
     await _notifications.initialize(

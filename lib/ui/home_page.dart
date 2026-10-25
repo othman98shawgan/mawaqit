@@ -54,14 +54,14 @@ class _MyHomePageState extends State<MyHomePage> {
           InAppUpdate.completeFlexibleUpdate().then((_) {
             if (mounted) printSnackBar("Success!", context);
           }).catchError((e) {
-            if (mounted) printSnackBar(e.toString(), context);
+            debugPrint("InAppUpdate check error: $e");
           });
         }).catchError((e) {
-          if (mounted) printSnackBar(e.toString(), context);
+          debugPrint("InAppUpdate check error: $e");
         });
       }
     }).catchError((e) {
-      if (mounted) printSnackBar(e.toString(), context);
+      debugPrint("InAppUpdate check error: $e");
     });
   }
 
