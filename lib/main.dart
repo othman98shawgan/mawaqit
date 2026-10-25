@@ -26,12 +26,17 @@ import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart' as intl;
+import 'package:intl/date_symbol_data_local.dart';
 
 bool isWeb = false;
 bool isAndroid = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await initializeDateFormatting('ar', null);
+  } catch (_) {}
 
   if (kIsWeb) {
     isWeb = true;
@@ -40,40 +45,37 @@ Future<void> main() async {
   }
 
   if (!kIsWeb) {
-    await Permission.notification.isDenied.then((value) {
+    Permission.notification.isDenied.then((value) {
       if (value) {
         Permission.notification.request();
       }
-    });
-    await NotificationsService.init();
+    }).catchError((_) => false);
   }
 
-  StorageManager.init().then((value) {
-    var prefs = value;
+  final prefs = await StorageManager.init();
 
-    //Theme
-    var isDark = StorageManager.readDataFromPrefs('isDark', prefs) ?? true;
-    ThemeMode themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+  //Theme
+  var isDark = StorageManager.readDataFromPrefs('isDark', prefs) ?? true;
+  ThemeMode themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
 
-    //Locale
-    var isArabic = StorageManager.readDataFromPrefs('isArabic', prefs) ?? true;
-    String language = isArabic ? 'ar' : 'en';
-    String city = StorageManager.readDataFromPrefs('City', prefs) ?? 'alQuds';
+  //Locale
+  var isArabic = StorageManager.readDataFromPrefs('isArabic', prefs) ?? true;
+  String language = isArabic ? 'ar' : 'en';
+  String city = StorageManager.readDataFromPrefs('City', prefs) ?? 'alQuds';
 
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => ThemeNotifier(themeMode)),
-          ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
-          ChangeNotifierProvider(create: (context) => ReminderNotifier()),
-          ChangeNotifierProvider(create: (context) => DhikrNotifier()),
-          ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
-          ChangeNotifierProvider(create: (context) => LocaleNotifier(Locale(language), city)),
-        ],
-        child: const MyApp(),
-      ),
-    );
-  });
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeNotifier(themeMode)),
+        ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
+        ChangeNotifierProvider(create: (context) => ReminderNotifier()),
+        ChangeNotifierProvider(create: (context) => DhikrNotifier()),
+        ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
+        ChangeNotifierProvider(create: (context) => LocaleNotifier(Locale(language), city)),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class SundayMaterialLocalizationAr extends MaterialLocalizationAr {
@@ -102,19 +104,24 @@ class SundayStartLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
   @override
   Future<MaterialLocalizations> load(Locale locale) async {
-    await GlobalMaterialLocalizations.delegate.load(locale);
-    const String localeName = 'ar';
-    return SundayMaterialLocalizationAr(
-      fullYearFormat: intl.DateFormat.y(localeName),
-      compactDateFormat: intl.DateFormat.yMd(localeName),
-      shortDateFormat: intl.DateFormat.yMMMd(localeName),
-      mediumDateFormat: intl.DateFormat.MMMEd(localeName),
-      longDateFormat: intl.DateFormat.yMMMMEEEEd(localeName),
-      yearMonthFormat: intl.DateFormat.yMMMM(localeName),
-      shortMonthDayFormat: intl.DateFormat.MMMd(localeName),
-      decimalFormat: intl.NumberFormat.decimalPattern(localeName),
-      twoDigitZeroPaddedFormat: intl.NumberFormat('00', localeName),
-    );
+    try {
+      await initializeDateFormatting('ar', null);
+      await GlobalMaterialLocalizations.delegate.load(locale);
+      const String localeName = 'ar';
+      return SundayMaterialLocalizationAr(
+        fullYearFormat: intl.DateFormat.y(localeName),
+        compactDateFormat: intl.DateFormat.yMd(localeName),
+        shortDateFormat: intl.DateFormat.yMMMd(localeName),
+        mediumDateFormat: intl.DateFormat.MMMEd(localeName),
+        longDateFormat: intl.DateFormat.yMMMMEEEEd(localeName),
+        yearMonthFormat: intl.DateFormat.yMMMM(localeName),
+        shortMonthDayFormat: intl.DateFormat.MMMd(localeName),
+        decimalFormat: intl.NumberFormat.decimalPattern(localeName),
+        twoDigitZeroPaddedFormat: intl.NumberFormat('00', localeName),
+      );
+    } catch (_) {
+      return await GlobalMaterialLocalizations.delegate.load(locale);
+    }
   }
 
   @override
