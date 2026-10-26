@@ -25,7 +25,7 @@ import 'ui/notifications_page.dart';
 import 'ui/notification_test_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -60,6 +60,10 @@ Future<void> main() async {
 
   final prefs = await StorageManager.init();
 
+
+
+  var notificationsStatus = StorageManager.readDataFromPrefs('NotificationsStatus', prefs) ?? true;
+
   //Theme
   var isDark = StorageManager.readDataFromPrefs('isDark', prefs) ?? true;
   ThemeMode themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
@@ -76,7 +80,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => DaylightSavingNotifier()),
         ChangeNotifierProvider(create: (context) => ReminderNotifier()),
         ChangeNotifierProvider(create: (context) => DhikrNotifier()),
-        ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier()),
+        ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier(notificationsStatus)),
         ChangeNotifierProvider(create: (context) => LocaleNotifier(Locale(language), city)),
       ],
       child: const MyApp(),
@@ -142,7 +146,7 @@ class MyApp extends StatelessWidget {
     return Consumer2<ThemeNotifier, LocaleNotifier>(
         builder: (context, theme, localeProvider, _) => MaterialApp(
               debugShowCheckedModeBanner: false,
-              title: 'Mawaqit Al-Quds',
+              title: kDebugMode ? '[DEV] Mawaqit Al-Quds' : 'Mawaqit Al-Quds',
               theme: theme.getTheme(),
               builder: (context, child) => mui.Theme(
                 data: theme.getMaterialUiTheme(),

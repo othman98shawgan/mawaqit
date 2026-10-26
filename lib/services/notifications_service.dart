@@ -21,6 +21,12 @@ class NotificationsService {
   static final onNotifications = BehaviorSubject<String?>();
   static final Map<int, Timer> _windowsTimers = {};
   static final Map<int, PendingNotificationRequest> _windowsPendingRequests = {};
+  static Future<void>? _initFuture;
+
+  static Future<void> ensureInitialized() {
+    _initFuture ??= init();
+    return _initFuture!;
+  }
 
   static Future<NotificationDetails> _notificationDetails(String channelId) async {
     var vibrationPattern = Int64List(4);
@@ -29,11 +35,26 @@ class NotificationsService {
     vibrationPattern[2] = 500;
     vibrationPattern[3] = 1000;
 
+    final String resolvedChannelId = channelId.contains('reminder')
+        ? 'mawaqit_reminder_channel'
+        : (channelId.contains('dst') ? 'mawaqit_dst_channel' : 'mawaqit_prayer_channel');
+
+    final String channelName = channelId.contains('reminder')
+        ? 'تذكير الصلاة'
+        : (channelId.contains('dst') ? 'التوقيت الصيفي والشتوي' : 'أوقات الصلاة');
+
+    final String channelDescription = channelId.contains('reminder')
+        ? 'تنبيهات تذكيرية قبل دخول وقت الصلاة'
+        : (channelId.contains('dst') ? 'تنبيهات تغيير التوقيت الصيفي والشتوي' : 'تنبيهات عند حلول وقت الصلاة');
+
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        channelId,
-        'channel name',
-        channelDescription: 'channel description',
+        resolvedChannelId,
+        channelName,
+        channelDescription: channelDescription,
+        icon: '@drawable/launcher_icon',
+        playSound: true,
+        enableVibration: true,
         importance: Importance.max,
         priority: Priority.high,
         vibrationPattern: vibrationPattern,
@@ -43,6 +64,7 @@ class NotificationsService {
   }
 
   static Future cancelAll() async {
+    await ensureInitialized();
     for (final timer in _windowsTimers.values) {
       timer.cancel();
     }
@@ -52,6 +74,7 @@ class NotificationsService {
   }
 
   static Future<void> cancelNotification(int id) async {
+    await ensureInitialized();
     _windowsTimers[id]?.cancel();
     _windowsTimers.remove(id);
     _windowsPendingRequests.remove(id);
@@ -59,6 +82,7 @@ class NotificationsService {
   }
 
   static Future<List<PendingNotificationRequest>> getPendingNotificationRequests() async {
+    await ensureInitialized();
     List<PendingNotificationRequest> osPending = [];
     try {
       osPending = await _notifications.pendingNotificationRequests();
@@ -95,39 +119,41 @@ class NotificationsService {
   }
 
   static Future init({bool initSheduled = false}) async {
-    tz.initializeTimeZones();
     try {
-      final dynamic timeZoneInfo = await FlutterTimezone.getLocalTimezone();
+      tz.initializeTimeZones();
       String timeZoneName = 'Asia/Jerusalem';
-      if (timeZoneInfo is String) {
-        timeZoneName = timeZoneInfo;
-      } else if (timeZoneInfo != null) {
-        try {
-          timeZoneName = timeZoneInfo.identifier.toString();
-        } catch (_) {}
-      }
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
-    } catch (_) {
       try {
-        tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
+        final timeZoneInfo = await FlutterTimezone.getLocalTimezone().timeout(
+          const Duration(seconds: 2),
+        );
+        timeZoneName = timeZoneInfo.identifier;
       } catch (_) {}
-    }
-    const android = AndroidInitializationSettings('@drawable/launcher_icon');
-    const windows = WindowsInitializationSettings(
-      appName: 'Mawaqit Al-Quds',
-      appUserModelId: 'com.othman.mawaqitquds',
-      guid: 'd49b0314-ee7a-4626-bf79-97cdb8a991bb',
-    );
-    const settings = InitializationSettings(
-      android: android,
-      windows: windows,
-    );
-    await _notifications.initialize(
-      settings: settings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        onNotifications.add(response.payload);
-      },
-    );
+
+      try {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+      } catch (_) {
+        tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
+      }
+    } catch (_) {}
+
+    try {
+      const android = AndroidInitializationSettings('@drawable/launcher_icon');
+      const windows = WindowsInitializationSettings(
+        appName: 'Mawaqit Al-Quds',
+        appUserModelId: 'com.othman.mawaqitquds',
+        guid: 'd49b0314-ee7a-4626-bf79-97cdb8a991bb',
+      );
+      const settings = InitializationSettings(
+        android: android,
+        windows: windows,
+      );
+      await _notifications.initialize(
+        settings: settings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) async {
+          onNotifications.add(response.payload);
+        },
+      );
+    } catch (_) {}
   }
 
   static Future showNotifications({
@@ -135,14 +161,16 @@ class NotificationsService {
     String? title,
     String? body,
     String? payload,
-  }) async =>
-      _notifications.show(
-        id: id,
-        title: title,
-        body: body,
-        notificationDetails: await _notificationDetails(id.toString()),
-        payload: payload,
-      );
+  }) async {
+    await ensureInitialized();
+    return _notifications.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: await _notificationDetails(id.toString()),
+      payload: payload,
+    );
+  }
 
   static Future<void> scheduleNotifications({
     int id = 0,
@@ -152,6 +180,8 @@ class NotificationsService {
     String? payload,
     required DateTime sheduledDate,
   }) async {
+    await ensureInitialized();
+
     final now = DateTime.now();
     if (!sheduledDate.isAfter(now)) {
       return;
@@ -214,31 +244,37 @@ class NotificationsService {
       return;
     }
 
-    final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    final canExact = (await android?.canScheduleExactNotifications()) ?? true;
-    final scheduleMode = canExact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle;
+    try {
+      final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final canExact = (await android?.canScheduleExactNotifications()) ?? true;
+      final scheduleMode = canExact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle;
 
-    await _notifications.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: scheduledTzDate,
-      notificationDetails: await _notificationDetails(channelId),
-      payload: effectivePayload,
-      androidScheduleMode: scheduleMode,
-    );
+      await _notifications.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledTzDate,
+        notificationDetails: await _notificationDetails(channelId),
+        payload: effectivePayload,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (e) {
+      debugPrint("Error scheduling notification id $id: $e");
+    }
   }
 }
 
 class NotificationsStatusNotifier with ChangeNotifier {
-  bool _notificationsStatus = false;
+  bool _notificationsStatus;
   bool _notificationsAlreadyRequested = false;
 
   bool getNotificationsStatus() => _notificationsStatus;
 
-  NotificationsStatusNotifier() {
+  NotificationsStatusNotifier([bool initialStatus = true]) : _notificationsStatus = initialStatus {
     StorageManager.readData('NotificationsStatus').then((value) {
-      _notificationsStatus = value ?? false;
+      if (value != null) {
+        _notificationsStatus = value;
+      }
       notifyListeners();
     });
   }
