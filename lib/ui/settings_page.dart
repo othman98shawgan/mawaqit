@@ -103,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Center(
             child: Text(
-              AppLocalizations.of(context)!.appVersion('1.0.8'),
+              AppLocalizations.of(context)!.appVersion('1.0.9'),
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 14,
