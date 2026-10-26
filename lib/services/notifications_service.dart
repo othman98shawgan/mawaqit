@@ -14,6 +14,7 @@ import 'package:timezone/timezone.dart' as tz;
 // ignore: depend_on_referenced_packages
 import 'package:timezone/data/latest.dart' as tz;
 
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'store_manager.dart';
 
 class NotificationsService {
@@ -35,17 +36,20 @@ class NotificationsService {
     vibrationPattern[2] = 500;
     vibrationPattern[3] = 1000;
 
+    final isArabic = (await StorageManager.readData('isArabic')) ?? true;
+    final l10n = lookupAppLocalizations(Locale(isArabic ? 'ar' : 'en'));
+
     final String resolvedChannelId = channelId.contains('reminder')
         ? 'mawaqit_reminder_channel'
         : (channelId.contains('dst') ? 'mawaqit_dst_channel' : 'mawaqit_prayer_channel');
 
     final String channelName = channelId.contains('reminder')
-        ? 'تذكير الصلاة'
-        : (channelId.contains('dst') ? 'التوقيت الصيفي والشتوي' : 'أوقات الصلاة');
+        ? l10n.reminderNotificationChannelName
+        : (channelId.contains('dst') ? l10n.dstNotificationChannelName : l10n.prayerNotificationChannelName);
 
     final String channelDescription = channelId.contains('reminder')
-        ? 'تنبيهات تذكيرية قبل دخول وقت الصلاة'
-        : (channelId.contains('dst') ? 'تنبيهات تغيير التوقيت الصيفي والشتوي' : 'تنبيهات عند حلول وقت الصلاة');
+        ? l10n.reminderNotificationChannelDescription
+        : (channelId.contains('dst') ? l10n.dstNotificationChannelDescription : l10n.prayerNotificationChannelDescription);
 
     return NotificationDetails(
       android: AndroidNotificationDetails(

@@ -313,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings),
-                tooltip: 'Settings',
+                tooltip: AppLocalizations.of(context)!.settingsString,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -578,8 +578,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _contactUs() async {
-    String mailAddress = 'mailto:oth1998@gmail.com';
-    String urlAddress = '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    final l10n = AppLocalizations.of(context)!;
+    final subject = Uri.encodeComponent(l10n.contactUsEmailSubject);
+    final body = Uri.encodeComponent(l10n.contactUsEmailBody);
+    String urlAddress = 'mailto:oth1998@gmail.com?subject=$subject&body=$body';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';

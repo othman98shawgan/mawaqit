@@ -391,4 +391,214 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get dstWinterNotificationBody =>
       'سيتم تأخير الساعة 60 دقيقة الليلة. يرجى الانتباه لموعد صلاة الفجر غداً.';
+
+  @override
+  String get prayerNotificationChannelName => 'أوقات الصلاة';
+
+  @override
+  String get prayerNotificationChannelDescription =>
+      'تنبيهات عند حلول وقت الصلاة';
+
+  @override
+  String get reminderNotificationChannelName => 'تذكير الصلاة';
+
+  @override
+  String get reminderNotificationChannelDescription =>
+      'تنبيهات تذكيرية قبل دخول وقت الصلاة';
+
+  @override
+  String get dstNotificationChannelName => 'التوقيت الصيفي والشتوي';
+
+  @override
+  String get dstNotificationChannelDescription =>
+      'تنبيهات تغيير التوقيت الصيفي والشتوي';
+
+  @override
+  String developerModeSteps(int count) {
+    return 'أنت على بعد $count نقرات من تفعيل وضع المطور';
+  }
+
+  @override
+  String get developerModeEnabled => 'تم تفعيل وضع المطور!';
+
+  @override
+  String get developerModeDisabled => 'تم تعطيل وضع المطور';
+
+  @override
+  String get notificationTesting => 'اختبار الإشعارات';
+
+  @override
+  String appVersion(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get testFajrTitle => 'تجربة أذان الفجر';
+
+  @override
+  String get testFajrBody => 'حان الآن موعد صلاة الفجر';
+
+  @override
+  String get dateNotSpecified => 'تاريخ غير محدد';
+
+  @override
+  String get notSpecified => 'غير محدد';
+
+  @override
+  String get dueNow => 'حان وقته';
+
+  @override
+  String inDaysHours(int days, int hours) {
+    return 'بعد $days يوم و $hours س';
+  }
+
+  @override
+  String inDays(int days) {
+    return 'بعد $days يوم';
+  }
+
+  @override
+  String inHoursMinutes(int hours, int minutes) {
+    return 'بعد $hours س و $minutes د';
+  }
+
+  @override
+  String inHours(int hours) {
+    return 'بعد $hours س';
+  }
+
+  @override
+  String inMinutes(int minutes) {
+    return 'بعد $minutes دقيقة';
+  }
+
+  @override
+  String inSeconds(int seconds) {
+    return 'بعد $seconds ثانية';
+  }
+
+  @override
+  String get testNotificationTitle => 'إشعار تجريبي';
+
+  @override
+  String get testNotificationBody =>
+      'هذا إشعار تجريبي للتأكد من وصول التنبيهات';
+
+  @override
+  String get testScheduledNotificationTitle => 'إشعار تجريبي مجدول';
+
+  @override
+  String get testScheduledNotificationBody =>
+      'هذا إشعار تجريبي مجدول للتأكد من التنبيهات';
+
+  @override
+  String get instantNotificationSent => 'تم إرسال الإشعار الفوري';
+
+  @override
+  String notificationScheduledInSeconds(int seconds) {
+    return 'تم جدولة الإشعار بعد $seconds ثوانٍ';
+  }
+
+  @override
+  String notificationCancelled(int id) {
+    return 'تم إلغاء الإشعار ($id)';
+  }
+
+  @override
+  String get allNotificationsCancelled => 'تم إلغاء جميع الإشعارات';
+
+  @override
+  String get refreshTooltip => 'تحديث';
+
+  @override
+  String get statusGranted => 'مفعل ومسموح';
+
+  @override
+  String get statusPermanentlyDenied => 'مرفوض بشكل دائم';
+
+  @override
+  String get statusDenied => 'غير مسموح';
+
+  @override
+  String get statusRestricted => 'غير مسموح';
+
+  @override
+  String get notificationPermissionStatus => 'حالة إذن الإشعارات';
+
+  @override
+  String get notificationPermissionDescription =>
+      'يتطلب نظام أندرويد و iOS الإذن لعرض التنبيهات والأذان عند حلول وقت الصلاة.';
+
+  @override
+  String get requestPermission => 'طلب الإذن';
+
+  @override
+  String get appSettings => 'إعدادات النظام';
+
+  @override
+  String get exactAlarmsPermission => 'إذن التنبيهات الدقيقة (Exact Alarms)';
+
+  @override
+  String get exactAlarmsDescription =>
+      'يتطلب نظام أندرويد 12 فأحدث إذناً خاصاً لجدولة الأذان والتنبيهات في وقتها بالدقيقة والثانية.';
+
+  @override
+  String get requestExactAlarmsPermission => 'طلب إذن التنبيهات الدقيقة';
+
+  @override
+  String get sendTestNotificationSection => 'إرسال إشعار تجريبي';
+
+  @override
+  String get notificationTitleLabel => 'عنوان الإشعار';
+
+  @override
+  String get notificationBodyLabel => 'نص الإشعار';
+
+  @override
+  String get scheduleDelayLabel => 'جدولة الإشعار بعد:';
+
+  @override
+  String get oneMinute => 'دقيقة';
+
+  @override
+  String secondsCount(int seconds) {
+    return '$seconds ثوانٍ';
+  }
+
+  @override
+  String get sendInstant => 'إرسال فوري';
+
+  @override
+  String get schedule => 'جدولة';
+
+  @override
+  String get activePendingNotifications => 'الإشعارات المجدولة النشطة';
+
+  @override
+  String get activePendingNotificationsDescription =>
+      'قائمة التنبيهات المسجلة حالياً لدى نظام التشغيل في انتظار وقت التفعيل.';
+
+  @override
+  String get noPendingNotifications => 'لا توجد إشعارات مجدولة حالياً';
+
+  @override
+  String get untitled => 'بدون عنوان';
+
+  @override
+  String get deleteTooltip => 'حذف';
+
+  @override
+  String get cancelAllNotifications => 'إلغاء مسح جميع الإشعارات';
+
+  @override
+  String get contactUsEmailSubject => 'تطبيق مواقيت بيت المقدس';
+
+  @override
+  String get contactUsEmailBody => 'السلام عليكم ورحمة الله، \n';
+
+  @override
+  String get daylightSavingDialogTitle => 'التوقيت الصيفي';
+
+  @override
+  String get daylightSavingStatus => 'حالة التوقيت الصيفي: ';
 }

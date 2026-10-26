@@ -1,9 +1,11 @@
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:alfajr/services/daylight_time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showDaylightSavingDialog(BuildContext context, Function updatePrayers) async {
   bool isSwitched = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
+  final l10n = AppLocalizations.of(context)!;
 
   var confirmMethod = (() {
     if (isSwitched == true) {
@@ -16,18 +18,18 @@ Future<void> showDaylightSavingDialog(BuildContext context, Function updatePraye
   });
 
   AlertDialog alert = AlertDialog(
-      title: const Text("Daylight saving time"),
+      title: Text(l10n.daylightSavingDialogTitle),
       actions: [
-        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancelString)),
         TextButton(
           onPressed: confirmMethod,
-          child: const Text('Confirm'),
+          child: Text(l10n.confirmString),
         ),
       ],
       content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return Consumer<DaylightSavingNotifier>(
           builder: (context, daylightSaving, child) => Row(children: [
-            const Text("Daylight saving time is: "),
+            Text(l10n.daylightSavingStatus),
             Switch(
               value: isSwitched,
               onChanged: (value) {

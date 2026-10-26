@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 
 import 'package:intl/intl.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
 import '../services/daylight_time_service.dart';
@@ -43,9 +44,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_titleController.text.isEmpty) {
-      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-      _titleController.text = isArabic ? 'تجربة أذان الفجر' : 'Test Fajr Azan';
-      _bodyController.text = isArabic ? 'حان الآن موعد صلاة الفجر' : 'It is now time for Fajr prayer';
+      final l10n = AppLocalizations.of(context)!;
+      _titleController.text = l10n.testFajrTitle;
+      _bodyController.text = l10n.testFajrBody;
     }
   }
 
@@ -177,45 +178,41 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     return null;
   }
 
-  String _formatScheduledDate(DateTime? date, bool isArabic) {
-    if (date == null) return isArabic ? 'تاريخ غير محدد' : 'Date not specified';
-    final locale = isArabic ? 'ar' : 'en';
+  String _formatScheduledDate(DateTime? date, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (date == null) return l10n.dateNotSpecified;
+    final locale = Localizations.localeOf(context).languageCode;
     final dayName = DateFormat('EEEE', locale).format(date);
     final dateStr = DateFormat('d MMMM yyyy', locale).format(date);
     return '$dayName، $dateStr';
   }
 
-  String _formatScheduledHour(DateTime? date, bool isArabic) {
+  String _formatScheduledHour(DateTime? date, BuildContext context) {
     if (date == null) return '--:--';
-    final locale = isArabic ? 'ar' : 'en';
+    final locale = Localizations.localeOf(context).languageCode;
     return DateFormat('hh:mm a', locale).format(date);
   }
 
-  String _formatRelativeTime(DateTime? date, bool isArabic) {
-    if (date == null) return isArabic ? 'غير محدد' : 'Not specified';
+  String _formatRelativeTime(DateTime? date, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (date == null) return l10n.notSpecified;
     final now = DateTime.now();
     final difference = date.difference(now);
 
     if (difference.isNegative) {
-      return isArabic ? 'حان وقته' : 'Due now';
+      return l10n.dueNow;
     } else if (difference.inDays > 0) {
       final days = difference.inDays;
       final hours = difference.inHours % 24;
-      return isArabic
-          ? (hours > 0 ? 'بعد $days يوم و $hours س' : 'بعد $days يوم')
-          : (hours > 0 ? 'in ${days}d ${hours}h' : 'in ${days}d');
+      return hours > 0 ? l10n.inDaysHours(days, hours) : l10n.inDays(days);
     } else if (difference.inHours > 0) {
       final hours = difference.inHours;
       final mins = difference.inMinutes % 60;
-      return isArabic
-          ? (mins > 0 ? 'بعد $hours س و $mins د' : 'بعد $hours س')
-          : (mins > 0 ? 'in ${hours}h ${mins}m' : 'in ${hours}h');
+      return mins > 0 ? l10n.inHoursMinutes(hours, mins) : l10n.inHours(hours);
     } else {
       final mins = difference.inMinutes;
       final secs = difference.inSeconds % 60;
-      return isArabic
-          ? (mins > 0 ? 'بعد $mins دقيقة' : 'بعد $secs ثانية')
-          : (mins > 0 ? 'in ${mins}m' : 'in ${secs}s');
+      return mins > 0 ? l10n.inMinutes(mins) : l10n.inSeconds(secs);
     }
   }
 
@@ -232,7 +229,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
       return 1;
     }
 
-    // Tie-breaker: reminder before prayer
     final titleA = a.title ?? '';
     final titleB = b.title ?? '';
     final aIsReminder = titleA.contains('بعد') || titleA.toLowerCase().contains('reminder') || titleA.contains('دقائق');
@@ -272,12 +268,12 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   }
 
   Future<void> _sendInstantNotification() async {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
     final title = _titleController.text.trim().isEmpty
-        ? (isArabic ? 'إشعار تجريبي' : 'Test Notification')
+        ? l10n.testNotificationTitle
         : _titleController.text.trim();
     final body = _bodyController.text.trim().isEmpty
-        ? (isArabic ? 'هذا إشعار تجريبي للتأكد من وصول التنبيهات' : 'This is a test notification')
+        ? l10n.testNotificationBody
         : _bodyController.text.trim();
 
     final testId = DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000;
@@ -290,18 +286,18 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     );
 
     if (mounted) {
-      _showSnackBar(isArabic ? 'تم إرسال الإشعار الفوري' : 'Instant notification sent');
+      _showSnackBar(l10n.instantNotificationSent);
       _loadPendingNotifications();
     }
   }
 
   Future<void> _scheduleNotification() async {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
     final title = _titleController.text.trim().isEmpty
-        ? (isArabic ? 'إشعار تجريبي مجدول' : 'Scheduled Test Notification')
+        ? l10n.testScheduledNotificationTitle
         : _titleController.text.trim();
     final body = _bodyController.text.trim().isEmpty
-        ? (isArabic ? 'هذا إشعار تجريبي مجدول للتأكد من التنبيهات' : 'This is a scheduled test notification')
+        ? l10n.testScheduledNotificationBody
         : _bodyController.text.trim();
 
     final scheduledDate = DateTime.now().add(Duration(seconds: _selectedDelaySeconds));
@@ -317,12 +313,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     );
 
     if (mounted) {
-      _showSnackBar(
-        isArabic
-            ? 'تم جدولة الإشعار بعد $_selectedDelaySeconds ثوانٍ'
-            : 'Notification scheduled in $_selectedDelaySeconds seconds',
-      );
-      // Wait a short moment then refresh the pending list
+      _showSnackBar(l10n.notificationScheduledInSeconds(_selectedDelaySeconds));
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) _loadPendingNotifications();
       });
@@ -332,8 +323,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   Future<void> _cancelNotification(int id) async {
     await NotificationsService.cancelNotification(id);
     if (mounted) {
-      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-      _showSnackBar(isArabic ? 'تم إلغاء الإشعار ($id)' : 'Cancelled notification ($id)');
+      _showSnackBar(AppLocalizations.of(context)!.notificationCancelled(id));
       _loadPendingNotifications();
     }
   }
@@ -341,8 +331,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   Future<void> _cancelAllNotifications() async {
     await NotificationsService.cancelAll();
     if (mounted) {
-      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-      _showSnackBar(isArabic ? 'تم إلغاء جميع الإشعارات' : 'All notifications cancelled');
+      _showSnackBar(AppLocalizations.of(context)!.allNotificationsCancelled);
       _loadPendingNotifications();
     }
   }
@@ -358,15 +347,15 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isArabic ? 'اختبار الإشعارات' : 'Notification Testing'),
+        title: Text(l10n.notificationTesting),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: isArabic ? 'تحديث' : 'Refresh',
+            tooltip: l10n.refreshTooltip,
             onPressed: () {
               _checkPermission();
               _loadPendingNotifications();
@@ -377,29 +366,30 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildPermissionCard(isArabic),
+          _buildPermissionCard(context),
           const SizedBox(height: 16),
-          _buildTriggerCard(isArabic),
+          _buildTriggerCard(context),
           const SizedBox(height: 16),
-          _buildPendingListCard(isArabic),
+          _buildPendingListCard(context),
         ],
       ),
     );
   }
 
-  Widget _buildPermissionCard(bool isArabic) {
+  Widget _buildPermissionCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     Color badgeColor;
     String statusText;
 
     if (_permissionStatus.isGranted) {
       badgeColor = Colors.green;
-      statusText = isArabic ? 'مفعل ومسموح' : 'Granted';
+      statusText = l10n.statusGranted;
     } else if (_permissionStatus.isPermanentlyDenied) {
       badgeColor = Colors.red;
-      statusText = isArabic ? 'مرفوض بشكل دائم' : 'Permanently Denied';
+      statusText = l10n.statusPermanentlyDenied;
     } else {
       badgeColor = Colors.orange;
-      statusText = isArabic ? 'غير مسموح' : 'Denied';
+      statusText = l10n.statusDenied;
     }
 
     return Card(
@@ -418,7 +408,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isArabic ? 'حالة إذن الإشعارات' : 'Notification Permission',
+                  l10n.notificationPermissionStatus,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -438,9 +428,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              isArabic
-                  ? 'يتطلب نظام أندرويد و iOS الإذن لعرض التنبيهات والأذان عند حلول وقت الصلاة.'
-                  : 'Android and iOS require explicit permission to display prayer and reminder alerts.',
+              l10n.notificationPermissionDescription,
               style: TextStyle(
                 fontSize: 13,
                 color: Theme.of(context).textTheme.bodySmall?.color,
@@ -453,7 +441,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.security, size: 18),
-                      label: Text(isArabic ? 'طلب الإذن' : 'Request Permission'),
+                      label: Text(l10n.requestPermission),
                       onPressed: _requestPermission,
                     ),
                   ),
@@ -461,7 +449,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.settings, size: 18),
-                    label: Text(isArabic ? 'إعدادات النظام' : 'App Settings'),
+                    label: Text(l10n.appSettings),
                     onPressed: () {
                       if (!kIsWeb && Platform.isWindows) {
                         launchUrl(Uri.parse('ms-settings:notifications'));
@@ -483,7 +471,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isArabic ? 'إذن التنبيهات الدقيقة (Exact Alarms)' : 'Exact Alarms Permission',
+                    l10n.exactAlarmsPermission,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -495,9 +483,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                     border: Border.all(color: _canScheduleExact ? Colors.green : Colors.orange),
                   ),
                   child: Text(
-                    _canScheduleExact
-                        ? (isArabic ? 'مفعل ومسموح' : 'Granted')
-                        : (isArabic ? 'غير مسموح' : 'Restricted'),
+                    _canScheduleExact ? l10n.statusGranted : l10n.statusRestricted,
                     style: TextStyle(
                       color: _canScheduleExact ? Colors.green : Colors.orange,
                       fontWeight: FontWeight.bold,
@@ -509,9 +495,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              isArabic
-                  ? 'يتطلب نظام أندرويد 12 فأحدث إذناً خاصاً لجدولة الأذان والتنبيهات في وقتها بالدقيقة والثانية.'
-                  : 'Android 12+ requires special permission to trigger prayer alarms at exact scheduled times.',
+              l10n.exactAlarmsDescription,
               style: TextStyle(
                 fontSize: 13,
                 color: Theme.of(context).textTheme.bodySmall?.color,
@@ -523,7 +507,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.alarm, size: 18),
-                  label: Text(isArabic ? 'طلب إذن التنبيهات الدقيقة' : 'Request Exact Alarm Permission'),
+                  label: Text(l10n.requestExactAlarmsPermission),
                   onPressed: _requestExactAlarmPermission,
                 ),
               ),
@@ -534,7 +518,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     );
   }
 
-  Widget _buildTriggerCard(bool isArabic) {
+  Widget _buildTriggerCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -548,7 +534,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 const Icon(Icons.notifications_active, color: Colors.teal),
                 const SizedBox(width: 8),
                 Text(
-                  isArabic ? 'إرسال إشعار تجريبي' : 'Send Test Notification',
+                  l10n.sendTestNotificationSection,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -557,7 +543,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                labelText: isArabic ? 'عنوان الإشعار' : 'Notification Title',
+                labelText: l10n.notificationTitleLabel,
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),
@@ -566,14 +552,14 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             TextField(
               controller: _bodyController,
               decoration: InputDecoration(
-                labelText: isArabic ? 'نص الإشعار' : 'Notification Body',
+                labelText: l10n.notificationBodyLabel,
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
             const SizedBox(height: 14),
             Text(
-              isArabic ? 'جدولة الإشعار بعد:' : 'Schedule Delay:',
+              l10n.scheduleDelayLabel,
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
@@ -583,7 +569,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 final isSelected = _selectedDelaySeconds == seconds;
                 return ChoiceChip(
                   label: Text(
-                    isArabic ? (seconds >= 60 ? 'دقيقة' : '$seconds ثوانٍ') : (seconds >= 60 ? '1 min' : '${seconds}s'),
+                    seconds >= 60 ? l10n.oneMinute : l10n.secondsCount(seconds),
                   ),
                   selected: isSelected,
                   onSelected: (selected) {
@@ -607,7 +593,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: const Icon(Icons.flash_on, size: 18),
-                    label: Text(isArabic ? 'إرسال فوري' : 'Send Instant'),
+                    label: Text(l10n.sendInstant),
                     onPressed: _sendInstantNotification,
                   ),
                 ),
@@ -618,7 +604,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: const Icon(Icons.schedule, size: 18),
-                    label: Text(isArabic ? 'جدولة' : 'Schedule'),
+                    label: Text(l10n.schedule),
                     onPressed: _scheduleNotification,
                   ),
                 ),
@@ -630,7 +616,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     );
   }
 
-  Widget _buildPendingListCard(bool isArabic) {
+  Widget _buildPendingListCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -644,7 +632,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 const Icon(Icons.list_alt, color: Colors.blueGrey),
                 const SizedBox(width: 8),
                 Text(
-                  isArabic ? 'الإشعارات المجدولة النشطة' : 'Active Pending Notifications',
+                  l10n.activePendingNotifications,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -663,9 +651,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              isArabic
-                  ? 'قائمة التنبيهات المسجلة حالياً لدى نظام التشغيل في انتظار وقت التفعيل.'
-                  : 'Notifications currently registered in the OS waiting to be triggered.',
+              l10n.activePendingNotificationsDescription,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).textTheme.bodySmall?.color,
@@ -688,7 +674,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                       Icon(Icons.notifications_off_outlined, size: 40, color: Colors.grey.shade400),
                       const SizedBox(height: 8),
                       Text(
-                        isArabic ? 'لا توجد إشعارات مجدولة حالياً' : 'No pending notifications',
+                        l10n.noPendingNotifications,
                         style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                       ),
                     ],
@@ -707,147 +693,147 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                     separatorBuilder: (context, index) => const Divider(height: 12),
                     itemBuilder: (context, index) {
                       final req = sortedList[index];
-                  final scheduledDate = _extractScheduledDate(req);
-                  final isDue = scheduledDate != null && scheduledDate.isBefore(DateTime.now());
+                      final scheduledDate = _extractScheduledDate(req);
+                      final isDue = scheduledDate != null && scheduledDate.isBefore(DateTime.now());
 
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.grey.withValues(alpha: 0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-                              child: Text(
-                                '${req.id}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                  child: Text(
+                                    '${req.id}',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        req.title ?? l10n.untitled,
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                      ),
+                                      if (req.body != null && req.body!.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2.0),
+                                          child: Text(
+                                            req.body!,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Theme.of(context).textTheme.bodySmall?.color,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                                  tooltip: l10n.deleteTooltip,
+                                  onPressed: () => _cancelNotification(req.id),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isDue
+                                    ? Colors.orange.withValues(alpha: 0.08)
+                                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isDue
+                                      ? Colors.orange.withValues(alpha: 0.3)
+                                      : Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                                  width: 1,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    req.title ?? (isArabic ? 'بدون عنوان' : 'Untitled'),
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                                  ),
-                                  if (req.body != null && req.body!.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 2.0),
-                                      child: Text(
-                                        req.body!,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context).textTheme.bodySmall?.color,
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today,
+                                        size: 14,
+                                        color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _formatScheduledDate(scheduledDate, context),
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                    ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time,
+                                        size: 15,
+                                        color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _formatScheduledHour(scheduledDate, context),
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: isDue
+                                              ? Colors.orange.withValues(alpha: 0.2)
+                                              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          _formatRelativeTime(scheduledDate, context),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
-                              tooltip: isArabic ? 'حذف' : 'Cancel',
-                              onPressed: () => _cancelNotification(req.id),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isDue
-                                ? Colors.orange.withValues(alpha: 0.08)
-                                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isDue
-                                  ? Colors.orange.withValues(alpha: 0.3)
-                                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    size: 14,
-                                    color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _formatScheduledDate(scheduledDate, isArabic),
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.access_time,
-                                    size: 15,
-                                    color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _formatScheduledHour(scheduledDate, isArabic),
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: isDue
-                                          ? Colors.orange.withValues(alpha: 0.2)
-                                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      _formatRelativeTime(scheduledDate, isArabic),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDue ? Colors.deepOrange : Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   );
-                },
-              );
                 },
               ),
             const SizedBox(height: 12),
@@ -859,7 +845,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                   side: const BorderSide(color: Colors.red),
                 ),
                 icon: const Icon(Icons.clear_all, size: 18),
-                label: Text(isArabic ? 'إلغاء مسح جميع الإشعارات' : 'Cancel All Notifications'),
+                label: Text(l10n.cancelAllNotifications),
                 onPressed: _pendingRequests.isEmpty ? null : _cancelAllNotifications,
               ),
             ),
