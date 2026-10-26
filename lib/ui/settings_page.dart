@@ -10,7 +10,7 @@ import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
 import '../services/notifications_service.dart';
-import 'package:flutter/foundation.dart';
+
 import '../services/store_manager.dart';
 import '../services/theme_service.dart';
 import 'widgets/reminder_dialog.dart';
@@ -197,8 +197,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            body: isAndroid
+            body: (isAndroid || isWindows)
                 ? SettingsList(
+                    platform: DevicePlatform.android,
                     contentPadding: const EdgeInsets.all(0),
                     lightTheme: SettingsThemeData(
                       settingsListBackground: color2.withValues(alpha: 0.2),
@@ -375,6 +376,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   )
                 : SettingsList(
+                    platform: DevicePlatform.android,
                     contentPadding: const EdgeInsets.all(0),
                     lightTheme: SettingsThemeData(
                       settingsListBackground: color2.withValues(alpha: 0.2),

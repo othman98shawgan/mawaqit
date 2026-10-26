@@ -18,6 +18,7 @@ import 'package:material_ui/material_ui.dart' as mui;
 import 'package:provider/provider.dart';
 
 import 'services/reminder_service.dart';
+import 'services/desktop_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
@@ -30,6 +31,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 bool isWeb = false;
 bool isAndroid = false;
+bool isWindows = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,14 +44,18 @@ Future<void> main() async {
     isWeb = true;
   } else if (Platform.isAndroid) {
     isAndroid = true;
+  } else if (Platform.isWindows) {
+    isWindows = true;
   }
 
-  if (!kIsWeb) {
+  if (!kIsWeb && !Platform.isWindows) {
     Permission.notification.isDenied.then((value) {
       if (value) {
         Permission.notification.request();
       }
-    }).catchError((_) => false);
+    }).catchError((_) {});
+  } else if (!kIsWeb && Platform.isWindows) {
+    await DesktopService().init();
   }
 
   final prefs = await StorageManager.init();

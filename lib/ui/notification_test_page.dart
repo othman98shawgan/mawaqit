@@ -1,4 +1,7 @@
-import 'package:alfajr/resources/colors.dart';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -54,6 +57,15 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   }
 
   Future<void> _checkPermission() async {
+    if (!kIsWeb && Platform.isWindows) {
+      if (mounted) {
+        setState(() {
+          _permissionStatus = PermissionStatus.granted;
+          _canScheduleExact = true;
+        });
+      }
+      return;
+    }
     final status = await Permission.notification.status;
     final canExact = await NotificationsService.canScheduleExactNotifications();
     if (mounted) {
@@ -65,6 +77,14 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   }
 
   Future<void> _requestPermission() async {
+    if (!kIsWeb && Platform.isWindows) {
+      if (mounted) {
+        setState(() {
+          _permissionStatus = PermissionStatus.granted;
+        });
+      }
+      return;
+    }
     final status = await Permission.notification.request();
     if (mounted) {
       setState(() {
@@ -443,7 +463,11 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                     icon: const Icon(Icons.settings, size: 18),
                     label: Text(isArabic ? 'إعدادات النظام' : 'App Settings'),
                     onPressed: () {
-                      AppSettings.openAppSettings(type: AppSettingsType.notification);
+                      if (!kIsWeb && Platform.isWindows) {
+                        launchUrl(Uri.parse('ms-settings:notifications'));
+                      } else {
+                        AppSettings.openAppSettings(type: AppSettingsType.notification);
+                      }
                     },
                   ),
                 ),

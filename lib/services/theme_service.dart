@@ -6,6 +6,7 @@ import '../resources/colors.dart';
 import 'store_manager.dart';
 
 class ThemeNotifier with ChangeNotifier {
+  // ignore: unused_field
   ThemeData? _themeData;
   ThemeData? getTheme() => _themeMode == ThemeMode.light ? lightTheme : darkTheme;
 
