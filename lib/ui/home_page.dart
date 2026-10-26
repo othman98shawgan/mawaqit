@@ -261,7 +261,6 @@ class _MyHomePageState extends State<MyHomePage> {
       checkForUpdate();
       WakelockPlus.enable();
     } else if (isWindows) {
-      WakelockPlus.enable();
       setScheduledPrayers([]);
     }
     NotificationsService.init();

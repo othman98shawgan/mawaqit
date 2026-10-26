@@ -18,6 +18,7 @@ import 'package:material_ui/material_ui.dart' as mui;
 import 'package:provider/provider.dart';
 
 import 'services/reminder_service.dart';
+import 'services/desktop_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
@@ -53,6 +54,8 @@ Future<void> main() async {
         Permission.notification.request();
       }
     }).catchError((_) {});
+  } else if (!kIsWeb && Platform.isWindows) {
+    await DesktopService().init();
   }
 
   final prefs = await StorageManager.init();

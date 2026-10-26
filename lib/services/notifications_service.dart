@@ -82,8 +82,7 @@ class NotificationsService {
     if (!kIsWeb && Platform.isWindows) {
       return true;
     }
-    final android = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     return (await android?.canScheduleExactNotifications()) ?? false;
   }
 
@@ -91,8 +90,7 @@ class NotificationsService {
     if (!kIsWeb && Platform.isWindows) {
       return true;
     }
-    final android = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     return await android?.requestExactAlarmsPermission();
   }
 
@@ -117,7 +115,7 @@ class NotificationsService {
     const android = AndroidInitializationSettings('@drawable/launcher_icon');
     const windows = WindowsInitializationSettings(
       appName: 'Mawaqit Al-Quds',
-      appUserModelId: 'com.othman.alfajr',
+      appUserModelId: 'com.othman.mawaqitquds',
       guid: 'd49b0314-ee7a-4626-bf79-97cdb8a991bb',
     );
     const settings = InitializationSettings(
@@ -160,9 +158,8 @@ class NotificationsService {
     }
 
     final isoDate = sheduledDate.toIso8601String();
-    final effectivePayload = (payload == null || payload.isEmpty)
-        ? isoDate
-        : (payload.contains(isoDate) ? payload : '$payload|$isoDate');
+    final effectivePayload =
+        (payload == null || payload.isEmpty) ? isoDate : (payload.contains(isoDate) ? payload : '$payload|$isoDate');
 
     final scheduledTzDate = tz.TZDateTime(
       tz.local,
@@ -217,12 +214,9 @@ class NotificationsService {
       return;
     }
 
-    final android = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     final canExact = (await android?.canScheduleExactNotifications()) ?? true;
-    final scheduleMode = canExact
-        ? AndroidScheduleMode.exactAllowWhileIdle
-        : AndroidScheduleMode.inexactAllowWhileIdle;
+    final scheduleMode = canExact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle;
 
     await _notifications.zonedSchedule(
       id: id,
