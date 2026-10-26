@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:alfajr/resources/colors.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:alfajr/services/day_of_year_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/theme_service.dart';
@@ -116,7 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> scheduleNextPrayers(DateTime time) async {
-    if (!isAndroid && !isWindows) {
+    try {
+      if (!isAndroid && !isWindows) {
       return;
     }
     // prayersToday = dummyDay; //TODO: FOR TESTING
@@ -220,6 +222,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     setScheduledPrayers(_scheduledPrayers);
+    } catch (e) {
+      debugPrint("Error scheduling next prayers: $e");
+    }
   }
 
   String adjustTime(String time) {
@@ -263,7 +268,8 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (isWindows) {
       setScheduledPrayers([]);
     }
-    NotificationsService.init();
+
+    NotificationsService.ensureInitialized();
     readJson();
     // cancelAllPrayers(); //TODO: FOR TESTING
     // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
@@ -280,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double height3 = height - padding.top - kToolbarHeight;
     double prayerCardHeight = height3 * 0.1;
     double mainCardHeight = height3 * 0.3;
-    var title = AppLocalizations.of(context)!.appName;
+    var title = kDebugMode ? '[DEV] ${AppLocalizations.of(context)!.appName}' : AppLocalizations.of(context)!.appName;
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -307,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings),
-                tooltip: 'Settings',
+                tooltip: AppLocalizations.of(context)!.settingsString,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -328,7 +334,7 @@ class _MyHomePageState extends State<MyHomePage> {
               scheduleNextPrayers(DateTime.now()),
             ]),
             builder: (buildContext, snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.connectionState == ConnectionState.done || snapshot.hasData || snapshot.hasError) {
                 summerTime = daylightSaving.getSummerTime();
                 reminderValue = reminder.getReminderTime();
                 timeDiff = localeProvider.timeDiff;
@@ -429,7 +435,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)!.appName, style: const TextStyle(color: Colors.white)),
+                      Text(kDebugMode ? '[DEV] ${AppLocalizations.of(context)!.appName}' : AppLocalizations.of(context)!.appName, style: const TextStyle(color: Colors.white)),
                       Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: Image.asset(
@@ -572,8 +578,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _contactUs() async {
-    String mailAddress = 'mailto:oth1998@gmail.com';
-    String urlAddress = '$mailAddress?subject=تطبيق مواقيت بيت المقدس&body=السلام عليكم ورحمة الله، \n';
+    final l10n = AppLocalizations.of(context)!;
+    final subject = Uri.encodeComponent(l10n.contactUsEmailSubject);
+    final body = Uri.encodeComponent(l10n.contactUsEmailBody);
+    String urlAddress = 'mailto:oth1998@gmail.com?subject=$subject&body=$body';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';

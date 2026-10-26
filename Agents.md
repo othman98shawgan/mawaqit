@@ -2,3 +2,4 @@ For all Git, branching, and release operations, strictly follow the rules in ./G
 
 ## Tasks
 - [x] feat: add Windows support with notifications and scheduling
+- [x] fix: resolve Android release notifications and add dev indicator to app name

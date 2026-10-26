@@ -66,10 +66,11 @@ android {
         release {
             signingConfig signingConfigs.release
             resValue "string", "app_name", "مواقيت بيت المقدس"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
             applicationIdSuffix ".dev"
-            resValue "string", "app_name", "مواقيت بيت المقدس (Dev)"
+            resValue "string", "app_name", "[DEV] مواقيت بيت المقدس"
         }
     }
 }

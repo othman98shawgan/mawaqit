@@ -498,5 +498,284 @@
    "dstWinterNotificationBody": "Clocks will move back 1 hour tonight. Please be mindful of tomorrow's Fajr prayer time.",
    "@dstWinterNotificationBody": {
       "description": "Notification body when winter time starts tomorrow"
-   }   
+   },
+   "prayerNotificationChannelName": "Prayer Times",
+   "@prayerNotificationChannelName": {
+      "description": "Android notification channel name for prayer times"
+   },
+   "prayerNotificationChannelDescription": "Notifications when prayer time arrives",
+   "@prayerNotificationChannelDescription": {
+      "description": "Android notification channel description for prayer times"
+   },
+   "reminderNotificationChannelName": "Prayer Reminder",
+   "@reminderNotificationChannelName": {
+      "description": "Android notification channel name for prayer reminders"
+   },
+   "reminderNotificationChannelDescription": "Reminder notifications before prayer time",
+   "@reminderNotificationChannelDescription": {
+      "description": "Android notification channel description for prayer reminders"
+   },
+   "dstNotificationChannelName": "Daylight Saving Time",
+   "@dstNotificationChannelName": {
+      "description": "Android notification channel name for daylight saving alerts"
+   },
+   "dstNotificationChannelDescription": "Notifications for daylight saving time transitions",
+   "@dstNotificationChannelDescription": {
+      "description": "Android notification channel description for daylight saving alerts"
+   },
+   "developerModeSteps": "You are {count} steps away from developer mode",
+   "@developerModeSteps": {
+      "description": "Snackbar message showing remaining taps to enable developer mode",
+      "placeholders": {
+         "count": {
+            "type": "int"
+         }
+      }
+   },
+   "developerModeEnabled": "Developer mode enabled!",
+   "@developerModeEnabled": {
+      "description": "Snackbar message when developer mode is enabled"
+   },
+   "developerModeDisabled": "Developer mode disabled",
+   "@developerModeDisabled": {
+      "description": "Snackbar message when developer mode is disabled"
+   },
+   "notificationTesting": "Notification Testing",
+   "@notificationTesting": {
+      "description": "Settings and app bar title for notification testing"
+   },
+   "appVersion": "Version {version}",
+   "@appVersion": {
+      "description": "App version display string",
+      "placeholders": {
+         "version": {
+            "type": "String"
+         }
+      }
+   },
+   "testFajrTitle": "Test Fajr Azan",
+   "@testFajrTitle": {
+      "description": "Default test notification title for Fajr"
+   },
+   "testFajrBody": "It is now time for Fajr prayer",
+   "@testFajrBody": {
+      "description": "Default test notification body for Fajr"
+   },
+   "dateNotSpecified": "Date not specified",
+   "@dateNotSpecified": {
+      "description": "Fallback text when scheduled date is not specified"
+   },
+   "notSpecified": "Not specified",
+   "@notSpecified": {
+      "description": "Fallback text for relative time when not specified"
+   },
+   "dueNow": "Due now",
+   "@dueNow": {
+      "description": "Relative time indicator when notification time has arrived"
+   },
+   "inDaysHours": "in {days}d {hours}h",
+   "@inDaysHours": {
+      "description": "Relative time formatting in days and hours",
+      "placeholders": {
+         "days": { "type": "int" },
+         "hours": { "type": "int" }
+      }
+   },
+   "inDays": "in {days}d",
+   "@inDays": {
+      "description": "Relative time formatting in days only",
+      "placeholders": {
+         "days": { "type": "int" }
+      }
+   },
+   "inHoursMinutes": "in {hours}h {minutes}m",
+   "@inHoursMinutes": {
+      "description": "Relative time formatting in hours and minutes",
+      "placeholders": {
+         "hours": { "type": "int" },
+         "minutes": { "type": "int" }
+      }
+   },
+   "inHours": "in {hours}h",
+   "@inHours": {
+      "description": "Relative time formatting in hours only",
+      "placeholders": {
+         "hours": { "type": "int" }
+      }
+   },
+   "inMinutes": "in {minutes}m",
+   "@inMinutes": {
+      "description": "Relative time formatting in minutes only",
+      "placeholders": {
+         "minutes": { "type": "int" }
+      }
+   },
+   "inSeconds": "in {seconds}s",
+   "@inSeconds": {
+      "description": "Relative time formatting in seconds only",
+      "placeholders": {
+         "seconds": { "type": "int" }
+      }
+   },
+   "testNotificationTitle": "Test Notification",
+   "@testNotificationTitle": {
+      "description": "Default title for instant test notification"
+   },
+   "testNotificationBody": "This is a test notification",
+   "@testNotificationBody": {
+      "description": "Default body for instant test notification"
+   },
+   "testScheduledNotificationTitle": "Scheduled Test Notification",
+   "@testScheduledNotificationTitle": {
+      "description": "Default title for scheduled test notification"
+   },
+   "testScheduledNotificationBody": "This is a scheduled test notification",
+   "@testScheduledNotificationBody": {
+      "description": "Default body for scheduled test notification"
+   },
+   "instantNotificationSent": "Instant notification sent",
+   "@instantNotificationSent": {
+      "description": "Snackbar confirming instant notification was sent"
+   },
+   "notificationScheduledInSeconds": "Notification scheduled in {seconds} seconds",
+   "@notificationScheduledInSeconds": {
+      "description": "Snackbar confirming notification scheduled in seconds",
+      "placeholders": {
+         "seconds": { "type": "int" }
+      }
+   },
+   "notificationCancelled": "Cancelled notification ({id})",
+   "@notificationCancelled": {
+      "description": "Snackbar confirming cancellation of a notification",
+      "placeholders": {
+         "id": { "type": "int" }
+      }
+   },
+   "allNotificationsCancelled": "All notifications cancelled",
+   "@allNotificationsCancelled": {
+      "description": "Snackbar confirming all notifications were cancelled"
+   },
+   "refreshTooltip": "Refresh",
+   "@refreshTooltip": {
+      "description": "Tooltip for refresh button"
+   },
+   "statusGranted": "Granted",
+   "@statusGranted": {
+      "description": "Status label when permission is granted"
+   },
+   "statusPermanentlyDenied": "Permanently Denied",
+   "@statusPermanentlyDenied": {
+      "description": "Status label when permission is permanently denied"
+   },
+   "statusDenied": "Denied",
+   "@statusDenied": {
+      "description": "Status label when permission is denied"
+   },
+   "statusRestricted": "Restricted",
+   "@statusRestricted": {
+      "description": "Status label when exact alarms are restricted"
+   },
+   "notificationPermissionStatus": "Notification Permission",
+   "@notificationPermissionStatus": {
+      "description": "Header for notification permission section"
+   },
+   "notificationPermissionDescription": "Android and iOS require permission to display notifications and azan at prayer times.",
+   "@notificationPermissionDescription": {
+      "description": "Description explaining why notification permission is needed"
+   },
+   "requestPermission": "Request Permission",
+   "@requestPermission": {
+      "description": "Button label to request notification permission"
+   },
+   "appSettings": "App Settings",
+   "@appSettings": {
+      "description": "Button label to open app settings"
+   },
+   "exactAlarmsPermission": "Exact Alarms Permission",
+   "@exactAlarmsPermission": {
+      "description": "Header for exact alarms permission section"
+   },
+   "exactAlarmsDescription": "Android 12+ requires a special permission to schedule azan and reminders at exact minutes.",
+   "@exactAlarmsDescription": {
+      "description": "Description explaining why exact alarm permission is needed"
+   },
+   "requestExactAlarmsPermission": "Request Exact Alarm Permission",
+   "@requestExactAlarmsPermission": {
+      "description": "Button label to request exact alarm permission"
+   },
+   "sendTestNotificationSection": "Send Test Notification",
+   "@sendTestNotificationSection": {
+      "description": "Header for test notification sending section"
+   },
+   "notificationTitleLabel": "Notification Title",
+   "@notificationTitleLabel": {
+      "description": "Textfield label for notification title"
+   },
+   "notificationBodyLabel": "Notification Body",
+   "@notificationBodyLabel": {
+      "description": "Textfield label for notification body"
+   },
+   "scheduleDelayLabel": "Schedule Delay:",
+   "@scheduleDelayLabel": {
+      "description": "Label for schedule delay chips"
+   },
+   "oneMinute": "1 min",
+   "@oneMinute": {
+      "description": "Label for 1 minute option"
+   },
+   "secondsCount": "{seconds}s",
+   "@secondsCount": {
+      "description": "Label for seconds delay option",
+      "placeholders": {
+         "seconds": { "type": "int" }
+      }
+   },
+   "sendInstant": "Send Instant",
+   "@sendInstant": {
+      "description": "Button label to send instant notification"
+   },
+   "schedule": "Schedule",
+   "@schedule": {
+      "description": "Button label to schedule notification"
+   },
+   "activePendingNotifications": "Active Pending Notifications",
+   "@activePendingNotifications": {
+      "description": "Header for active pending notifications list"
+   },
+   "activePendingNotificationsDescription": "List of notifications currently registered with the OS awaiting trigger time.",
+   "@activePendingNotificationsDescription": {
+      "description": "Description for pending notifications list"
+   },
+   "noPendingNotifications": "No pending notifications",
+   "@noPendingNotifications": {
+      "description": "Empty state label when there are no pending notifications"
+   },
+   "untitled": "Untitled",
+   "@untitled": {
+      "description": "Fallback label when notification has no title"
+   },
+   "deleteTooltip": "Delete",
+   "@deleteTooltip": {
+      "description": "Tooltip for delete/cancel button"
+   },
+   "cancelAllNotifications": "Cancel All Notifications",
+   "@cancelAllNotifications": {
+      "description": "Button label to cancel all scheduled notifications"
+   },
+   "contactUsEmailSubject": "Mawaqit Al-Quds App",
+   "@contactUsEmailSubject": {
+      "description": "Default subject line for contact us email"
+   },
+   "contactUsEmailBody": "Peace be upon you,\n",
+   "@contactUsEmailBody": {
+      "description": "Default body text for contact us email"
+   },
+   "daylightSavingDialogTitle": "Daylight saving time",
+   "@daylightSavingDialogTitle": {
+      "description": "Title of the daylight saving dialog"
+   },
+   "daylightSavingStatus": "Daylight saving time is: ",
+   "@daylightSavingStatus": {
+      "description": "Status label inside daylight saving dialog"
+   }
 }

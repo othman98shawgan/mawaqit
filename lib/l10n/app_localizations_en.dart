@@ -391,4 +391,213 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dstWinterNotificationBody =>
       'Clocks will move back 1 hour tonight. Please be mindful of tomorrow\'s Fajr prayer time.';
+
+  @override
+  String get prayerNotificationChannelName => 'Prayer Times';
+
+  @override
+  String get prayerNotificationChannelDescription =>
+      'Notifications when prayer time arrives';
+
+  @override
+  String get reminderNotificationChannelName => 'Prayer Reminder';
+
+  @override
+  String get reminderNotificationChannelDescription =>
+      'Reminder notifications before prayer time';
+
+  @override
+  String get dstNotificationChannelName => 'Daylight Saving Time';
+
+  @override
+  String get dstNotificationChannelDescription =>
+      'Notifications for daylight saving time transitions';
+
+  @override
+  String developerModeSteps(int count) {
+    return 'You are $count steps away from developer mode';
+  }
+
+  @override
+  String get developerModeEnabled => 'Developer mode enabled!';
+
+  @override
+  String get developerModeDisabled => 'Developer mode disabled';
+
+  @override
+  String get notificationTesting => 'Notification Testing';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get testFajrTitle => 'Test Fajr Azan';
+
+  @override
+  String get testFajrBody => 'It is now time for Fajr prayer';
+
+  @override
+  String get dateNotSpecified => 'Date not specified';
+
+  @override
+  String get notSpecified => 'Not specified';
+
+  @override
+  String get dueNow => 'Due now';
+
+  @override
+  String inDaysHours(int days, int hours) {
+    return 'in ${days}d ${hours}h';
+  }
+
+  @override
+  String inDays(int days) {
+    return 'in ${days}d';
+  }
+
+  @override
+  String inHoursMinutes(int hours, int minutes) {
+    return 'in ${hours}h ${minutes}m';
+  }
+
+  @override
+  String inHours(int hours) {
+    return 'in ${hours}h';
+  }
+
+  @override
+  String inMinutes(int minutes) {
+    return 'in ${minutes}m';
+  }
+
+  @override
+  String inSeconds(int seconds) {
+    return 'in ${seconds}s';
+  }
+
+  @override
+  String get testNotificationTitle => 'Test Notification';
+
+  @override
+  String get testNotificationBody => 'This is a test notification';
+
+  @override
+  String get testScheduledNotificationTitle => 'Scheduled Test Notification';
+
+  @override
+  String get testScheduledNotificationBody =>
+      'This is a scheduled test notification';
+
+  @override
+  String get instantNotificationSent => 'Instant notification sent';
+
+  @override
+  String notificationScheduledInSeconds(int seconds) {
+    return 'Notification scheduled in $seconds seconds';
+  }
+
+  @override
+  String notificationCancelled(int id) {
+    return 'Cancelled notification ($id)';
+  }
+
+  @override
+  String get allNotificationsCancelled => 'All notifications cancelled';
+
+  @override
+  String get refreshTooltip => 'Refresh';
+
+  @override
+  String get statusGranted => 'Granted';
+
+  @override
+  String get statusPermanentlyDenied => 'Permanently Denied';
+
+  @override
+  String get statusDenied => 'Denied';
+
+  @override
+  String get statusRestricted => 'Restricted';
+
+  @override
+  String get notificationPermissionStatus => 'Notification Permission';
+
+  @override
+  String get notificationPermissionDescription =>
+      'Android and iOS require permission to display notifications and azan at prayer times.';
+
+  @override
+  String get requestPermission => 'Request Permission';
+
+  @override
+  String get appSettings => 'App Settings';
+
+  @override
+  String get exactAlarmsPermission => 'Exact Alarms Permission';
+
+  @override
+  String get exactAlarmsDescription =>
+      'Android 12+ requires a special permission to schedule azan and reminders at exact minutes.';
+
+  @override
+  String get requestExactAlarmsPermission => 'Request Exact Alarm Permission';
+
+  @override
+  String get sendTestNotificationSection => 'Send Test Notification';
+
+  @override
+  String get notificationTitleLabel => 'Notification Title';
+
+  @override
+  String get notificationBodyLabel => 'Notification Body';
+
+  @override
+  String get scheduleDelayLabel => 'Schedule Delay:';
+
+  @override
+  String get oneMinute => '1 min';
+
+  @override
+  String secondsCount(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String get sendInstant => 'Send Instant';
+
+  @override
+  String get schedule => 'Schedule';
+
+  @override
+  String get activePendingNotifications => 'Active Pending Notifications';
+
+  @override
+  String get activePendingNotificationsDescription =>
+      'List of notifications currently registered with the OS awaiting trigger time.';
+
+  @override
+  String get noPendingNotifications => 'No pending notifications';
+
+  @override
+  String get untitled => 'Untitled';
+
+  @override
+  String get deleteTooltip => 'Delete';
+
+  @override
+  String get cancelAllNotifications => 'Cancel All Notifications';
+
+  @override
+  String get contactUsEmailSubject => 'Mawaqit Al-Quds App';
+
+  @override
+  String get contactUsEmailBody => 'Peace be upon you,\n';
+
+  @override
+  String get daylightSavingDialogTitle => 'Daylight saving time';
+
+  @override
+  String get daylightSavingStatus => 'Daylight saving time is: ';
 }

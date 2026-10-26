@@ -55,15 +55,10 @@ class _SettingsPageState extends State<SettingsPage> {
     _devTapCount++;
     final remaining = 7 - _devTapCount;
     if (remaining <= 3 && remaining > 0) {
-      final isAr = Localizations.localeOf(context).languageCode == 'ar';
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isAr
-                ? 'أنت على بعد $remaining نقرات من تفعيل وضع المطور'
-                : 'You are $remaining steps away from developer mode',
-          ),
+          content: Text(AppLocalizations.of(context)!.developerModeSteps(remaining)),
           duration: const Duration(seconds: 1),
         ),
       );
@@ -72,11 +67,10 @@ class _SettingsPageState extends State<SettingsPage> {
         _isDevMode = true;
       });
       StorageManager.saveData('isDevMode', true);
-      final isAr = Localizations.localeOf(context).languageCode == 'ar';
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isAr ? 'تم تفعيل وضع المطور!' : 'Developer mode enabled!'),
+          content: Text(AppLocalizations.of(context)!.developerModeEnabled),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -90,11 +84,10 @@ class _SettingsPageState extends State<SettingsPage> {
       _devTapCount = 0;
     });
     StorageManager.saveData('isDevMode', false);
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(isAr ? 'تم تعطيل وضع المطور' : 'Developer mode disabled'),
+        content: Text(AppLocalizations.of(context)!.developerModeDisabled),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -110,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Center(
             child: Text(
-              Localizations.localeOf(context).languageCode == 'ar' ? 'الإصدار 1.0.6' : 'Version 1.0.6',
+              AppLocalizations.of(context)!.appVersion('1.0.8'),
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 14,
@@ -343,9 +336,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           if (_isDevMode)
                             SettingsTile.navigation(
                               title: Text(
-                                Localizations.localeOf(context).languageCode == 'ar'
-                                    ? 'اختبار الإشعارات'
-                                    : 'Notification Testing',
+                                AppLocalizations.of(context)!.notificationTesting,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily),
                               ),

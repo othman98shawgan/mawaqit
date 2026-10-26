@@ -745,6 +745,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clocks will move back 1 hour tonight. Please be mindful of tomorrow\'s Fajr prayer time.'**
   String get dstWinterNotificationBody;
+
+  /// Android notification channel name for prayer times
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times'**
+  String get prayerNotificationChannelName;
+
+  /// Android notification channel description for prayer times
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications when prayer time arrives'**
+  String get prayerNotificationChannelDescription;
+
+  /// Android notification channel name for prayer reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Reminder'**
+  String get reminderNotificationChannelName;
+
+  /// Android notification channel description for prayer reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder notifications before prayer time'**
+  String get reminderNotificationChannelDescription;
+
+  /// Android notification channel name for daylight saving alerts
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight Saving Time'**
+  String get dstNotificationChannelName;
+
+  /// Android notification channel description for daylight saving alerts
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications for daylight saving time transitions'**
+  String get dstNotificationChannelDescription;
+
+  /// Snackbar message showing remaining taps to enable developer mode
+  ///
+  /// In en, this message translates to:
+  /// **'You are {count} steps away from developer mode'**
+  String developerModeSteps(int count);
+
+  /// Snackbar message when developer mode is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Developer mode enabled!'**
+  String get developerModeEnabled;
+
+  /// Snackbar message when developer mode is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Developer mode disabled'**
+  String get developerModeDisabled;
+
+  /// Settings and app bar title for notification testing
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Testing'**
+  String get notificationTesting;
+
+  /// App version display string
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// Default test notification title for Fajr
+  ///
+  /// In en, this message translates to:
+  /// **'Test Fajr Azan'**
+  String get testFajrTitle;
+
+  /// Default test notification body for Fajr
+  ///
+  /// In en, this message translates to:
+  /// **'It is now time for Fajr prayer'**
+  String get testFajrBody;
+
+  /// Fallback text when scheduled date is not specified
+  ///
+  /// In en, this message translates to:
+  /// **'Date not specified'**
+  String get dateNotSpecified;
+
+  /// Fallback text for relative time when not specified
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get notSpecified;
+
+  /// Relative time indicator when notification time has arrived
+  ///
+  /// In en, this message translates to:
+  /// **'Due now'**
+  String get dueNow;
+
+  /// Relative time formatting in days and hours
+  ///
+  /// In en, this message translates to:
+  /// **'in {days}d {hours}h'**
+  String inDaysHours(int days, int hours);
+
+  /// Relative time formatting in days only
+  ///
+  /// In en, this message translates to:
+  /// **'in {days}d'**
+  String inDays(int days);
+
+  /// Relative time formatting in hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'in {hours}h {minutes}m'**
+  String inHoursMinutes(int hours, int minutes);
+
+  /// Relative time formatting in hours only
+  ///
+  /// In en, this message translates to:
+  /// **'in {hours}h'**
+  String inHours(int hours);
+
+  /// Relative time formatting in minutes only
+  ///
+  /// In en, this message translates to:
+  /// **'in {minutes}m'**
+  String inMinutes(int minutes);
+
+  /// Relative time formatting in seconds only
+  ///
+  /// In en, this message translates to:
+  /// **'in {seconds}s'**
+  String inSeconds(int seconds);
+
+  /// Default title for instant test notification
+  ///
+  /// In en, this message translates to:
+  /// **'Test Notification'**
+  String get testNotificationTitle;
+
+  /// Default body for instant test notification
+  ///
+  /// In en, this message translates to:
+  /// **'This is a test notification'**
+  String get testNotificationBody;
+
+  /// Default title for scheduled test notification
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Test Notification'**
+  String get testScheduledNotificationTitle;
+
+  /// Default body for scheduled test notification
+  ///
+  /// In en, this message translates to:
+  /// **'This is a scheduled test notification'**
+  String get testScheduledNotificationBody;
+
+  /// Snackbar confirming instant notification was sent
+  ///
+  /// In en, this message translates to:
+  /// **'Instant notification sent'**
+  String get instantNotificationSent;
+
+  /// Snackbar confirming notification scheduled in seconds
+  ///
+  /// In en, this message translates to:
+  /// **'Notification scheduled in {seconds} seconds'**
+  String notificationScheduledInSeconds(int seconds);
+
+  /// Snackbar confirming cancellation of a notification
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled notification ({id})'**
+  String notificationCancelled(int id);
+
+  /// Snackbar confirming all notifications were cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'All notifications cancelled'**
+  String get allNotificationsCancelled;
+
+  /// Tooltip for refresh button
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refreshTooltip;
+
+  /// Status label when permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Granted'**
+  String get statusGranted;
+
+  /// Status label when permission is permanently denied
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently Denied'**
+  String get statusPermanentlyDenied;
+
+  /// Status label when permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Denied'**
+  String get statusDenied;
+
+  /// Status label when exact alarms are restricted
+  ///
+  /// In en, this message translates to:
+  /// **'Restricted'**
+  String get statusRestricted;
+
+  /// Header for notification permission section
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Permission'**
+  String get notificationPermissionStatus;
+
+  /// Description explaining why notification permission is needed
+  ///
+  /// In en, this message translates to:
+  /// **'Android and iOS require permission to display notifications and azan at prayer times.'**
+  String get notificationPermissionDescription;
+
+  /// Button label to request notification permission
+  ///
+  /// In en, this message translates to:
+  /// **'Request Permission'**
+  String get requestPermission;
+
+  /// Button label to open app settings
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get appSettings;
+
+  /// Header for exact alarms permission section
+  ///
+  /// In en, this message translates to:
+  /// **'Exact Alarms Permission'**
+  String get exactAlarmsPermission;
+
+  /// Description explaining why exact alarm permission is needed
+  ///
+  /// In en, this message translates to:
+  /// **'Android 12+ requires a special permission to schedule azan and reminders at exact minutes.'**
+  String get exactAlarmsDescription;
+
+  /// Button label to request exact alarm permission
+  ///
+  /// In en, this message translates to:
+  /// **'Request Exact Alarm Permission'**
+  String get requestExactAlarmsPermission;
+
+  /// Header for test notification sending section
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test Notification'**
+  String get sendTestNotificationSection;
+
+  /// Textfield label for notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Title'**
+  String get notificationTitleLabel;
+
+  /// Textfield label for notification body
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Body'**
+  String get notificationBodyLabel;
+
+  /// Label for schedule delay chips
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Delay:'**
+  String get scheduleDelayLabel;
+
+  /// Label for 1 minute option
+  ///
+  /// In en, this message translates to:
+  /// **'1 min'**
+  String get oneMinute;
+
+  /// Label for seconds delay option
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String secondsCount(int seconds);
+
+  /// Button label to send instant notification
+  ///
+  /// In en, this message translates to:
+  /// **'Send Instant'**
+  String get sendInstant;
+
+  /// Button label to schedule notification
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get schedule;
+
+  /// Header for active pending notifications list
+  ///
+  /// In en, this message translates to:
+  /// **'Active Pending Notifications'**
+  String get activePendingNotifications;
+
+  /// Description for pending notifications list
+  ///
+  /// In en, this message translates to:
+  /// **'List of notifications currently registered with the OS awaiting trigger time.'**
+  String get activePendingNotificationsDescription;
+
+  /// Empty state label when there are no pending notifications
+  ///
+  /// In en, this message translates to:
+  /// **'No pending notifications'**
+  String get noPendingNotifications;
+
+  /// Fallback label when notification has no title
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get untitled;
+
+  /// Tooltip for delete/cancel button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteTooltip;
+
+  /// Button label to cancel all scheduled notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel All Notifications'**
+  String get cancelAllNotifications;
+
+  /// Default subject line for contact us email
+  ///
+  /// In en, this message translates to:
+  /// **'Mawaqit Al-Quds App'**
+  String get contactUsEmailSubject;
+
+  /// Default body text for contact us email
+  ///
+  /// In en, this message translates to:
+  /// **'Peace be upon you,\n'**
+  String get contactUsEmailBody;
+
+  /// Title of the daylight saving dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight saving time'**
+  String get daylightSavingDialogTitle;
+
+  /// Status label inside daylight saving dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight saving time is: '**
+  String get daylightSavingStatus;
 }
 
 class _AppLocalizationsDelegate

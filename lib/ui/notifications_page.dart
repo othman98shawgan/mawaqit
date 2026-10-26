@@ -20,7 +20,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.bug_report_outlined),
-            tooltip: 'Notification Testing',
+            tooltip: AppLocalizations.of(context)!.notificationTesting,
             onPressed: () {
               Navigator.pushNamed(context, '/notification_test');
             },
