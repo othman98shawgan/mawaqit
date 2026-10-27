@@ -13,6 +13,48 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     CreateAndAttachConsole();
   }
 
+  // Single-instance enforcement: ensure only one instance of the app runs at a time.
+  const wchar_t kUniqueMutexName[] = L"Mawaqit_AlQuds_SingleInstance_Mutex";
+  HANDLE mutex = ::CreateMutex(nullptr, TRUE, kUniqueMutexName);
+  if (::GetLastError() == ERROR_ALREADY_EXISTS) {
+    // Another instance is already running. Find and restore its window.
+    HWND existing_window = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"Mawaqit Al-Quds");
+    if (!existing_window) {
+      existing_window = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"[DEV] Mawaqit Al-Quds");
+    }
+    if (!existing_window) {
+      ::EnumWindows([](HWND hwnd, LPARAM lParam) -> BOOL {
+        wchar_t class_name[256];
+        if (::GetClassName(hwnd, class_name, sizeof(class_name) / sizeof(wchar_t))) {
+          if (wcscmp(class_name, L"FLUTTER_RUNNER_WIN32_WINDOW") == 0) {
+            wchar_t title[256];
+            if (::GetWindowText(hwnd, title, sizeof(title) / sizeof(wchar_t))) {
+              if (wcsstr(title, L"Mawaqit") != nullptr) {
+                *reinterpret_cast<HWND*>(lParam) = hwnd;
+                return FALSE;
+              }
+            }
+          }
+        }
+        return TRUE;
+      }, reinterpret_cast<LPARAM>(&existing_window));
+    }
+
+    if (existing_window) {
+      ::ShowWindow(existing_window, SW_SHOW);
+      if (::IsIconic(existing_window)) {
+        ::ShowWindow(existing_window, SW_RESTORE);
+      }
+      ::BringWindowToTop(existing_window);
+      ::SetForegroundWindow(existing_window);
+    }
+
+    if (mutex) {
+      ::CloseHandle(mutex);
+    }
+    return EXIT_SUCCESS;
+  }
+
   // Initialize COM, so that it is available for use in the library and/or
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
@@ -28,6 +70,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(420, 840);
   if (!window.Create(L"Mawaqit Al-Quds", origin, size)) {
+    if (mutex) {
+      ::CloseHandle(mutex);
+    }
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
@@ -39,5 +84,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   }
 
   ::CoUninitialize();
+  if (mutex) {
+    ::CloseHandle(mutex);
+  }
   return EXIT_SUCCESS;
 }

@@ -2,7 +2,7 @@
 ; Requires Inno Setup 6 (https://jrsoftware.org/isdl.php)
 
 #define MyAppName "Mawaqit Al-Quds"
-#define MyAppVersion "1.0.8"
+#define MyAppVersion "1.0.9"
 #define MyAppPublisher "Othman"
 #define MyAppURL "https://github.com/othman98shawgan/mawaqit"
 #define MyAppExeName "alfajr.exe"
