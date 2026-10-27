@@ -5,7 +5,7 @@
 #define MyAppVersion "1.0.9"
 #define MyAppPublisher "Othman"
 #define MyAppURL "https://github.com/othman98shawgan/mawaqit"
-#define MyAppExeName "alfajr.exe"
+#define MyAppExeName "Mawaqit Al-Quds.exe"
 #define MyAppId "{{7D2E6894-F8B2-4E57-9A39-123456789ABC}"
 
 [Setup]
@@ -25,6 +25,8 @@ Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64
+CloseApplications=yes
+RestartApplications=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

@@ -92,9 +92,9 @@ BEGIN
             VALUE "CompanyName", "com.othman" "\0"
             VALUE "FileDescription", "Mawaqit Al-Quds" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "alfajr" "\0"
+            VALUE "InternalName", "Mawaqit Al-Quds" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.othman. All rights reserved." "\0"
-            VALUE "OriginalFilename", "alfajr.exe" "\0"
+            VALUE "OriginalFilename", "Mawaqit Al-Quds.exe" "\0"
             VALUE "ProductName", "Mawaqit Al-Quds" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
