@@ -600,4 +600,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get daylightSavingStatus => 'Daylight saving time is: ';
+
+  @override
+  String get alarmSection => 'Prayer Alarms';
+
+  @override
+  String get fajrAlarm => 'Fajr Alarm';
+
+  @override
+  String prayerAlarmTitle(String prayer) {
+    return '$prayer Alarm';
+  }
+
+  @override
+  String get enableAlarm => 'Enable Alarm';
+
+  @override
+  String get alarmSound => 'Alarm Sound';
+
+  @override
+  String get soundAlaqsa => 'Al-Aqsa Mosque Adhan';
+
+  @override
+  String get soundMakkah => 'Makkah Adhan';
+
+  @override
+  String get soundMadina => 'Madinah Adhan';
+
+  @override
+  String get soundChime => 'App Alarm Tone';
+
+  @override
+  String get soundSystem => 'System Default Alarm';
+
+  @override
+  String get alarmOffset => 'Alarm Time';
+
+  @override
+  String get alarmOffsetExact => 'At prayer time (0m)';
+
+  @override
+  String alarmOffsetBefore(int minutes) {
+    return '$minutes min before';
+  }
+
+  @override
+  String get alarmSnooze => 'Snooze';
+
+  @override
+  String get alarmSnoozeDuration => 'Snooze Duration';
+
+  @override
+  String alarmSnoozeMinutes(int minutes) {
+    return '$minutes minutes';
+  }
+
+  @override
+  String get alarmSnoozeOff => 'Disabled';
+
+  @override
+  String get alarmDismiss => 'Dismiss';
+
+  @override
+  String alarmRingingTitle(String prayer) {
+    return 'Time for $prayer';
+  }
+
+  @override
+  String get alarmWakeupDhikr =>
+      'All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.';
+
+  @override
+  String get batteryOptimizationTitle => 'Battery Optimization';
+
+  @override
+  String get batteryOptimizationDesc =>
+      'To ensure your prayer alarms ring reliably even when the phone is locked, please exempt Mawaqit from battery optimizations.';
+
+  @override
+  String get batteryOptimizationDisabled => 'Exempted (Alarms Reliable)';
+
+  @override
+  String get batteryOptimizationEnabled =>
+      'Optimization Active (Alarms May Delay)';
+
+  @override
+  String get disableBatteryOptimization => 'Disable Battery Optimization';
+
+  @override
+  String get soundAbdulbasit => 'Abdulbasit Abdusamad';
+
+  @override
+  String get soundMinshawi => 'Mohamed Siddiq El-Minshawi';
+
+  @override
+  String get soundHussary => 'Mahmoud Khalil Al-Hussary';
+
+  @override
+  String get soundNafees => 'Ahmad Al-Nafees';
 }

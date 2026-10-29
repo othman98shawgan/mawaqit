@@ -15,11 +15,14 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
 import 'package:alfajr/l10n/app_localizations.dart';
+import 'prayer_alarm_service.dart';
 import 'store_manager.dart';
 
 class NotificationsService {
   static final _notifications = FlutterLocalNotificationsPlugin();
+  static FlutterLocalNotificationsPlugin get notificationsPlugin => _notifications;
   static final onNotifications = BehaviorSubject<String?>();
+  static final onNotificationResponses = BehaviorSubject<NotificationResponse>();
   static final Map<int, Timer> _windowsTimers = {};
   static final Map<int, PendingNotificationRequest> _windowsPendingRequests = {};
   static Future<void>? _initFuture;
@@ -154,8 +157,13 @@ class NotificationsService {
       await _notifications.initialize(
         settings: settings,
         onDidReceiveNotificationResponse: (NotificationResponse response) async {
+          onNotificationResponses.add(response);
           onNotifications.add(response.payload);
+          if (response.actionId == 'alarm_dismiss' || response.actionId == 'alarm_snooze') {
+            alarmActionBackgroundCallback(response);
+          }
         },
+        onDidReceiveBackgroundNotificationResponse: alarmActionBackgroundCallback,
       );
     } catch (_) {}
   }

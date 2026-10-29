@@ -778,4 +778,146 @@
    "@daylightSavingStatus": {
       "description": "Status label inside daylight saving dialog"
    }
+,
+   "alarmSection": "Prayer Alarms",
+   "@alarmSection": {
+      "description": "Header for prayer alarms section"
+   },
+   "fajrAlarm": "Fajr Alarm",
+   "@fajrAlarm": {
+      "description": "Fajr alarm title"
+   },
+   "prayerAlarmTitle": "{prayer} Alarm",
+   "@prayerAlarmTitle": {
+      "description": "Prayer alarm title",
+      "placeholders": {
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "enableAlarm": "Enable Alarm",
+   "@enableAlarm": {
+      "description": "Toggle switch label for enabling alarm"
+   },
+   "alarmSound": "Alarm Sound",
+   "@alarmSound": {
+      "description": "Label for alarm sound selection"
+   },
+   "soundAlaqsa": "Al-Aqsa Mosque Adhan",
+   "@soundAlaqsa": {
+      "description": "Al-Aqsa Adhan option"
+   },
+   "soundMakkah": "Makkah Adhan",
+   "@soundMakkah": {
+      "description": "Makkah Adhan option"
+   },
+   "soundMadina": "Madinah Adhan",
+   "@soundMadina": {
+      "description": "Madinah Adhan option"
+   },
+   "soundChime": "App Alarm Tone",
+   "@soundChime": {
+      "description": "App alarm tone option"
+   },
+   "soundSystem": "System Default Alarm",
+   "@soundSystem": {
+      "description": "System default alarm option"
+   },
+   "alarmOffset": "Alarm Time",
+   "@alarmOffset": {
+      "description": "Label for alarm offset"
+   },
+   "alarmOffsetExact": "At prayer time (0m)",
+   "@alarmOffsetExact": {
+      "description": "Alarm at exact prayer time"
+   },
+   "alarmOffsetBefore": "{minutes} min before",
+   "@alarmOffsetBefore": {
+      "description": "Alarm before prayer time",
+      "placeholders": {
+         "minutes": {
+            "type": "int",
+            "example": "15"
+         }
+      }
+   },
+   "alarmSnooze": "Snooze",
+   "@alarmSnooze": {
+      "description": "Snooze button label"
+   },
+   "alarmSnoozeDuration": "Snooze Duration",
+   "@alarmSnoozeDuration": {
+      "description": "Snooze duration label"
+   },
+   "alarmSnoozeMinutes": "{minutes} minutes",
+   "@alarmSnoozeMinutes": {
+      "description": "Minutes for snooze",
+      "placeholders": {
+         "minutes": {
+            "type": "int",
+            "example": "10"
+         }
+      }
+   },
+   "alarmSnoozeOff": "Disabled",
+   "@alarmSnoozeOff": {
+      "description": "Snooze disabled"
+   },
+   "alarmDismiss": "Dismiss",
+   "@alarmDismiss": {
+      "description": "Dismiss button label"
+   },
+   "alarmRingingTitle": "Time for {prayer}",
+   "@alarmRingingTitle": {
+      "description": "Ringing alarm title",
+      "placeholders": {
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "alarmWakeupDhikr": "All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.",
+   "@alarmWakeupDhikr": {
+      "description": "Wake-up dhikr upon dismissing Fajr alarm"
+   },
+   "batteryOptimizationTitle": "Battery Optimization",
+   "@batteryOptimizationTitle": {
+      "description": "Battery optimization title"
+   },
+   "batteryOptimizationDesc": "To ensure your prayer alarms ring reliably even when the phone is locked, please exempt Mawaqit from battery optimizations.",
+   "@batteryOptimizationDesc": {
+      "description": "Battery optimization description"
+   },
+   "batteryOptimizationDisabled": "Exempted (Alarms Reliable)",
+   "@batteryOptimizationDisabled": {
+      "description": "Battery optimization exempted status"
+   },
+   "batteryOptimizationEnabled": "Optimization Active (Alarms May Delay)",
+   "@batteryOptimizationEnabled": {
+      "description": "Battery optimization active status"
+   },
+   "disableBatteryOptimization": "Disable Battery Optimization",
+   "@disableBatteryOptimization": {
+      "description": "Disable battery optimization button"
+   }
+,
+   "soundAbdulbasit": "Abdulbasit Abdusamad",
+   "@soundAbdulbasit": {
+      "description": "Abdulbasit Abdusamad Adhan option"
+   },
+   "soundMinshawi": "Mohamed Siddiq El-Minshawi",
+   "@soundMinshawi": {
+      "description": "El-Minshawi Adhan option"
+   },
+   "soundHussary": "Mahmoud Khalil Al-Hussary",
+   "@soundHussary": {
+      "description": "Al-Hussary Adhan option"
+   },
+   "soundNafees": "Ahmad Al-Nafees",
+   "@soundNafees": {
+      "description": "Ahmad Al-Nafees Adhan option"
+   }
 }

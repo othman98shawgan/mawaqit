@@ -1,4 +1,4 @@
-{
+﻿{
    "language":"العربية",
    "appName": "مواقيت بيت المقدس",
    "fajrString": "الفجر",
@@ -167,4 +167,35 @@
    "contactUsEmailBody": "السلام عليكم ورحمة الله، \n",
    "daylightSavingDialogTitle": "التوقيت الصيفي",
    "daylightSavingStatus": "حالة التوقيت الصيفي: "
+,
+   "alarmSection": "منبهات الصلاة",
+   "fajrAlarm": "منبه الفجر",
+   "prayerAlarmTitle": "منبه {prayer}",
+   "enableAlarm": "تفعيل المنبه",
+   "alarmSound": "نغمة المنبه",
+   "soundAlaqsa": "أذان المسجد الأقصى",
+   "soundMakkah": "أذان المسجد الحرام",
+   "soundMadina": "أذان المسجد النبوي",
+   "soundChime": "نغمة التطبيق الخاصة",
+   "soundSystem": "نغمة منبه النظام",
+   "alarmOffset": "وقت التنبيه",
+   "alarmOffsetExact": "في موعد الصلاة تماماً (0 د)",
+   "alarmOffsetBefore": "قبل {minutes} دقيقة",
+   "alarmSnooze": "غفوة",
+   "alarmSnoozeDuration": "مدة الغفوة",
+   "alarmSnoozeMinutes": "{minutes} دقائق",
+   "alarmSnoozeOff": "معطلة",
+   "alarmDismiss": "إيقاف",
+   "alarmRingingTitle": "حان الآن موعد {prayer}",
+   "alarmWakeupDhikr": "الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور",
+   "batteryOptimizationTitle": "تحسين البطارية",
+   "batteryOptimizationDesc": "لضمان عمل منبه الصلاة بدقة عندما يكون الهاتف مقفلاً، يرجى استثناء تطبيق مواقيت من تحسين البطارية.",
+   "batteryOptimizationDisabled": "تم استثناء التطبيق (التنبيه مضمون)",
+   "batteryOptimizationEnabled": "تحسين البطارية مفعل (قد يتأخر المنبه)",
+   "disableBatteryOptimization": "تعطيل تحسين البطارية"
+,
+   "soundAbdulbasit": "أذان الشيخ عبد الباسط عبد الصمد",
+   "soundMinshawi": "أذان الشيخ محمد صديق المنشاوي",
+   "soundHussary": "أذان الشيخ محمود خليل الحصري",
+   "soundNafees": "أذان الشيخ أحمد النفيس"
 }

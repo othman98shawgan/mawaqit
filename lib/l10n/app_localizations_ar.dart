@@ -601,4 +601,103 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get daylightSavingStatus => 'حالة التوقيت الصيفي: ';
+
+  @override
+  String get alarmSection => 'منبهات الصلاة';
+
+  @override
+  String get fajrAlarm => 'منبه الفجر';
+
+  @override
+  String prayerAlarmTitle(String prayer) {
+    return 'منبه $prayer';
+  }
+
+  @override
+  String get enableAlarm => 'تفعيل المنبه';
+
+  @override
+  String get alarmSound => 'نغمة المنبه';
+
+  @override
+  String get soundAlaqsa => 'أذان المسجد الأقصى';
+
+  @override
+  String get soundMakkah => 'أذان المسجد الحرام';
+
+  @override
+  String get soundMadina => 'أذان المسجد النبوي';
+
+  @override
+  String get soundChime => 'نغمة التطبيق الخاصة';
+
+  @override
+  String get soundSystem => 'نغمة منبه النظام';
+
+  @override
+  String get alarmOffset => 'وقت التنبيه';
+
+  @override
+  String get alarmOffsetExact => 'في موعد الصلاة تماماً (0 د)';
+
+  @override
+  String alarmOffsetBefore(int minutes) {
+    return 'قبل $minutes دقيقة';
+  }
+
+  @override
+  String get alarmSnooze => 'غفوة';
+
+  @override
+  String get alarmSnoozeDuration => 'مدة الغفوة';
+
+  @override
+  String alarmSnoozeMinutes(int minutes) {
+    return '$minutes دقائق';
+  }
+
+  @override
+  String get alarmSnoozeOff => 'معطلة';
+
+  @override
+  String get alarmDismiss => 'إيقاف';
+
+  @override
+  String alarmRingingTitle(String prayer) {
+    return 'حان الآن موعد $prayer';
+  }
+
+  @override
+  String get alarmWakeupDhikr =>
+      'الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور';
+
+  @override
+  String get batteryOptimizationTitle => 'تحسين البطارية';
+
+  @override
+  String get batteryOptimizationDesc =>
+      'لضمان عمل منبه الصلاة بدقة عندما يكون الهاتف مقفلاً، يرجى استثناء تطبيق مواقيت من تحسين البطارية.';
+
+  @override
+  String get batteryOptimizationDisabled =>
+      'تم استثناء التطبيق (التنبيه مضمون)';
+
+  @override
+  String get batteryOptimizationEnabled =>
+      'تحسين البطارية مفعل (قد يتأخر المنبه)';
+
+  @override
+  String get disableBatteryOptimization => 'تعطيل تحسين البطارية';
+
+  @override
+  String get soundAbdulbasit => 'أذان الشيخ عبد الباسط عبد الصمد';
+
+  @override
+  String get soundMinshawi => 'أذان الشيخ محمد صديق المنشاوي';
+
+  @override
+  String get soundHussary => 'أذان الشيخ محمود خليل الحصري';
+
+  @override
+  String get soundNafees => 'أذان الشيخ أحمد النفيس';
 }

@@ -23,6 +23,8 @@ import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
 import 'ui/notification_test_page.dart';
+import 'ui/alarm_ringing_page.dart';
+import 'ui/alarms_settings_page.dart';
 import 'ui/settings_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
@@ -164,6 +166,8 @@ class MyApp extends StatelessWidget {
                 '/notifications': (context) => const NotificationsPage(),
                 '/notification_test': (context) => const NotificationTestPage(),
                 '/apps': (context) => const OurAppsPage(),
+                '/alarms_settings': (context) => const AlarmsSettingsPage(),
+                '/alarm_ringing': (context) { final prayer = ModalRoute.of(context)?.settings.arguments as String? ?? 'Fajr'; return AlarmRingingPage(prayerName: prayer); },
               },
               supportedLocales: L10n.all,
               localizationsDelegates: [

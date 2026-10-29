@@ -19,7 +19,10 @@ import '../main.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
+import '../models/prayer_alarm.dart';
 import '../services/notifications_service.dart';
+import '../services/prayer_alarm_service.dart';
+import 'alarm_ringing_page.dart';
 import '../services/prayer_methods.dart';
 import '../services/reminder_service.dart';
 import '../services/store_manager.dart';
@@ -47,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   PrayersModel prayersToday = PrayersModel.empty();
   int reminderValue = 10;
   int timeDiff = 0;
+  StreamSubscription? _notificationsSub;
 
   Future<void> checkForUpdate() async {
     InAppUpdate.checkForUpdate().then((info) {
@@ -163,6 +167,17 @@ class _MyHomePageState extends State<MyHomePage> {
       timeDiff,
       isAutoMode: dstNotifier.isAutoDst,
     ));
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final Map<String, String> prayerLabels = {
+      'Fajr': getPrayerTranslation('Fajr', context),
+      'Shuruq': getPrayerTranslation('Shuruq', context),
+      'Duhr': getPrayerTranslation('Duhr', context),
+      'Asr': getPrayerTranslation('Asr', context),
+      'Maghrib': getPrayerTranslation('Maghrib', context),
+      'Isha': getPrayerTranslation('Isha', context),
+    };
+    final alarmSettingsMap = isAndroid ? await PrayerAlarmService.loadAllAlarmSettings() : <String, PrayerAlarmSettings>{};
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -170,12 +185,12 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       var prayerBody = '';
       var pryaerTitle = '';
+      final localizedLabel = prayerLabels[prayer.label] ?? prayer.label;
       if (prayer.label == 'Shuruq') {
-        prayerBody = AppLocalizations.of(context)!.notificationsShuruqBody;
-        pryaerTitle = AppLocalizations.of(context)!.notificationsShuruqPrayerTimeTitle;
+        prayerBody = l10n.notificationsShuruqBody;
+        pryaerTitle = l10n.notificationsShuruqPrayerTimeTitle;
       } else {
-        pryaerTitle =
-            AppLocalizations.of(context)!.notificationsPrayerTimeTitle(getPrayerTranslation(prayer.label, context));
+        pryaerTitle = l10n.notificationsPrayerTimeTitle(localizedLabel);
       }
 
       NotificationsService.scheduleNotifications(
@@ -187,6 +202,20 @@ class _MyHomePageState extends State<MyHomePage> {
           sheduledDate: prayer.time);
 
       _scheduledPrayers.add(id);
+      if (isAndroid) {
+        final alarmSettings = alarmSettingsMap[prayer.label] ?? PrayerAlarmSettings(prayerName: prayer.label);
+        if (alarmSettings.isEnabled) {
+          await PrayerAlarmService.schedulePrayerAlarm(
+            prayerName: prayer.label,
+            prayerTime: prayer.time,
+            settings: alarmSettings,
+            title: l10n.alarmRingingTitle(pryaerTitle),
+            body: pryaerTitle,
+            dismissLabel: l10n.alarmDismiss,
+            snoozeLabel: l10n.alarmSnooze,
+          );
+        }
+      }
       //Set reminder
       if (reminderStatus) {
         var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
@@ -196,16 +225,14 @@ class _MyHomePageState extends State<MyHomePage> {
         var reminderId = getPrayerNotificationId(reminderTime);
         var reminderTitle = '';
         if (prayer.label == 'Shuruq') {
-          reminderTitle = AppLocalizations.of(context)!.notificationsShuruqReminderTitle(reminderValue);
+          reminderTitle = l10n.notificationsShuruqReminderTitle(reminderValue);
           if (reminderValue <= 10) {
-            reminderTitle = AppLocalizations.of(context)!.notificationsShuruqReminderTitleMinutes(reminderValue);
+            reminderTitle = l10n.notificationsShuruqReminderTitleMinutes(reminderValue);
           }
         } else {
-          reminderTitle = AppLocalizations.of(context)!
-              .notificationsReminderTitle(getPrayerTranslation(prayer.label, context), reminderValue);
+          reminderTitle = l10n.notificationsReminderTitle(localizedLabel, reminderValue);
           if (reminderValue <= 10) {
-            reminderTitle = AppLocalizations.of(context)!
-                .notificationsReminderTitleMinutes(getPrayerTranslation(prayer.label, context), reminderValue);
+            reminderTitle = l10n.notificationsReminderTitleMinutes(localizedLabel, reminderValue);
           }
         }
 
@@ -271,9 +298,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
     NotificationsService.ensureInitialized();
     readJson();
-    // cancelAllPrayers(); //TODO: FOR TESTING
-    // scheduleNextPrayers(DateTime.now()); //TODO: FOR TESTING
-    //  listenNotifications();
+    listenNotifications();
+  }
+
+  void listenNotifications() {
+    _notificationsSub?.cancel();
+    _notificationsSub = NotificationsService.onNotifications.stream.listen((payload) {
+      if (payload != null && payload.startsWith('alarm|') && mounted) {
+        final prayer = payload.split('|')[1];
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => AlarmRingingPage(prayerName: prayer),
+            fullscreenDialog: true,
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationsSub?.cancel();
+    super.dispose();
   }
 
   @override

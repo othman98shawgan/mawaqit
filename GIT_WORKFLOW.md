@@ -13,6 +13,9 @@
 
 ### 2. Step-by-Step Workflow for Every Task
 
+**Step 0: Scope Alignment (Mandatory Before Coding)**
+Before creating a branch or writing any code, always showcase the whole scope of the feature or fix (architecture, UI/UX flows, edge cases, cross-platform behavior, and audio/data models), especially for big features. Only begin coding after aligning with the user on the approach.
+
 **Step 1: Start New Task**
 Before writing any code for a new task, run:
 ```bash
