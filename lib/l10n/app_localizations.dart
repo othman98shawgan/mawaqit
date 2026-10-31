@@ -1364,6 +1364,12 @@ abstract class AppLocalizations {
   /// **'Grant Permission'**
   String get fullScreenIntentAction;
 
+  /// Label for alarm delay dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Delay'**
+  String get alarmDelay;
+
   /// Status text when full screen intent permission is granted
   ///
   /// In en, this message translates to:

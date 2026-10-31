@@ -213,5 +213,6 @@
    "fullScreenIntentTitle": "إذن منبه شاشة القفل",
    "fullScreenIntentDesc": "يتطلب أندرويد 14 منح إذن لعرض المنبه وإيقاظ الشاشة تلقائياً أثناء قفل الهاتف.",
    "fullScreenIntentAction": "منح الإذن",
+   "alarmDelay": "التأخير",
    "fullScreenIntentGranted": "إذن منبه شاشة القفل مفعّل"
 }

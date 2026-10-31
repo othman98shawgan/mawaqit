@@ -756,5 +756,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullScreenIntentAction => 'منح الإذن';
 
   @override
+  String get alarmDelay => 'التأخير';
+
+  @override
   String get fullScreenIntentGranted => 'إذن منبه شاشة القفل مفعّل';
 }

@@ -1005,6 +1005,10 @@
    "@fullScreenIntentAction": {
       "description": "Button to open full screen intent settings"
    },
+   "alarmDelay": "Delay",
+   "@alarmDelay": {
+      "description": "Label for alarm delay dropdown"
+   },
    "fullScreenIntentGranted": "Full-screen alarm permission granted",
    "@fullScreenIntentGranted": {
       "description": "Status text when full screen intent permission is granted"

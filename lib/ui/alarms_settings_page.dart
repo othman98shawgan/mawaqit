@@ -347,10 +347,10 @@ class _AlarmsSettingsPageState extends State<AlarmsSettingsPage> with WidgetsBin
                                 flex: 2,
                                 child: DropdownButtonFormField<int>(
                                   value: _testDelay,
-                                  decoration: const InputDecoration(
-                                    labelText: "Delay",
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  decoration: InputDecoration(
+                                    labelText: l10n.alarmDelay,
+                                    border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   ),
                                   items: const [
                                     DropdownMenuItem(value: 5, child: Text("5s")),

@@ -34,7 +34,17 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
   bool _batteryOptimizationIgnored = true;
   bool _fullScreenIntentGranted = true;
 
-  final List<String> _soundOptions = ['alaqsa', 'makkah', 'madina', 'abdulbasit', 'minshawi', 'hussary', 'nafees', 'system', 'silent'];
+  final List<String> _soundOptions = [
+    'alaqsa',
+    'makkah',
+    'madina',
+    'abdulbasit',
+    'minshawi',
+    'hussary',
+    'nafees',
+    'system',
+    'silent'
+  ];
   final List<int> _snoozeOptions = [0, 5, 10, 15];
 
   @override
@@ -285,15 +295,11 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
               const SizedBox(height: 8),
 
               // Sound Selection
-              Text(
-                l10n.alarmSound,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _soundOptions.contains(_settings.soundType) ? _settings.soundType : 'alaqsa',
                 isExpanded: true,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  labelText: l10n.alarmSound,
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
@@ -314,15 +320,11 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
               const SizedBox(height: 16),
 
               // Snooze Duration
-              Text(
-                l10n.alarmSnoozeDuration,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              const SizedBox(height: 6),
               DropdownButtonFormField<int>(
                 value: _snoozeOptions.contains(_settings.snoozeMinutes) ? _settings.snoozeMinutes : 10,
                 isExpanded: true,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  labelText: l10n.alarmSnoozeDuration,
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),

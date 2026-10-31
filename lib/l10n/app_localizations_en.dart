@@ -754,5 +754,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullScreenIntentAction => 'Grant Permission';
 
   @override
+  String get alarmDelay => 'Delay';
+
+  @override
   String get fullScreenIntentGranted => 'Full-screen alarm permission granted';
 }
