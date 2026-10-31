@@ -1,4 +1,4 @@
-﻿{
+{
    "language":"العربية",
    "appName": "مواقيت بيت المقدس",
    "fajrString": "الفجر",
@@ -176,8 +176,8 @@
    "soundAlaqsa": "أذان المسجد الأقصى",
    "soundMakkah": "أذان المسجد الحرام",
    "soundMadina": "أذان المسجد النبوي",
-   "soundChime": "نغمة التطبيق الخاصة",
    "soundSystem": "نغمة منبه النظام",
+   "soundSilent": "صامت (اهتزاز فقط)",
    "alarmOffset": "وقت التنبيه",
    "alarmOffsetExact": "في موعد الصلاة تماماً (0 د)",
    "alarmOffsetBefore": "قبل {minutes} دقيقة",
@@ -198,4 +198,18 @@
    "soundMinshawi": "أذان الشيخ محمد صديق المنشاوي",
    "soundHussary": "أذان الشيخ محمود خليل الحصري",
    "soundNafees": "أذان الشيخ أحمد النفيس"
+,
+   "testAlarmTitle": "اختبار منبه الصلاة",
+   "testAlarmDesc": "تشغيل منبه تجريبي للتأكد من الصوت التكراري، واستيقاظ الشاشة أثناء القفل، وأزرار الإيقاف والغفوة.",
+   "triggerAlarmInSeconds": "تشغيل المنبه بعد {seconds} ثوانٍ",
+   "testAlarmLockHint": "ملاحظة: اقفل شاشة هاتفك بعد الضغط للتأكد من استيقاظ الشاشة أثناء القفل!",
+   "configuredPrayerAlarms": "منبهات الصلوات المضبوطة",
+   "configuredPrayerAlarmsDesc": "حالة وإعدادات المنبه لكل صلاة من الصلوات الخمس والشروق.",
+   "alarmScheduledInSeconds": "تم جدولة المنبه التجريبي بعد {seconds} ثوانٍ. اقفل شاشتك الآن!",
+   "activeInOs": "نشط لدى النظام",
+   "testAlarmButton": "اختبار المنبه (5 ث)",
+   "fullScreenIntentTitle": "إذن منبه شاشة القفل",
+   "fullScreenIntentDesc": "يتطلب أندرويد 14 منح إذن لعرض المنبه وإيقاظ الشاشة تلقائياً أثناء قفل الهاتف.",
+   "fullScreenIntentAction": "منح الإذن",
+   "fullScreenIntentGranted": "إذن منبه شاشة القفل مفعّل"
 }

@@ -1154,17 +1154,17 @@ abstract class AppLocalizations {
   /// **'Madinah Adhan'**
   String get soundMadina;
 
-  /// App alarm tone option
-  ///
-  /// In en, this message translates to:
-  /// **'App Alarm Tone'**
-  String get soundChime;
-
   /// System default alarm option
   ///
   /// In en, this message translates to:
   /// **'System Default Alarm'**
   String get soundSystem;
+
+  /// Silent alarm option with vibration only
+  ///
+  /// In en, this message translates to:
+  /// **'Silent (Vibrate only)'**
+  String get soundSilent;
 
   /// Label for alarm offset
   ///
@@ -1279,6 +1279,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ahmad Al-Nafees'**
   String get soundNafees;
+
+  /// Title for test alarm card
+  ///
+  /// In en, this message translates to:
+  /// **'Test Prayer Alarm'**
+  String get testAlarmTitle;
+
+  /// Description for test alarm
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger a test alarm to verify looping audio, lock screen wake-up, and dismiss/snooze actions.'**
+  String get testAlarmDesc;
+
+  /// Button to trigger alarm with delay
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger Alarm in {seconds}s'**
+  String triggerAlarmInSeconds(int seconds);
+
+  /// Hint to lock phone for testing
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Lock your phone right after pressing to verify lock-screen wake-up!'**
+  String get testAlarmLockHint;
+
+  /// Title for configured prayer alarms list in testing page
+  ///
+  /// In en, this message translates to:
+  /// **'Configured Prayer Alarms'**
+  String get configuredPrayerAlarms;
+
+  /// Description for configured prayer alarms list
+  ///
+  /// In en, this message translates to:
+  /// **'Status and configuration of in-app prayer alarms for each prayer.'**
+  String get configuredPrayerAlarmsDesc;
+
+  /// Snackbar message when test alarm scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Test alarm scheduled in {seconds} seconds. Lock your phone now!'**
+  String alarmScheduledInSeconds(int seconds);
+
+  /// Badge showing alarm is active in OS scheduler
+  ///
+  /// In en, this message translates to:
+  /// **'Active in OS'**
+  String get activeInOs;
+
+  /// Quick button to test alarm
+  ///
+  /// In en, this message translates to:
+  /// **'Test Alarm (5s)'**
+  String get testAlarmButton;
+
+  /// Title for full screen intent permission card
+  ///
+  /// In en, this message translates to:
+  /// **'Full-Screen Alarm Permission'**
+  String get fullScreenIntentTitle;
+
+  /// Description for full screen intent permission
+  ///
+  /// In en, this message translates to:
+  /// **'Android 14 requires permission to wake up the screen and show the alarm when your device is locked.'**
+  String get fullScreenIntentDesc;
+
+  /// Button to open full screen intent settings
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get fullScreenIntentAction;
+
+  /// Status text when full screen intent permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Full-screen alarm permission granted'**
+  String get fullScreenIntentGranted;
 }
 
 class _AppLocalizationsDelegate

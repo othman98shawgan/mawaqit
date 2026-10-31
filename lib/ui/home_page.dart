@@ -19,7 +19,6 @@ import '../main.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
-import '../models/prayer_alarm.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_alarm_service.dart';
 import 'alarm_ringing_page.dart';
@@ -42,7 +41,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool summerTime = false;
   List _prayerList = [];
   int dayInYear = 0;
@@ -51,6 +50,33 @@ class _MyHomePageState extends State<MyHomePage> {
   int reminderValue = 10;
   int timeDiff = 0;
   StreamSubscription? _notificationsSub;
+  StreamSubscription? _nativeAlarmSub;
+  bool _isAlarmRingingOpen = false;
+
+  void _openAlarmRingingPage(String payload) {
+    if (_isAlarmRingingOpen || !mounted) return;
+    if (!payload.contains('alarm|')) return;
+
+    final clean = payload.substring(payload.indexOf('alarm|'));
+    final parts = clean.split('|');
+    final prayer = parts.length >= 2 ? parts[1] : 'Fajr';
+    final sound = parts.length >= 3 ? parts[2] : null;
+    final snoozeMinutes = parts.length >= 4 ? int.tryParse(parts[3]) : null;
+
+    _isAlarmRingingOpen = true;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AlarmRingingPage(
+          prayerName: prayer,
+          soundType: sound,
+          snoozeMinutes: snoozeMinutes,
+        ),
+        fullscreenDialog: true,
+      ),
+    ).then((_) {
+      _isAlarmRingingOpen = false;
+    });
+  }
 
   Future<void> checkForUpdate() async {
     InAppUpdate.checkForUpdate().then((info) {
@@ -138,6 +164,18 @@ class _MyHomePageState extends State<MyHomePage> {
       setScheduledPrayers(_scheduledPrayers);
     }
     if (!mounted) return; //Make sure widget is mounted
+
+    if (isAndroid) {
+      final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+      final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+      await PrayerAlarmService.scheduleUpcomingAlarms(
+        prayerList: _prayerList,
+        summerTime: dstNotifier.getSummerTime(),
+        timeDiff: diff,
+      );
+    }
+    if (!mounted) return;
+
     var notifiactionsStatus = Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
     var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
@@ -177,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'Maghrib': getPrayerTranslation('Maghrib', context),
       'Isha': getPrayerTranslation('Isha', context),
     };
-    final alarmSettingsMap = isAndroid ? await PrayerAlarmService.loadAllAlarmSettings() : <String, PrayerAlarmSettings>{};
+
     for (final prayer in prayersToSchedule) {
       var id = getPrayerNotificationId(prayer.time);
       if (_scheduledPrayers.contains(id)) {
@@ -202,20 +240,6 @@ class _MyHomePageState extends State<MyHomePage> {
           sheduledDate: prayer.time);
 
       _scheduledPrayers.add(id);
-      if (isAndroid) {
-        final alarmSettings = alarmSettingsMap[prayer.label] ?? PrayerAlarmSettings(prayerName: prayer.label);
-        if (alarmSettings.isEnabled) {
-          await PrayerAlarmService.schedulePrayerAlarm(
-            prayerName: prayer.label,
-            prayerTime: prayer.time,
-            settings: alarmSettings,
-            title: l10n.alarmRingingTitle(pryaerTitle),
-            body: pryaerTitle,
-            dismissLabel: l10n.alarmDismiss,
-            snoozeLabel: l10n.alarmSnooze,
-          );
-        }
-      }
       //Set reminder
       if (reminderStatus) {
         var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
@@ -289,6 +313,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    PrayerAlarmService.initPlatformChannel();
+    PrayerAlarmService.getPendingAlarmPayload().then((payload) {
+      if (payload != null && mounted) {
+        _openAlarmRingingPage(payload);
+      }
+    });
     if (isAndroid) {
       checkForUpdate();
       WakelockPlus.enable();
@@ -302,23 +333,36 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void listenNotifications() {
+    _nativeAlarmSub?.cancel();
+    _nativeAlarmSub = PrayerAlarmService.onNativeAlarmTriggered.stream.listen((payload) {
+      if (payload != null && mounted) {
+        _openAlarmRingingPage(payload);
+      }
+    });
     _notificationsSub?.cancel();
     _notificationsSub = NotificationsService.onNotifications.stream.listen((payload) {
-      if (payload != null && payload.startsWith('alarm|') && mounted) {
-        final prayer = payload.split('|')[1];
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => AlarmRingingPage(prayerName: prayer),
-            fullscreenDialog: true,
-          ),
-        );
+      if (payload != null && mounted) {
+        _openAlarmRingingPage(payload);
       }
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      PrayerAlarmService.getPendingAlarmPayload().then((payload) {
+        if (payload != null && mounted) {
+          _openAlarmRingingPage(payload);
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _notificationsSub?.cancel();
+    _nativeAlarmSub?.cancel();
     super.dispose();
   }
 

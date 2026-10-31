@@ -292,8 +292,9 @@ String getPrayerTranslation(String label, BuildContext context) {
     'Asr': AppLocalizations.of(context)!.asrString,
     'Maghrib': AppLocalizations.of(context)!.maghribString,
     'Isha': AppLocalizations.of(context)!.ishaString,
+    'Test': AppLocalizations.of(context)!.testAlarmTitle,
   };
-  return map[label]!;
+  return map[label] ?? label;
 }
 
 String adjustTime(BuildContext context, String time, [DateTime? forDate]) {

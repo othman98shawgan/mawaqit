@@ -25,28 +25,45 @@ class AlarmDialog extends StatefulWidget {
   State<AlarmDialog> createState() => _AlarmDialogState();
 }
 
-class _AlarmDialogState extends State<AlarmDialog> {
+class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
   bool _isLoading = true;
   late PrayerAlarmSettings _settings;
   bool _batteryOptimizationIgnored = true;
+  bool _fullScreenIntentGranted = true;
 
   final List<int> _offsetOptions = [0, -10, -15, -20, -30, -45, -60];
-  final List<String> _soundOptions = ['alaqsa', 'makkah', 'madina', 'abdulbasit', 'minshawi', 'hussary', 'nafees', 'chime', 'system'];
+  final List<String> _soundOptions = ['alaqsa', 'makkah', 'madina', 'abdulbasit', 'minshawi', 'hussary', 'nafees', 'system', 'silent'];
   final List<int> _snoozeOptions = [0, 5, 10, 15];
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadSettings();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadSettings();
+    }
   }
 
   Future<void> _loadSettings() async {
     final loaded = await PrayerAlarmService.loadAlarmSettings(widget.prayerName);
     final ignored = await PrayerAlarmService.isBatteryOptimizationIgnored();
+    final fullScreen = await PrayerAlarmService.canUseFullScreenIntent();
     if (mounted) {
       setState(() {
         _settings = loaded;
         _batteryOptimizationIgnored = ignored;
+        _fullScreenIntentGranted = fullScreen;
         _isLoading = false;
       });
     }
@@ -68,9 +85,10 @@ class _AlarmDialogState extends State<AlarmDialog> {
         return l10n.soundHussary;
       case 'nafees':
         return l10n.soundNafees;
-      case 'chime':
-        return l10n.soundChime;
       case 'system':
+        return l10n.soundSystem;
+      case 'silent':
+        return l10n.soundSilent;
       default:
         return l10n.soundSystem;
     }
@@ -92,21 +110,67 @@ class _AlarmDialogState extends State<AlarmDialog> {
 
   Future<void> _saveSettings() async {
     final l10n = AppLocalizations.of(context)!;
-    final prayerTitle = getPrayerTranslation(widget.prayerName, context);
     await PrayerAlarmService.saveAlarmSettings(_settings);
 
-    if (_settings.isEnabled) {
-      await PrayerAlarmService.schedulePrayerAlarm(
-        prayerName: widget.prayerName,
-        prayerTime: widget.prayerTime,
-        settings: _settings,
-        title: l10n.alarmRingingTitle(prayerTitle),
-        body: prayerTitle,
-        dismissLabel: l10n.alarmDismiss,
-        snoozeLabel: l10n.alarmSnooze,
-      );
-    } else {
-      await PrayerAlarmService.cancelAlarm(widget.prayerName);
+    if (!kIsWeb && Platform.isAndroid) {
+      if (!_settings.isEnabled) {
+        await PrayerAlarmService.cancelAlarm(widget.prayerName);
+      } else {
+        // If enabling alarm, proactively guide the user through permissions
+        if (!_batteryOptimizationIgnored) {
+          final granted = await PrayerAlarmService.requestIgnoreBatteryOptimization();
+          _batteryOptimizationIgnored = granted;
+        }
+
+        if (!_fullScreenIntentGranted && mounted) {
+          final grantTapped = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Row(
+                children: [
+                  Icon(Icons.screen_lock_portrait, color: prayerColor, size: 24),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.fullScreenIntentTitle,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                l10n.fullScreenIntentDesc,
+                style: const TextStyle(fontSize: 13),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: Text(
+                    l10n.cancelString,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: prayerColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  icon: const Icon(Icons.settings, size: 16),
+                  label: Text(l10n.fullScreenIntentAction),
+                ),
+              ],
+            ),
+          );
+
+          if (grantTapped == true) {
+            await PrayerAlarmService.openFullScreenIntentSettings();
+          }
+        }
+      }
+      await PrayerAlarmService.scheduleUpcomingAlarms();
     }
 
     widget.onSaved?.call();
@@ -254,6 +318,60 @@ class _AlarmDialogState extends State<AlarmDialog> {
               ),
               const SizedBox(height: 12),
 
+              if (!kIsWeb && Platform.isAndroid && !_fullScreenIntentGranted) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade400, width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.screen_lock_portrait, color: Colors.red.shade700, size: 20),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              l10n.fullScreenIntentTitle,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.fullScreenIntentDesc,
+                        style: TextStyle(fontSize: 11, color: isDark ? Colors.white70 : Colors.black87),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () async {
+                            await PrayerAlarmService.openFullScreenIntentSettings();
+                            Future.delayed(const Duration(seconds: 1), _loadSettings);
+                          },
+                          icon: const Icon(Icons.settings, size: 16),
+                          label: Text(l10n.fullScreenIntentAction, style: const TextStyle(fontSize: 11)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               // Battery Optimization warning banner (Android only)
               if (!kIsWeb && Platform.isAndroid && !_batteryOptimizationIgnored) ...[
                 const SizedBox(height: 8),

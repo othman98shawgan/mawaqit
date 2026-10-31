@@ -13,6 +13,9 @@ import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
 import '../services/daylight_time_service.dart';
 
+import '../models/prayer_alarm.dart';
+import '../resources/colors.dart';
+import '../services/prayer_alarm_service.dart';
 class NotificationTestPage extends StatefulWidget {
   const NotificationTestPage({super.key});
 
@@ -26,9 +29,12 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
 
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool _canScheduleExact = true;
+  bool _canUseFullScreen = true;
   List<PendingNotificationRequest> _pendingRequests = [];
   List<String> _cachedScheduledPrayers = [];
   bool _isLoadingPending = false;
+  Map<String, PrayerAlarmSettings> _prayerAlarms = {};
+  List<Map<String, dynamic>> _scheduledNativeAlarms = [];
   int _selectedDelaySeconds = 5;
 
   final List<int> _delayOptions = [5, 10, 30, 60];
@@ -69,10 +75,12 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     }
     final status = await Permission.notification.status;
     final canExact = await NotificationsService.canScheduleExactNotifications();
+    final canFullScreen = await PrayerAlarmService.canUseFullScreenIntent();
     if (mounted) {
       setState(() {
         _permissionStatus = status;
         _canScheduleExact = canExact;
+        _canUseFullScreen = canFullScreen;
       });
     }
   }
@@ -246,6 +254,11 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     try {
       final rawList = await NotificationsService.getPendingNotificationRequests();
       final prayers = await getScheduledPrayers();
+      final alarms = await PrayerAlarmService.loadAllAlarmSettings();
+      if (!kIsWeb && Platform.isAndroid) {
+        await PrayerAlarmService.scheduleUpcomingAlarms();
+      }
+      final nativeAlarms = await PrayerAlarmService.getScheduledNativeAlarms();
       final list = List<PendingNotificationRequest>.from(rawList);
 
       _cachedScheduledPrayers = prayers;
@@ -254,6 +267,8 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
       if (mounted) {
         setState(() {
           _pendingRequests = list;
+          _prayerAlarms = alarms;
+          _scheduledNativeAlarms = nativeAlarms;
           _isLoadingPending = false;
         });
       }
@@ -367,6 +382,10 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
         padding: const EdgeInsets.all(16.0),
         children: [
           _buildPermissionCard(context),
+          const SizedBox(height: 16),
+          _buildActiveNativeAlarmsCard(context),
+          const SizedBox(height: 16),
+          _buildPrayerAlarmsCard(context),
           const SizedBox(height: 16),
           _buildTriggerCard(context),
           const SizedBox(height: 16),
@@ -511,6 +530,62 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                   onPressed: _requestExactAlarmPermission,
                 ),
               ),
+            ],
+            if (!kIsWeb && Platform.isAndroid) ...[
+              const Divider(height: 24),
+              Row(
+                children: [
+                  Icon(
+                    _canUseFullScreen ? Icons.screen_lock_portrait : Icons.screen_lock_rotation,
+                    color: _canUseFullScreen ? Colors.green : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.fullScreenIntentTitle,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (_canUseFullScreen ? Colors.green : Colors.orange).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _canUseFullScreen ? Colors.green : Colors.orange),
+                    ),
+                    child: Text(
+                      _canUseFullScreen ? l10n.statusGranted : l10n.statusRestricted,
+                      style: TextStyle(
+                        color: _canUseFullScreen ? Colors.green : Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.fullScreenIntentDesc,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+              ),
+              if (!_canUseFullScreen) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.settings, size: 18),
+                    label: Text(l10n.fullScreenIntentAction),
+                    onPressed: () async {
+                      await PrayerAlarmService.openFullScreenIntentSettings();
+                      Future.delayed(const Duration(seconds: 1), _checkPermission);
+                    },
+                  ),
+                ),
+              ],
             ],
           ],
         ),
@@ -849,6 +924,332 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 onPressed: _pendingRequests.isEmpty ? null : _cancelAllNotifications,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveNativeAlarmsCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.alarm_on, color: prayerColor),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Active OS Alarms & Snoozes',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: prayerColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: prayerColor, width: 0.8),
+                  ),
+                  child: Text(
+                    '${_scheduledNativeAlarms.length}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: prayerColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.refresh, size: 20),
+                  tooltip: 'Refresh OS Alarms',
+                  onPressed: _loadPendingNotifications,
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Alarms currently queued in Android AlarmManager (Exact AlarmClock), including multi-day and active snoozes.',
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_scheduledNativeAlarms.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.alarm_off, color: Colors.grey.shade500, size: 28),
+                    const SizedBox(height: 6),
+                    Text(
+                      'No native alarms currently registered in the OS.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _scheduledNativeAlarms.length,
+                separatorBuilder: (context, index) => const Divider(height: 10),
+                itemBuilder: (context, index) {
+                  final alarm = _scheduledNativeAlarms[index];
+                  final id = alarm['id'] as int? ?? 0;
+                  final triggerAtMillis = (alarm['triggerAtMillis'] as num?)?.toInt() ?? 0;
+                  final triggerDate = DateTime.fromMillisecondsSinceEpoch(triggerAtMillis);
+                  final prayerName = alarm['prayerName'] as String? ?? 'Alarm';
+                  final soundName = alarm['soundName'] as String? ?? 'alaqsa';
+                  final snoozeMinutes = alarm['snoozeMinutes'] as int? ?? 0;
+                  final isSnoozed = prayerName.toLowerCase().contains('snooze');
+                  final now = DateTime.now();
+                  final diff = triggerDate.difference(now);
+
+                  String diffText;
+                  if (diff.isNegative) {
+                    diffText = 'Now / Ringing';
+                  } else if (diff.inSeconds < 60) {
+                    diffText = 'in ${diff.inSeconds}s';
+                  } else if (diff.inMinutes < 60) {
+                    diffText = 'in ${diff.inMinutes}m ${diff.inSeconds % 60}s';
+                  } else if (diff.inHours < 24) {
+                    diffText = 'in ${diff.inHours}h ${diff.inMinutes % 60}m';
+                  } else {
+                    diffText = 'in ${diff.inDays}d ${diff.inHours % 24}h';
+                  }
+
+                  Color cardBorderColor = Colors.grey.withValues(alpha: 0.2);
+                  if (isSnoozed) {
+                    cardBorderColor = Colors.orangeAccent.withValues(alpha: 0.6);
+                  } else if (diff.inMinutes < 60 && !diff.isNegative) {
+                    cardBorderColor = prayerColor.withValues(alpha: 0.6);
+                  }
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: cardBorderColor, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isSnoozed
+                              ? Icons.snooze
+                              : (soundName == 'silent' ? Icons.vibration : Icons.alarm_on),
+                          color: isSnoozed ? Colors.orangeAccent : prayerColor,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    prayerName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: (isSnoozed ? Colors.orange : Colors.green).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: isSnoozed ? Colors.orange : Colors.green,
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      diffText,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: isSnoozed ? Colors.orange : Colors.green,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                DateFormat('EEE, MMM d • hh:mm:ss a').format(triggerDate),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                              ),
+                              Text(
+                                'ID: $id • Sound: $soundName${snoozeMinutes > 0 ? ' • Snooze: ${snoozeMinutes}m' : ''}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Theme.of(context).textTheme.bodySmall?.color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                          tooltip: 'Cancel this alarm',
+                          onPressed: () async {
+                            await PrayerAlarmService.cancelSpecificAlarm(id);
+                            _loadPendingNotifications();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrayerAlarmsCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final prayers = ['Fajr', 'Shuruq', 'Duhr', 'Asr', 'Maghrib', 'Isha'];
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.alarm, color: prayerColor),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.configuredPrayerAlarms,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.configuredPrayerAlarmsDesc,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...prayers.map((prayer) {
+              final settings = _prayerAlarms[prayer] ?? PrayerAlarmSettings(prayerName: prayer);
+              final alarmId = PrayerAlarmService.getAlarmId(prayer);
+              final isPending = settings.isEnabled;
+              final prayerTitle = getPrayerTranslation(prayer, context);
+
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: settings.isEnabled ? prayerColor.withValues(alpha: 0.5) : Colors.grey.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      settings.isEnabled ? Icons.alarm_on : Icons.alarm_off,
+                      color: settings.isEnabled ? prayerColor : Colors.grey,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                prayerTitle,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: (isPending ? Colors.green : Colors.grey).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: isPending ? Colors.green : Colors.grey, width: 0.8),
+                                ),
+                                child: Text(
+                                  isPending ? l10n.activeInOs : (settings.isEnabled ? 'Enabled' : l10n.alarmSnoozeOff),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: isPending ? Colors.green : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            settings.isEnabled
+                                ? '${settings.soundType} • ${settings.offsetMinutes == 0 ? l10n.alarmOffsetExact : l10n.alarmOffsetBefore(settings.offsetMinutes.abs())} (ID: $alarmId)'
+                                : l10n.alarmSnoozeOff,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(Icons.play_arrow, size: 14),
+                      label: Text(l10n.testAlarmButton, style: const TextStyle(fontSize: 11)),
+                      onPressed: () async {
+                        await PrayerAlarmService.scheduleTestAlarm(
+                          soundType: settings.soundType,
+                          delaySeconds: 5,
+                          snoozeMinutes: settings.snoozeMinutes > 0 ? settings.snoozeMinutes : 5,
+                          title: l10n.testAlarmTitle,
+                          body: '$prayerTitle (${settings.soundType})',
+                          dismissLabel: l10n.alarmDismiss,
+                          snoozeLabel: l10n.alarmSnooze,
+                        );
+                        if (mounted) {
+                          _showSnackBar(l10n.alarmScheduledInSeconds(5));
+                          _loadPendingNotifications();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),

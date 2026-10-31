@@ -629,10 +629,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get soundMadina => 'أذان المسجد النبوي';
 
   @override
-  String get soundChime => 'نغمة التطبيق الخاصة';
+  String get soundSystem => 'نغمة منبه النظام';
 
   @override
-  String get soundSystem => 'نغمة منبه النظام';
+  String get soundSilent => 'صامت (اهتزاز فقط)';
 
   @override
   String get alarmOffset => 'وقت التنبيه';
@@ -700,4 +700,51 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get soundNafees => 'أذان الشيخ أحمد النفيس';
+
+  @override
+  String get testAlarmTitle => 'اختبار منبه الصلاة';
+
+  @override
+  String get testAlarmDesc =>
+      'تشغيل منبه تجريبي للتأكد من الصوت التكراري، واستيقاظ الشاشة أثناء القفل، وأزرار الإيقاف والغفوة.';
+
+  @override
+  String triggerAlarmInSeconds(int seconds) {
+    return 'تشغيل المنبه بعد $seconds ثوانٍ';
+  }
+
+  @override
+  String get testAlarmLockHint =>
+      'ملاحظة: اقفل شاشة هاتفك بعد الضغط للتأكد من استيقاظ الشاشة أثناء القفل!';
+
+  @override
+  String get configuredPrayerAlarms => 'منبهات الصلوات المضبوطة';
+
+  @override
+  String get configuredPrayerAlarmsDesc =>
+      'حالة وإعدادات المنبه لكل صلاة من الصلوات الخمس والشروق.';
+
+  @override
+  String alarmScheduledInSeconds(int seconds) {
+    return 'تم جدولة المنبه التجريبي بعد $seconds ثوانٍ. اقفل شاشتك الآن!';
+  }
+
+  @override
+  String get activeInOs => 'نشط لدى النظام';
+
+  @override
+  String get testAlarmButton => 'اختبار المنبه (5 ث)';
+
+  @override
+  String get fullScreenIntentTitle => 'إذن منبه شاشة القفل';
+
+  @override
+  String get fullScreenIntentDesc =>
+      'يتطلب أندرويد 14 منح إذن لعرض المنبه وإيقاظ الشاشة تلقائياً أثناء قفل الهاتف.';
+
+  @override
+  String get fullScreenIntentAction => 'منح الإذن';
+
+  @override
+  String get fullScreenIntentGranted => 'إذن منبه شاشة القفل مفعّل';
 }

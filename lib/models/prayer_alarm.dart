@@ -2,7 +2,7 @@ class PrayerAlarmSettings {
   final String prayerName; // 'Fajr', 'Shuruq', 'Duhr', 'Asr', 'Maghrib', 'Isha'
   final bool isEnabled;
   final int offsetMinutes; // e.g. 0, -10, -15, -20, -30, -45, -60
-  final String soundType; // 'alaqsa', 'makkah', 'madina', 'chime', 'system'
+  final String soundType; // 'alaqsa', 'makkah', 'madina', 'abdulbasit', 'minshawi', 'hussary', 'nafees', 'system', 'silent'
   final int snoozeMinutes; // 5, 10, 0 (0 = disabled)
   final bool vibrate;
 

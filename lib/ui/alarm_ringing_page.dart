@@ -7,10 +7,14 @@ import '../services/prayer_methods.dart';
 
 class AlarmRingingPage extends StatefulWidget {
   final String prayerName;
+  final String? soundType;
+  final int? snoozeMinutes;
 
   const AlarmRingingPage({
     super.key,
     required this.prayerName,
+    this.soundType,
+    this.snoozeMinutes,
   });
 
   @override
@@ -21,10 +25,30 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   bool _isDismissed = false;
+  String? _soundType;
 
   @override
   void initState() {
     super.initState();
+    _soundType = widget.soundType;
+    PrayerAlarmService.wakeScreen();
+    if (widget.soundType != null) {
+      if (widget.soundType != 'silent') {
+        PrayerAlarmService.startAlarmAudio(widget.soundType!);
+      }
+    } else {
+      PrayerAlarmService.loadAlarmSettings(widget.prayerName).then((s) {
+        if (mounted) {
+          setState(() {
+            _soundType = s.soundType;
+          });
+        }
+        if (s.soundType != 'silent') {
+          PrayerAlarmService.startAlarmAudio(s.soundType);
+        }
+      });
+    }
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -37,11 +61,13 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
 
   @override
   void dispose() {
+    PrayerAlarmService.stopAlarmAudio();
     _pulseController.dispose();
     super.dispose();
   }
 
   Future<void> _handleDismiss() async {
+    await PrayerAlarmService.stopAlarmAudio();
     await PrayerAlarmService.dismiss(widget.prayerName);
     setState(() {
       _isDismissed = true;
@@ -54,7 +80,12 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   }
 
   Future<void> _handleSnooze() async {
-    await PrayerAlarmService.snooze(widget.prayerName);
+    await PrayerAlarmService.stopAlarmAudio();
+    await PrayerAlarmService.snooze(
+      widget.prayerName,
+      snoozeMinutes: widget.snoozeMinutes,
+      soundType: _soundType,
+    );
     if (mounted) {
       Navigator.of(context).pop();
     }
@@ -85,6 +116,8 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   }
 
   Widget _buildRingingView(AppLocalizations l10n, String prayerTitle) {
+    final isSilent = _soundType == 'silent';
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
@@ -109,7 +142,7 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
                   ],
                 ),
                 child: Icon(
-                  Icons.alarm_on,
+                  isSilent ? Icons.vibration : Icons.alarm_on,
                   size: 80,
                   color: prayerColor,
                 ),
@@ -133,6 +166,24 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
                 fontSize: 18,
               ),
             ),
+            if (isSilent) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.vibration, size: 16, color: prayerColor),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.soundSilent,
+                    style: TextStyle(
+                      color: prayerColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const Spacer(),
             Row(
               children: [

@@ -628,10 +628,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get soundMadina => 'Madinah Adhan';
 
   @override
-  String get soundChime => 'App Alarm Tone';
+  String get soundSystem => 'System Default Alarm';
 
   @override
-  String get soundSystem => 'System Default Alarm';
+  String get soundSilent => 'Silent (Vibrate only)';
 
   @override
   String get alarmOffset => 'Alarm Time';
@@ -698,4 +698,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get soundNafees => 'Ahmad Al-Nafees';
+
+  @override
+  String get testAlarmTitle => 'Test Prayer Alarm';
+
+  @override
+  String get testAlarmDesc =>
+      'Trigger a test alarm to verify looping audio, lock screen wake-up, and dismiss/snooze actions.';
+
+  @override
+  String triggerAlarmInSeconds(int seconds) {
+    return 'Trigger Alarm in ${seconds}s';
+  }
+
+  @override
+  String get testAlarmLockHint =>
+      'Tip: Lock your phone right after pressing to verify lock-screen wake-up!';
+
+  @override
+  String get configuredPrayerAlarms => 'Configured Prayer Alarms';
+
+  @override
+  String get configuredPrayerAlarmsDesc =>
+      'Status and configuration of in-app prayer alarms for each prayer.';
+
+  @override
+  String alarmScheduledInSeconds(int seconds) {
+    return 'Test alarm scheduled in $seconds seconds. Lock your phone now!';
+  }
+
+  @override
+  String get activeInOs => 'Active in OS';
+
+  @override
+  String get testAlarmButton => 'Test Alarm (5s)';
+
+  @override
+  String get fullScreenIntentTitle => 'Full-Screen Alarm Permission';
+
+  @override
+  String get fullScreenIntentDesc =>
+      'Android 14 requires permission to wake up the screen and show the alarm when your device is locked.';
+
+  @override
+  String get fullScreenIntentAction => 'Grant Permission';
+
+  @override
+  String get fullScreenIntentGranted => 'Full-screen alarm permission granted';
 }

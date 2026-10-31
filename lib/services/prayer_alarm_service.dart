@@ -2,29 +2,120 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-// ignore: depend_on_referenced_packages
-import 'package:timezone/timezone.dart' as tz;
+import 'package:rxdart/rxdart.dart';
 
+import '../data/prayer_times.dart';
+import '../models/prayer.dart';
 import '../models/prayer_alarm.dart';
+import '../models/prayers.dart';
+import 'day_of_year_service.dart';
+import 'daylight_time_service.dart';
 import 'notifications_service.dart';
+import 'prayer_methods.dart';
 import 'store_manager.dart';
 
 @pragma('vm:entry-point')
 void alarmActionBackgroundCallback(NotificationResponse response) async {
+  final payload = response.payload ?? '';
   if (response.actionId == 'alarm_dismiss' || response.actionId == 'alarm_snooze') {
-    final payload = response.payload ?? '';
     final prayer = payload.startsWith('alarm|') ? payload.split('|')[1] : 'Fajr';
     if (response.actionId == 'alarm_dismiss') {
       await PrayerAlarmService.dismiss(prayer);
     } else if (response.actionId == 'alarm_snooze') {
       await PrayerAlarmService.snooze(prayer);
     }
+  } else if (payload.startsWith('alarm|')) {
+    await PrayerAlarmService.triggerAlarmNow(payload);
   }
 }
 
 class PrayerAlarmService {
+  static const MethodChannel _alarmChannel = MethodChannel('com.othman.mawaqitquds/alarm');
+  static final BehaviorSubject<String?> onNativeAlarmTriggered = BehaviorSubject<String?>();
+  static bool _channelInitialized = false;
+
+  static void initPlatformChannel() {
+    if (_channelInitialized || kIsWeb || !Platform.isAndroid) return;
+    _channelInitialized = true;
+    _alarmChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onAlarmTriggered') {
+        final payload = call.arguments as String?;
+        if (payload != null) {
+          onNativeAlarmTriggered.add(payload);
+        }
+      }
+    });
+  }
+
+  static Future<bool> canUseFullScreenIntent() async {
+    if (kIsWeb || !Platform.isAndroid) return true;
+    try {
+      final res = await _alarmChannel.invokeMethod<bool>('canUseFullScreenIntent');
+      return res ?? true;
+    } catch (e) {
+      debugPrint('Error checking canUseFullScreenIntent: $e');
+      return true;
+    }
+  }
+
+  static Future<void> openFullScreenIntentSettings() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('openFullScreenIntentSettings');
+    } catch (e) {
+      debugPrint('Error opening full screen intent settings: $e');
+    }
+  }
+
+  static Future<void> triggerAlarmNow(String payload) async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('triggerAlarmNow', {'payload': payload});
+    } catch (e) {
+      debugPrint('Error triggering alarm now: $e');
+    }
+  }
+
+  static Future<void> wakeScreen() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('wakeScreen');
+    } catch (e) {
+      debugPrint('Error waking screen: $e');
+    }
+  }
+
+  static Future<void> startAlarmAudio(String soundName) async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('startAlarmAudio', {'soundName': soundName});
+    } catch (e) {
+      debugPrint('Error starting alarm audio: $e');
+    }
+  }
+
+  static Future<void> stopAlarmAudio() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('stopAlarmAudio');
+    } catch (e) {
+      debugPrint('Error stopping alarm audio: $e');
+    }
+  }
+
+  static Future<String?> getPendingAlarmPayload() async {
+    if (kIsWeb || !Platform.isAndroid) return null;
+    try {
+      return await _alarmChannel.invokeMethod<String>('getPendingAlarmPayload');
+    } catch (e) {
+      debugPrint('Error getting pending alarm payload: $e');
+      return null;
+    }
+  }
+
   static const String _prefsPrefix = 'PrayerAlarm_';
   static final Map<String, int> _alarmIds = {
     'Fajr': 810010,
@@ -35,6 +126,7 @@ class PrayerAlarmService {
     'Isha': 810060,
   };
   static const int _snoozeBaseId = 810090;
+  static const int testAlarmId = 810999;
 
   static AndroidNotificationSound? resolveSound(String soundType) {
     switch (soundType) {
@@ -52,15 +144,31 @@ class PrayerAlarmService {
         return const RawResourceAndroidNotificationSound('adhan_hussary');
       case 'nafees':
         return const RawResourceAndroidNotificationSound('adhan_nafees');
-      case 'chime':
-        return const RawResourceAndroidNotificationSound('alarm_chime');
       case 'system':
       default:
         return null;
     }
   }
 
-  static int getAlarmId(String prayerName) {
+  static const Map<String, int> _prayerIndex = {
+    'Fajr': 1,
+    'Shuruq': 2,
+    'Duhr': 3,
+    'Asr': 4,
+    'Maghrib': 5,
+    'Isha': 6,
+  };
+
+  static int getPrayerAlarmId(String prayerName, DateTime prayerTime) {
+    final day = dayOfYear(prayerTime);
+    final pIndex = _prayerIndex[prayerName] ?? 1;
+    return 800000 + (day * 10) + pIndex;
+  }
+
+  static int getAlarmId(String prayerName, [DateTime? date]) {
+    if (date != null) {
+      return getPrayerAlarmId(prayerName, date);
+    }
     return _alarmIds[prayerName] ?? 810010;
   }
 
@@ -113,8 +221,103 @@ class PrayerAlarmService {
 
   static Future<void> cancelAlarm(String prayerName) async {
     if (kIsWeb || !Platform.isAndroid) return;
-    await NotificationsService.cancelNotification(getAlarmId(prayerName));
-    await NotificationsService.cancelNotification(getSnoozeAlarmId(prayerName));
+    final now = DateTime.now();
+    for (int i = 0; i < 14; i++) {
+      final date = now.add(Duration(days: i));
+      final id = getPrayerAlarmId(prayerName, date);
+      try {
+        await _alarmChannel.invokeMethod('cancelNativeAlarm', {'id': id});
+      } catch (_) {}
+      await NotificationsService.cancelNotification(id);
+    }
+    final legacyId = _alarmIds[prayerName];
+    if (legacyId != null) {
+      try {
+        await _alarmChannel.invokeMethod('cancelNativeAlarm', {'id': legacyId});
+      } catch (_) {}
+      await NotificationsService.cancelNotification(legacyId);
+    }
+    final snoozeId = getSnoozeAlarmId(prayerName);
+    try {
+      await _alarmChannel.invokeMethod('cancelNativeAlarm', {'id': snoozeId});
+    } catch (_) {}
+    await NotificationsService.cancelNotification(snoozeId);
+  }
+
+  static Future<void> scheduleUpcomingAlarms({
+    List? prayerList,
+    bool? summerTime,
+    int? timeDiff,
+  }) async {
+    if (kIsWeb || !Platform.isAndroid) return;
+
+    final alarmSettingsMap = await loadAllAlarmSettings();
+    final enabledPrayers = alarmSettingsMap.entries.where((e) => e.value.isEnabled).map((e) => e.key).toSet();
+
+    if (enabledPrayers.isEmpty) {
+      for (final prayer in _alarmIds.keys) {
+        await cancelAlarm(prayer);
+      }
+      return;
+    }
+
+    for (final prayer in _alarmIds.keys) {
+      if (!enabledPrayers.contains(prayer)) {
+        await cancelAlarm(prayer);
+      }
+    }
+
+    List prayersData = prayerList ?? [];
+    if (prayersData.isEmpty) {
+      try {
+        prayersData = json.decode(prayersJson) as List;
+      } catch (e) {
+        debugPrint('Error loading prayersJson for alarms: $e');
+        return;
+      }
+    }
+
+    final diff = timeDiff ?? (await StorageManager.readData('timeDiff') as int? ?? 0);
+    final now = DateTime.now();
+    final prayersToSchedule = <Prayer>[];
+
+    // Build today and next 13 days of prayers (14-day rolling buffer)
+    for (int dayOffset = 0; dayOffset <= 13; dayOffset++) {
+      final targetDate = now.add(Duration(days: dayOffset));
+      final dayDst = summerTime ?? DaylightSavingNotifier.isDstOnDate(targetDate);
+      final dayIdx = dayOfYear(targetDate);
+      if (dayIdx >= 0 && dayIdx < prayersData.length) {
+        final dayPrayersModel = PrayersModel.fromJson(prayersData[dayIdx]);
+        prayersToSchedule.addAll(getDayPrayers(targetDate, dayPrayersModel, dayDst, diff));
+      }
+    }
+
+    for (final prayer in prayersToSchedule) {
+      if (!enabledPrayers.contains(prayer.label)) continue;
+      final settings = alarmSettingsMap[prayer.label]!;
+
+      final targetTime = prayer.time.add(Duration(minutes: settings.offsetMinutes));
+      if (!targetTime.isAfter(now)) continue;
+
+      final alarmId = getPrayerAlarmId(prayer.label, prayer.time);
+
+      try {
+        await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
+          'id': alarmId,
+          'triggerAtMillis': targetTime.millisecondsSinceEpoch,
+          'prayerName': prayer.label,
+          'soundName': settings.soundType,
+          'title': 'Time for ${prayer.label}',
+          'body': prayer.label,
+          'dismissLabel': 'Dismiss',
+          'snoozeLabel': 'Snooze',
+          'snoozeMinutes': settings.snoozeMinutes,
+          'vibrate': settings.vibrate,
+        });
+      } catch (e) {
+        debugPrint('Error scheduling rolling native alarm for ${prayer.label}: $e');
+      }
+    }
   }
 
   static Future<void> schedulePrayerAlarm({
@@ -141,130 +344,123 @@ class PrayerAlarmService {
     }
 
     final id = getAlarmId(prayerName);
-    final channelId = 'mawaqit_alarm_${config.soundType}';
-    final channelName = 'Prayer Alarm (${config.soundType})';
-
-    final sound = resolveSound(config.soundType);
-
-    final vibrationPattern = Int64List(6);
-    vibrationPattern[0] = 0;
-    vibrationPattern[1] = 1000;
-    vibrationPattern[2] = 500;
-    vibrationPattern[3] = 1000;
-    vibrationPattern[4] = 500;
-    vibrationPattern[5] = 1000;
-
-    final actions = <AndroidNotificationAction>[
-      AndroidNotificationAction(
-        'alarm_dismiss',
-        dismissLabel ?? 'Dismiss',
-        cancelNotification: true,
-      ),
-    ];
-
-    if (config.snoozeMinutes > 0) {
-      actions.add(
-        AndroidNotificationAction(
-          'alarm_snooze',
-          snoozeLabel ?? 'Snooze',
-        ),
-      );
-    }
-
-    final androidDetails = AndroidNotificationDetails(
-      channelId,
-      channelName,
-      channelDescription: 'High-priority prayer alarms that wake device and loop until stopped',
-      icon: '@drawable/launcher_icon',
-      importance: Importance.max,
-      priority: Priority.high,
-      category: AndroidNotificationCategory.alarm,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      playSound: true,
-      sound: sound,
-      enableVibration: config.vibrate,
-      vibrationPattern: config.vibrate ? vibrationPattern : null,
-      fullScreenIntent: true,
-      ongoing: true,
-      autoCancel: false,
-      additionalFlags: Int32List.fromList(<int>[4]), // FLAG_INSISTENT: loops audio until handled
-      actions: actions,
-    );
-
-    final notificationDetails = NotificationDetails(android: androidDetails);
-    final tzTarget = tz.TZDateTime.from(targetTime, tz.local);
 
     try {
-      await NotificationsService.notificationsPlugin.zonedSchedule(
-        id: id,
-        title: title ?? 'Time for $prayerName',
-        body: body ?? '',
-        scheduledDate: tzTarget,
-        notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-        payload: 'alarm|$prayerName',
-      );
+      await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
+        'id': id,
+        'triggerAtMillis': targetTime.millisecondsSinceEpoch,
+        'prayerName': prayerName,
+        'soundName': config.soundType,
+        'title': title ?? 'Time for $prayerName',
+        'body': body ?? '',
+        'dismissLabel': dismissLabel ?? 'Dismiss',
+        'snoozeLabel': snoozeLabel ?? 'Snooze',
+        'snoozeMinutes': config.snoozeMinutes,
+        'vibrate': config.vibrate,
+      });
     } catch (e) {
-      debugPrint('Error scheduling prayer alarm ($prayerName): $e');
+      debugPrint('Error scheduling native prayer alarm ($prayerName): $e');
     }
   }
 
-  static Future<void> snooze(String prayerName) async {
+  static Future<void> snooze(
+    String prayerName, {
+    int? snoozeMinutes,
+    String? soundType,
+  }) async {
     if (kIsWeb || !Platform.isAndroid) return;
-    await NotificationsService.cancelNotification(getAlarmId(prayerName));
+    await stopAlarmAudio();
 
     final config = await loadAlarmSettings(prayerName);
-    final snoozeMinutes = config.snoozeMinutes > 0 ? config.snoozeMinutes : 10;
-    final snoozeTime = DateTime.now().add(Duration(minutes: snoozeMinutes));
-
-    final sound = resolveSound(config.soundType);
-
-    final androidDetails = AndroidNotificationDetails(
-      'mawaqit_alarm_${config.soundType}',
-      'Prayer Alarm (${config.soundType})',
-      channelDescription: 'High-priority prayer alarms that wake device and loop until stopped',
-      icon: '@drawable/launcher_icon',
-      importance: Importance.max,
-      priority: Priority.high,
-      category: AndroidNotificationCategory.alarm,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      playSound: true,
-      sound: sound,
-      enableVibration: config.vibrate,
-      fullScreenIntent: true,
-      ongoing: true,
-      autoCancel: false,
-      additionalFlags: Int32List.fromList(<int>[4]),
-      actions: [
-        const AndroidNotificationAction(
-          'alarm_dismiss',
-          'Dismiss',
-          cancelNotification: true,
-        ),
-      ],
-    );
-
-    final notificationDetails = NotificationDetails(android: androidDetails);
-    final tzTarget = tz.TZDateTime.from(snoozeTime, tz.local);
+    final duration = snoozeMinutes ?? (config.snoozeMinutes > 0 ? config.snoozeMinutes : 5);
+    final sound = soundType ?? config.soundType;
+    final snoozeTime = DateTime.now().add(Duration(minutes: duration));
+    final snoozeId = getSnoozeAlarmId(prayerName);
 
     try {
-      await NotificationsService.notificationsPlugin.zonedSchedule(
-        id: getSnoozeAlarmId(prayerName),
-        title: 'Snooze: $prayerName',
-        body: 'Alarm snoozed for $snoozeMinutes minutes',
-        scheduledDate: tzTarget,
-        notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-        payload: 'alarm|$prayerName',
-      );
+      await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
+        'id': snoozeId,
+        'triggerAtMillis': snoozeTime.millisecondsSinceEpoch,
+        'prayerName': prayerName.startsWith('Snooze:') ? prayerName : 'Snooze: $prayerName',
+        'soundName': sound,
+        'title': 'Snooze: $prayerName',
+        'body': 'Alarm snoozed for $duration minutes',
+        'dismissLabel': 'Dismiss',
+        'snoozeLabel': 'Snooze',
+        'snoozeMinutes': duration,
+        'vibrate': config.vibrate,
+      });
     } catch (e) {
-      debugPrint('Error scheduling snooze alarm ($prayerName): $e');
+      debugPrint('Error scheduling native snooze alarm ($prayerName): $e');
+    }
+  }
+
+  static Future<void> scheduleTestAlarm({
+    required String soundType,
+    int delaySeconds = 5,
+    int snoozeMinutes = 5,
+    String? title,
+    String? body,
+    String? dismissLabel,
+    String? snoozeLabel,
+  }) async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    final testTime = DateTime.now().add(Duration(seconds: delaySeconds));
+
+    try {
+      await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
+        'id': testAlarmId,
+        'triggerAtMillis': testTime.millisecondsSinceEpoch,
+        'prayerName': 'Test',
+        'soundName': soundType,
+        'title': title ?? 'Test Prayer Alarm',
+        'body': body ?? 'Testing alarm audio ($soundType)',
+        'dismissLabel': dismissLabel ?? 'Dismiss',
+        'snoozeLabel': snoozeLabel ?? 'Snooze',
+        'snoozeMinutes': snoozeMinutes,
+        'vibrate': true,
+      });
+    } catch (e) {
+      debugPrint('Error scheduling native test alarm: $e');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getScheduledNativeAlarms() async {
+    if (kIsWeb || !Platform.isAndroid) return [];
+    try {
+      final res = await _alarmChannel.invokeMethod('getScheduledNativeAlarms');
+      if (res is List) {
+        return res.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+    } catch (e) {
+      debugPrint('Error getting scheduled native alarms: $e');
+    }
+    return [];
+  }
+
+  static Future<void> cancelSpecificAlarm(int id) async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('cancelNativeAlarm', {'id': id});
+      await NotificationsService.cancelNotification(id);
+    } catch (e) {
+      debugPrint('Error cancelling specific native alarm ($id): $e');
     }
   }
 
   static Future<void> dismiss(String prayerName) async {
     if (kIsWeb || !Platform.isAndroid) return;
-    await NotificationsService.cancelNotification(getAlarmId(prayerName));
-    await NotificationsService.cancelNotification(getSnoozeAlarmId(prayerName));
+    await stopAlarmAudio();
+    final alarmId = getAlarmId(prayerName);
+    final snoozeId = getSnoozeAlarmId(prayerName);
+    try {
+      await _alarmChannel.invokeMethod('cancelNativeAlarm', {'id': snoozeId});
+      await _alarmChannel.invokeMethod('cancelNativeAlarm', {'id': testAlarmId});
+    } catch (e) {
+      debugPrint('Error dismissing native alarm: $e');
+    }
+    await NotificationsService.cancelNotification(alarmId);
+    await NotificationsService.cancelNotification(snoozeId);
+    await NotificationsService.cancelNotification(testAlarmId);
   }
 }

@@ -58,8 +58,8 @@ void main() {
       expect(PrayerAlarmService.resolveSound('minshawi'), isNotNull);
       expect(PrayerAlarmService.resolveSound('hussary'), isNotNull);
       expect(PrayerAlarmService.resolveSound('nafees'), isNotNull);
-      expect(PrayerAlarmService.resolveSound('chime'), isNotNull);
       expect(PrayerAlarmService.resolveSound('system'), isNull);
+      expect(PrayerAlarmService.resolveSound('silent'), isNull);
     });
 
     test('Prayer alarm IDs are distinct and consistent', () {
@@ -72,6 +72,16 @@ void main() {
 
       final fajrSnoozeId = PrayerAlarmService.getSnoozeAlarmId('Fajr');
       expect(fajrId, isNot(equals(fajrSnoozeId)));
+
+      final monday = DateTime(2026, 11, 1, 5, 0);
+      final tuesday = DateTime(2026, 11, 2, 5, 0);
+      final mondayFajr = PrayerAlarmService.getPrayerAlarmId('Fajr', monday);
+      final mondayDuhr = PrayerAlarmService.getPrayerAlarmId('Duhr', monday);
+      final tuesdayFajr = PrayerAlarmService.getPrayerAlarmId('Fajr', tuesday);
+
+      expect(mondayFajr, isNot(equals(mondayDuhr)));
+      expect(mondayFajr, isNot(equals(tuesdayFajr)));
+      expect(PrayerAlarmService.getPrayerAlarmId('Fajr', monday), equals(mondayFajr));
     });
   });
 }

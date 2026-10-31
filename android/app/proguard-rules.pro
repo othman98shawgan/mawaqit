@@ -8,3 +8,7 @@
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+
+# Native Mawaqit Alarm Engine ProGuard Rules
+-keep class com.example.alfajr.** { *; }
+-keepclassmembers class com.example.alfajr.** { *; }
