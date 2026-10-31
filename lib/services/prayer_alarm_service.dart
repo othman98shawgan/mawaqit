@@ -249,6 +249,7 @@ class PrayerAlarmService {
     bool? summerTime,
     int? timeDiff,
     Map<String, String>? localizedTitles,
+    Map<String, String>? localizedBodies,
   }) async {
     if (kIsWeb || !Platform.isAndroid) return;
 
@@ -302,6 +303,10 @@ class PrayerAlarmService {
 
       final alarmId = getPrayerAlarmId(prayer.label, prayer.time);
       final alarmTitle = localizedTitles?[prayer.label] ?? '${prayer.label} Alarm';
+      final alarmBody = localizedBodies?[prayer.label] ??
+          (settings.offsetMinutes == 0
+              ? 'Time for ${prayer.label}'
+              : '${settings.offsetMinutes.abs()} minutes remaining until ${prayer.label}');
 
       try {
         await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
@@ -310,10 +315,11 @@ class PrayerAlarmService {
           'prayerName': prayer.label,
           'soundName': settings.soundType,
           'title': alarmTitle,
-          'body': alarmTitle,
+          'body': alarmBody,
           'dismissLabel': 'Dismiss',
           'snoozeLabel': 'Snooze',
           'snoozeMinutes': settings.snoozeMinutes,
+          'offsetMinutes': settings.offsetMinutes,
           'vibrate': settings.vibrate,
         });
       } catch (e) {
@@ -347,6 +353,10 @@ class PrayerAlarmService {
 
     final id = getAlarmId(prayerName);
     final alarmTitle = title ?? '$prayerName Alarm';
+    final alarmBody = body ??
+        (config.offsetMinutes == 0
+            ? 'Time for $prayerName'
+            : '${config.offsetMinutes.abs()} minutes remaining until $prayerName');
 
     try {
       await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
@@ -355,10 +365,11 @@ class PrayerAlarmService {
         'prayerName': prayerName,
         'soundName': config.soundType,
         'title': alarmTitle,
-        'body': body ?? alarmTitle,
+        'body': alarmBody,
         'dismissLabel': dismissLabel ?? 'Dismiss',
         'snoozeLabel': snoozeLabel ?? 'Snooze',
         'snoozeMinutes': config.snoozeMinutes,
+        'offsetMinutes': config.offsetMinutes,
         'vibrate': config.vibrate,
       });
     } catch (e) {
@@ -391,6 +402,7 @@ class PrayerAlarmService {
         'dismissLabel': 'Dismiss',
         'snoozeLabel': 'Snooze',
         'snoozeMinutes': duration,
+        'offsetMinutes': 0,
         'vibrate': config.vibrate,
       });
     } catch (e) {
@@ -421,6 +433,7 @@ class PrayerAlarmService {
         'dismissLabel': dismissLabel ?? 'Dismiss',
         'snoozeLabel': snoozeLabel ?? 'Snooze',
         'snoozeMinutes': snoozeMinutes,
+        'offsetMinutes': 0,
         'vibrate': true,
       });
     } catch (e) {

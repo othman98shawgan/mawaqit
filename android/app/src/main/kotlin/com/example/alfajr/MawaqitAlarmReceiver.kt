@@ -19,6 +19,7 @@ class MawaqitAlarmReceiver : BroadcastReceiver() {
                 val soundName = intent.getStringExtra("sound_name") ?: "alaqsa"
                 val title = intent.getStringExtra("title") ?: "$prayerName Alarm"
                 val body = intent.getStringExtra("body") ?: ""
+                val offsetMinutes = intent.getIntExtra("offset_minutes", 0)
                 val dismissLabel = intent.getStringExtra("dismiss_label") ?: "Dismiss"
                 val snoozeLabel = intent.getStringExtra("snooze_label") ?: "Snooze"
                 val snoozeMinutes = intent.getIntExtra("snooze_minutes", 10)
@@ -31,6 +32,7 @@ class MawaqitAlarmReceiver : BroadcastReceiver() {
                     soundName = soundName,
                     title = title,
                     body = body,
+                    offsetMinutes = offsetMinutes,
                     dismissLabel = dismissLabel,
                     snoozeLabel = snoozeLabel,
                     snoozeMinutes = snoozeMinutes,

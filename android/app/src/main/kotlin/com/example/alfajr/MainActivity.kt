@@ -100,6 +100,7 @@ class MainActivity : FlutterActivity() {
                         val soundName = call.argument<String>("soundName") ?: "alaqsa"
                         val title = call.argument<String>("title") ?: "$prayerName Alarm"
                         val body = call.argument<String>("body") ?: ""
+                        val offsetMinutes = call.argument<Int>("offsetMinutes") ?: 0
                         val dismissLabel = call.argument<String>("dismissLabel") ?: "Dismiss"
                         val snoozeLabel = call.argument<String>("snoozeLabel") ?: "Snooze"
                         val snoozeMinutes = call.argument<Int>("snoozeMinutes") ?: 10
@@ -113,6 +114,7 @@ class MainActivity : FlutterActivity() {
                             soundName = soundName,
                             title = title,
                             body = body,
+                            offsetMinutes = offsetMinutes,
                             dismissLabel = dismissLabel,
                             snoozeLabel = snoozeLabel,
                             snoozeMinutes = snoozeMinutes,

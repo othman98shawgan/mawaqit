@@ -83,5 +83,15 @@ void main() {
       expect(mondayFajr, isNot(equals(tuesdayFajr)));
       expect(PrayerAlarmService.getPrayerAlarmId('Fajr', monday), equals(mondayFajr));
     });
+
+    test('5-minute precision offsets and target calculation', () {
+      final prayerTime = DateTime(2026, 11, 1, 5, 0);
+      for (int minutes = 0; minutes <= 60; minutes += 5) {
+        final offset = minutes == 0 ? 0 : -minutes;
+        final settings = PrayerAlarmSettings(prayerName: 'Fajr', offsetMinutes: offset);
+        final target = prayerTime.add(Duration(minutes: settings.offsetMinutes));
+        expect(target, equals(prayerTime.subtract(Duration(minutes: minutes))));
+      }
+    });
   });
 }

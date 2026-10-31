@@ -261,10 +261,14 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
       final prayers = await getScheduledPrayers();
       final alarms = await PrayerAlarmService.loadAllAlarmSettings();
       if (!kIsWeb && Platform.isAndroid) {
+        if (!mounted) return;
+        final offsets = alarms.map((k, v) => MapEntry(k, v.offsetMinutes));
+        final localizedBodies = getLocalizedPrayerAlarmMessages(context, offsets);
         await PrayerAlarmService.scheduleUpcomingAlarms(
           summerTime: dstNotifier.getSummerTime(),
           timeDiff: diff,
           localizedTitles: localizedTitles,
+          localizedBodies: localizedBodies,
         );
       }
       final nativeAlarms = await PrayerAlarmService.getScheduledNativeAlarms();

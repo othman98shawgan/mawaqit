@@ -187,6 +187,8 @@
    "alarmSnoozeOff": "معطلة",
    "alarmDismiss": "إيقاف",
    "alarmRingingTitle": "منبه {prayer}",
+   "alarmNowTimeMessage": "حان الآن موعد {prayer}",
+   "alarmRemainingTimeMessage": "بقي {minutes} دقيقة على موعد {prayer}",
    "alarmWakeupDhikr": "الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور",
    "batteryOptimizationTitle": "تحسين البطارية",
    "batteryOptimizationDesc": "لضمان عمل منبه الصلاة بدقة عندما يكون الهاتف مقفلاً، يرجى استثناء تطبيق مواقيت من تحسين البطارية.",

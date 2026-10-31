@@ -33,6 +33,7 @@ object AlarmController {
         soundName: String,
         title: String,
         body: String,
+        offsetMinutes: Int = 0,
         dismissLabel: String,
         snoozeLabel: String,
         snoozeMinutes: Int,
@@ -41,7 +42,7 @@ object AlarmController {
         val appContext = context.applicationContext
         acquireWakeLock(appContext)
 
-        val payload = "alarm|$prayerName|$soundName|$snoozeMinutes"
+        val payload = "alarm|$prayerName|$soundName|$snoozeMinutes|$offsetMinutes"
         pendingAlarmPayload = payload
 
         // 1. Start continuous looping audio at max volume on STREAM_ALARM (skip if silent)
@@ -362,6 +363,7 @@ object AlarmController {
         soundName: String,
         title: String,
         body: String,
+        offsetMinutes: Int = 0,
         dismissLabel: String,
         snoozeLabel: String,
         snoozeMinutes: Int,
@@ -377,6 +379,7 @@ object AlarmController {
             putExtra("sound_name", soundName)
             putExtra("title", title)
             putExtra("body", body)
+            putExtra("offset_minutes", offsetMinutes)
             putExtra("dismiss_label", dismissLabel)
             putExtra("snooze_label", snoozeLabel)
             putExtra("snooze_minutes", snoozeMinutes)
@@ -410,6 +413,7 @@ object AlarmController {
             soundName,
             title,
             body,
+            offsetMinutes,
             dismissLabel,
             snoozeLabel,
             snoozeMinutes,
@@ -445,6 +449,7 @@ object AlarmController {
         soundName: String,
         title: String,
         body: String,
+        offsetMinutes: Int,
         dismissLabel: String,
         snoozeLabel: String,
         snoozeMinutes: Int,
@@ -459,6 +464,7 @@ object AlarmController {
                 put("soundName", soundName)
                 put("title", title)
                 put("body", body)
+                put("offsetMinutes", offsetMinutes)
                 put("dismissLabel", dismissLabel)
                 put("snoozeLabel", snoozeLabel)
                 put("snoozeMinutes", snoozeMinutes)
@@ -500,6 +506,7 @@ object AlarmController {
                                 soundName = obj.optString("soundName", "alaqsa"),
                                 title = obj.optString("title", "Prayer Alarm"),
                                 body = obj.optString("body", ""),
+                                offsetMinutes = obj.optInt("offsetMinutes", 0),
                                 dismissLabel = obj.optString("dismissLabel", "Dismiss"),
                                 snoozeLabel = obj.optString("snoozeLabel", "Snooze"),
                                 snoozeMinutes = obj.optInt("snoozeMinutes", 10),

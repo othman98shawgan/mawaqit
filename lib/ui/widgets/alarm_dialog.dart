@@ -34,7 +34,6 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
   bool _batteryOptimizationIgnored = true;
   bool _fullScreenIntentGranted = true;
 
-  final List<int> _offsetOptions = [0, -10, -15, -20, -30, -45, -60];
   final List<String> _soundOptions = ['alaqsa', 'makkah', 'madina', 'abdulbasit', 'minshawi', 'hussary', 'nafees', 'system', 'silent'];
   final List<int> _snoozeOptions = [0, 5, 10, 15];
 
@@ -176,10 +175,17 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
           }
         }
       }
+      final alarmSettingsMap = await PrayerAlarmService.loadAllAlarmSettings();
+      if (!mounted) return;
+      alarmSettingsMap[widget.prayerName] = _settings;
+      final offsets = alarmSettingsMap.map((k, v) => MapEntry(k, v.offsetMinutes));
+      final localizedBodies = getLocalizedPrayerAlarmMessages(context, offsets);
+
       await PrayerAlarmService.scheduleUpcomingAlarms(
         summerTime: dstNotifier.getSummerTime(),
         timeDiff: diff,
         localizedTitles: localizedTitles,
+        localizedBodies: localizedBodies,
       );
     }
 
@@ -241,33 +247,42 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
 
             if (_settings.isEnabled) ...[
               // Alarm Time / Offset
-              Text(
-                l10n.alarmOffset,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.alarmOffset,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                  Text(
+                    _getOffsetTitle(_settings.offsetMinutes, l10n),
+                    style: TextStyle(
+                      color: prayerColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
-              DropdownButtonFormField<int>(
-                value: _offsetOptions.contains(_settings.offsetMinutes) ? _settings.offsetMinutes : 0,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-                items: _offsetOptions.map((offset) {
-                  return DropdownMenuItem<int>(
-                    value: offset,
-                    child: Text(_getOffsetTitle(offset, l10n)),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) {
+              const SizedBox(height: 4),
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Slider(
+                  value: (_settings.offsetMinutes.abs().toDouble()).clamp(0.0, 60.0),
+                  min: 0,
+                  max: 60,
+                  divisions: 12,
+                  label: '${_settings.offsetMinutes.abs()}m',
+                  onChanged: (val) {
                     setState(() {
-                      _settings = _settings.copyWith(offsetMinutes: val);
+                      _settings = _settings.copyWith(
+                        offsetMinutes: val == 0 ? 0 : -val.round(),
+                      );
                     });
-                  }
-                },
+                  },
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Sound Selection
               Text(

@@ -879,6 +879,30 @@
          }
       }
    },
+   "alarmNowTimeMessage": "It is now time for {prayer}",
+   "@alarmNowTimeMessage": {
+      "description": "Alarm message when prayer time has arrived",
+      "placeholders": {
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "alarmRemainingTimeMessage": "{minutes} minutes remaining until {prayer}",
+   "@alarmRemainingTimeMessage": {
+      "description": "Alarm message showing minutes left before prayer",
+      "placeholders": {
+         "minutes": {
+            "type": "int",
+            "example": "15"
+         },
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
    "alarmWakeupDhikr": "All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.",
    "@alarmWakeupDhikr": {
       "description": "Wake-up dhikr upon dismissing Fajr alarm"

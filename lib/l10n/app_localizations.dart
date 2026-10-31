@@ -1220,6 +1220,18 @@ abstract class AppLocalizations {
   /// **'{prayer} Alarm'**
   String alarmRingingTitle(String prayer);
 
+  /// Alarm message when prayer time has arrived
+  ///
+  /// In en, this message translates to:
+  /// **'It is now time for {prayer}'**
+  String alarmNowTimeMessage(String prayer);
+
+  /// Alarm message showing minutes left before prayer
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes remaining until {prayer}'**
+  String alarmRemainingTimeMessage(int minutes, String prayer);
+
   /// Wake-up dhikr upon dismissing Fajr alarm
   ///
   /// In en, this message translates to:

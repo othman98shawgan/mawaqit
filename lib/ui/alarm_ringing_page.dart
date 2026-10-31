@@ -9,12 +9,14 @@ class AlarmRingingPage extends StatefulWidget {
   final String prayerName;
   final String? soundType;
   final int? snoozeMinutes;
+  final int? offsetMinutes;
 
   const AlarmRingingPage({
     super.key,
     required this.prayerName,
     this.soundType,
     this.snoozeMinutes,
+    this.offsetMinutes,
   });
 
   @override
@@ -26,11 +28,13 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   late Animation<double> _pulseAnimation;
   bool _isDismissed = false;
   String? _soundType;
+  int? _offsetMinutes;
 
   @override
   void initState() {
     super.initState();
     _soundType = widget.soundType;
+    _offsetMinutes = widget.offsetMinutes;
     PrayerAlarmService.wakeScreen();
     if (widget.soundType != null) {
       if (widget.soundType != 'silent') {
@@ -41,6 +45,7 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
         if (mounted) {
           setState(() {
             _soundType = s.soundType;
+            _offsetMinutes ??= s.offsetMinutes;
           });
         }
         if (s.soundType != 'silent') {
@@ -158,6 +163,20 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
                 color: Colors.white,
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              widget.prayerName == 'Test'
+                  ? l10n.testAlarmDesc
+                  : (_offsetMinutes == null || _offsetMinutes == 0
+                      ? l10n.alarmNowTimeMessage(prayerTitle)
+                      : l10n.alarmRemainingTimeMessage(_offsetMinutes!.abs(), prayerTitle)),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
               ),
             ),
             if (isSilent) ...[

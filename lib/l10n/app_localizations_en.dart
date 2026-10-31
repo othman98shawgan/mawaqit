@@ -667,6 +667,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String alarmNowTimeMessage(String prayer) {
+    return 'It is now time for $prayer';
+  }
+
+  @override
+  String alarmRemainingTimeMessage(int minutes, String prayer) {
+    return '$minutes minutes remaining until $prayer';
+  }
+
+  @override
   String get alarmWakeupDhikr =>
       'All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.';
 

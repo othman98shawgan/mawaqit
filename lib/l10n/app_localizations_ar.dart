@@ -668,6 +668,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String alarmNowTimeMessage(String prayer) {
+    return 'حان الآن موعد $prayer';
+  }
+
+  @override
+  String alarmRemainingTimeMessage(int minutes, String prayer) {
+    return 'بقي $minutes دقيقة على موعد $prayer';
+  }
+
+  @override
   String get alarmWakeupDhikr =>
       'الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور';
 

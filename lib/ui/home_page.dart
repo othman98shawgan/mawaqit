@@ -62,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     final prayer = parts.length >= 2 ? parts[1] : 'Fajr';
     final sound = parts.length >= 3 ? parts[2] : null;
     final snoozeMinutes = parts.length >= 4 ? int.tryParse(parts[3]) : null;
+    final offsetMinutes = parts.length >= 5 ? int.tryParse(parts[4]) : null;
 
     _isAlarmRingingOpen = true;
     Navigator.of(context).push(
@@ -70,6 +71,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           prayerName: prayer,
           soundType: sound,
           snoozeMinutes: snoozeMinutes,
+          offsetMinutes: offsetMinutes,
         ),
         fullscreenDialog: true,
       ),
@@ -168,11 +170,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (isAndroid) {
       final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
       final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+      final titles = getLocalizedPrayerAlarmTitles(context);
+      final alarmSettingsMap = await PrayerAlarmService.loadAllAlarmSettings();
+      if (!mounted) return;
+      final offsets = alarmSettingsMap.map((k, v) => MapEntry(k, v.offsetMinutes));
+      final localizedBodies = getLocalizedPrayerAlarmMessages(context, offsets);
       await PrayerAlarmService.scheduleUpcomingAlarms(
         prayerList: _prayerList,
         summerTime: dstNotifier.getSummerTime(),
         timeDiff: diff,
-        localizedTitles: getLocalizedPrayerAlarmTitles(context),
+        localizedTitles: titles,
+        localizedBodies: localizedBodies,
       );
     }
     if (!mounted) return;
