@@ -663,7 +663,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String alarmRingingTitle(String prayer) {
-    return 'Time for $prayer';
+    return '$prayer Alarm';
   }
 
   @override

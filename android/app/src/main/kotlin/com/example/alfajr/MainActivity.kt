@@ -99,7 +99,7 @@ class MainActivity : FlutterActivity() {
                             ?: (System.currentTimeMillis() + 5000L)
                         val prayerName = call.argument<String>("prayerName") ?: "Fajr"
                         val soundName = call.argument<String>("soundName") ?: "alaqsa"
-                        val title = call.argument<String>("title") ?: "Time for $prayerName"
+                        val title = call.argument<String>("title") ?: "$prayerName Alarm"
                         val body = call.argument<String>("body") ?: ""
                         val dismissLabel = call.argument<String>("dismissLabel") ?: "Dismiss"
                         val snoozeLabel = call.argument<String>("snoozeLabel") ?: "Snooze"

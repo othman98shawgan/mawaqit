@@ -869,7 +869,7 @@
    "@alarmDismiss": {
       "description": "Dismiss button label"
    },
-   "alarmRingingTitle": "Time for {prayer}",
+   "alarmRingingTitle": "{prayer} Alarm",
    "@alarmRingingTitle": {
       "description": "Ringing alarm title",
       "placeholders": {

@@ -1217,7 +1217,7 @@ abstract class AppLocalizations {
   /// Ringing alarm title
   ///
   /// In en, this message translates to:
-  /// **'Time for {prayer}'**
+  /// **'{prayer} Alarm'**
   String alarmRingingTitle(String prayer);
 
   /// Wake-up dhikr upon dismissing Fajr alarm

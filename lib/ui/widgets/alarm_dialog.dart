@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../../models/prayer_alarm.dart';
 import '../../resources/colors.dart';
+import '../../services/daylight_time_service.dart';
+import '../../services/locale_service.dart';
 import '../../services/prayer_alarm_service.dart';
 import '../../services/prayer_methods.dart';
 
@@ -110,6 +113,9 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
 
   Future<void> _saveSettings() async {
     final l10n = AppLocalizations.of(context)!;
+    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+    final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+    final localizedTitles = getLocalizedPrayerAlarmTitles(context);
     await PrayerAlarmService.saveAlarmSettings(_settings);
 
     if (!kIsWeb && Platform.isAndroid) {
@@ -170,7 +176,11 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
           }
         }
       }
-      await PrayerAlarmService.scheduleUpcomingAlarms();
+      await PrayerAlarmService.scheduleUpcomingAlarms(
+        summerTime: dstNotifier.getSummerTime(),
+        timeDiff: diff,
+        localizedTitles: localizedTitles,
+      );
     }
 
     widget.onSaved?.call();

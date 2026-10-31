@@ -150,20 +150,14 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
             ),
             const SizedBox(height: 36),
             Text(
-              l10n.alarmRingingTitle(prayerTitle),
+              widget.prayerName == 'Test'
+                  ? l10n.testAlarmTitle
+                  : l10n.alarmRingingTitle(prayerTitle),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              prayerTitle,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 18,
               ),
             ),
             if (isSilent) ...[

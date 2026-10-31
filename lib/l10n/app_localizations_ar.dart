@@ -664,7 +664,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String alarmRingingTitle(String prayer) {
-    return 'حان الآن موعد $prayer';
+    return 'منبه $prayer';
   }
 
   @override

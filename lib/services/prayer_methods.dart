@@ -297,6 +297,18 @@ String getPrayerTranslation(String label, BuildContext context) {
   return map[label] ?? label;
 }
 
+Map<String, String> getLocalizedPrayerAlarmTitles(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return {
+    'Fajr': l10n.prayerAlarmTitle(getPrayerTranslation('Fajr', context)),
+    'Shuruq': l10n.prayerAlarmTitle(getPrayerTranslation('Shuruq', context)),
+    'Duhr': l10n.prayerAlarmTitle(getPrayerTranslation('Duhr', context)),
+    'Asr': l10n.prayerAlarmTitle(getPrayerTranslation('Asr', context)),
+    'Maghrib': l10n.prayerAlarmTitle(getPrayerTranslation('Maghrib', context)),
+    'Isha': l10n.prayerAlarmTitle(getPrayerTranslation('Isha', context)),
+  };
+}
+
 String adjustTime(BuildContext context, String time, [DateTime? forDate]) {
   var currTimeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
   var dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);

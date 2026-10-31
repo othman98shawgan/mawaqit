@@ -248,6 +248,7 @@ class PrayerAlarmService {
     List? prayerList,
     bool? summerTime,
     int? timeDiff,
+    Map<String, String>? localizedTitles,
   }) async {
     if (kIsWeb || !Platform.isAndroid) return;
 
@@ -300,6 +301,7 @@ class PrayerAlarmService {
       if (!targetTime.isAfter(now)) continue;
 
       final alarmId = getPrayerAlarmId(prayer.label, prayer.time);
+      final alarmTitle = localizedTitles?[prayer.label] ?? '${prayer.label} Alarm';
 
       try {
         await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
@@ -307,8 +309,8 @@ class PrayerAlarmService {
           'triggerAtMillis': targetTime.millisecondsSinceEpoch,
           'prayerName': prayer.label,
           'soundName': settings.soundType,
-          'title': 'Time for ${prayer.label}',
-          'body': prayer.label,
+          'title': alarmTitle,
+          'body': alarmTitle,
           'dismissLabel': 'Dismiss',
           'snoozeLabel': 'Snooze',
           'snoozeMinutes': settings.snoozeMinutes,
@@ -344,6 +346,7 @@ class PrayerAlarmService {
     }
 
     final id = getAlarmId(prayerName);
+    final alarmTitle = title ?? '$prayerName Alarm';
 
     try {
       await _alarmChannel.invokeMethod('scheduleNativeAlarm', {
@@ -351,8 +354,8 @@ class PrayerAlarmService {
         'triggerAtMillis': targetTime.millisecondsSinceEpoch,
         'prayerName': prayerName,
         'soundName': config.soundType,
-        'title': title ?? 'Time for $prayerName',
-        'body': body ?? '',
+        'title': alarmTitle,
+        'body': body ?? alarmTitle,
         'dismissLabel': dismissLabel ?? 'Dismiss',
         'snoozeLabel': snoozeLabel ?? 'Snooze',
         'snoozeMinutes': config.snoozeMinutes,

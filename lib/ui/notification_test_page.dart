@@ -8,7 +8,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
+import '../services/locale_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_methods.dart';
 import '../services/daylight_time_service.dart';
@@ -248,6 +250,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   }
 
   Future<void> _loadPendingNotifications() async {
+    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+    final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+    final localizedTitles = getLocalizedPrayerAlarmTitles(context);
     setState(() {
       _isLoadingPending = true;
     });
@@ -256,7 +261,11 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
       final prayers = await getScheduledPrayers();
       final alarms = await PrayerAlarmService.loadAllAlarmSettings();
       if (!kIsWeb && Platform.isAndroid) {
-        await PrayerAlarmService.scheduleUpcomingAlarms();
+        await PrayerAlarmService.scheduleUpcomingAlarms(
+          summerTime: dstNotifier.getSummerTime(),
+          timeDiff: diff,
+          localizedTitles: localizedTitles,
+        );
       }
       final nativeAlarms = await PrayerAlarmService.getScheduledNativeAlarms();
       final list = List<PendingNotificationRequest>.from(rawList);

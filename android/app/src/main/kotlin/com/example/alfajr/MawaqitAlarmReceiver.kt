@@ -17,7 +17,7 @@ class MawaqitAlarmReceiver : BroadcastReceiver() {
                 val id = intent.getIntExtra("alarm_id", 810999)
                 val prayerName = intent.getStringExtra("prayer_name") ?: "Fajr"
                 val soundName = intent.getStringExtra("sound_name") ?: "alaqsa"
-                val title = intent.getStringExtra("title") ?: "Time for $prayerName"
+                val title = intent.getStringExtra("title") ?: "$prayerName Alarm"
                 val body = intent.getStringExtra("body") ?: ""
                 val dismissLabel = intent.getStringExtra("dismiss_label") ?: "Dismiss"
                 val snoozeLabel = intent.getStringExtra("snooze_label") ?: "Snooze"

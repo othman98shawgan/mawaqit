@@ -172,6 +172,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         prayerList: _prayerList,
         summerTime: dstNotifier.getSummerTime(),
         timeDiff: diff,
+        localizedTitles: getLocalizedPrayerAlarmTitles(context),
       );
     }
     if (!mounted) return;
