@@ -60,33 +60,38 @@ class ThemeNotifier with ChangeNotifier {
   static final _darkSwitchTheme = SwitchThemeData(
     thumbColor: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.disabled)) {
-        return Colors.grey.shade600;
+        return states.contains(WidgetState.selected)
+            ? const Color(0xFF003732).withOpacity(0.38)
+            : Colors.grey.shade600;
       }
       if (states.contains(WidgetState.selected)) {
-        return Colors.white;
+        return const Color(0xFF003732);
       }
-      return Colors.grey.shade400;
+      return const Color(0xFF899390);
     }),
     trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.grey.shade800;
       }
       if (states.contains(WidgetState.selected)) {
-        return darkThemeSwatch;
+        return const Color(0xFF80CBC4);
       }
-      return Colors.grey.shade800;
+      return const Color(0xFF303635);
     }),
     trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return states.contains(WidgetState.selected) ? Colors.transparent : Colors.grey.shade600;
+      }
       if (states.contains(WidgetState.selected)) {
         return Colors.transparent;
       }
-      return Colors.grey.shade500;
+      return const Color(0xFF899390);
     }),
     thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
       if (states.contains(WidgetState.selected)) {
-        return const Icon(Icons.check, color: darkThemeSwatch);
+        return const Icon(Icons.check, color: Color(0xFF80CBC4));
       }
-      return Icon(Icons.close, color: Colors.grey.shade800);
+      return const Icon(Icons.close, color: Color(0xFF303635));
     }),
   );
 

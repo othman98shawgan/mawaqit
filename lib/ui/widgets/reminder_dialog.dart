@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 
-import '../../resources/colors.dart';
-
 Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int reminderValue, Function updateReminder) async {
   var currentReminderValue = reminderValue;
   var currentReminderStatus = reminderStatus;
@@ -43,22 +41,6 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
             child: SwitchListTile(
               title: Text(reminderSetMessage, style: TextStyle(color: textColor)),
               value: currentReminderStatus,
-              activeThumbColor: Colors.white,
-              activeTrackColor: isLight ? color3 : darkThemeSwatch,
-              inactiveThumbColor: isLight ? const Color(0xFF72796F) : Colors.grey.shade400,
-              inactiveTrackColor: isLight ? const Color(0xFFE0E3DC) : Colors.grey.shade800,
-              trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Colors.transparent;
-                }
-                return isLight ? const Color(0xFF72796F) : Colors.grey.shade500;
-              }),
-              thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Icon(Icons.check, color: isLight ? color3 : darkThemeSwatch);
-                }
-                return Icon(Icons.close, color: isLight ? const Color(0xFFE0E3DC) : Colors.grey.shade800);
-              }),
               onChanged: (bool value) {
                 setState(() {
                   currentReminderStatus = value;

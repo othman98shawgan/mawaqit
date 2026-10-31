@@ -231,7 +231,6 @@ class _AlarmDialogState extends State<AlarmDialog> with WidgetsBindingObserver {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               value: _settings.isEnabled,
-              activeColor: prayerColor,
               onChanged: (val) {
                 setState(() {
                   _settings = _settings.copyWith(isEnabled: val);
