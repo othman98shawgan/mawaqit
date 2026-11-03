@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 
 import '../resources/colors.dart';
@@ -29,6 +32,7 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   bool _isDismissed = false;
   String? _soundType;
   int? _offsetMinutes;
+  StreamSubscription<String?>? _snoozeSub;
 
   @override
   void initState() {
@@ -36,6 +40,13 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
     _soundType = widget.soundType;
     _offsetMinutes = widget.offsetMinutes;
     PrayerAlarmService.wakeScreen();
+
+    _snoozeSub = PrayerAlarmService.onNativeAlarmSnoozed.listen((prayer) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+
     if (widget.soundType != null) {
       if (widget.soundType != 'silent') {
         PrayerAlarmService.startAlarmAudio(widget.soundType!);
@@ -66,6 +77,7 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
 
   @override
   void dispose() {
+    _snoozeSub?.cancel();
     PrayerAlarmService.stopAlarmAudio();
     _pulseController.dispose();
     super.dispose();
@@ -101,20 +113,38 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
     final l10n = AppLocalizations.of(context)!;
     final prayerTitle = getPrayerTranslation(widget.prayerName, context);
 
-    return WillPopScope(
-      onWillPop: () async {
-        // Prevent accidental back press while alarm is ringing
-        if (!_isDismissed) {
-          await _handleDismiss();
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.keyS ||
+              event.logicalKey == LogicalKeyboardKey.audioVolumeDown ||
+              event.logicalKey == LogicalKeyboardKey.audioVolumeUp) {
+            _handleSnooze();
+            return KeyEventResult.handled;
+          } else if (event.logicalKey == LogicalKeyboardKey.escape ||
+              event.logicalKey == LogicalKeyboardKey.keyD) {
+            _handleDismiss();
+            return KeyEventResult.handled;
+          }
         }
-        return true;
+        return KeyEventResult.ignored;
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFF121824),
-        body: SafeArea(
-          child: _isDismissed && widget.prayerName == 'Fajr'
-              ? _buildDhikrView(l10n, prayerTitle)
-              : _buildRingingView(l10n, prayerTitle),
+      child: WillPopScope(
+        onWillPop: () async {
+          // Prevent accidental back press while alarm is ringing
+          if (!_isDismissed) {
+            await _handleDismiss();
+          }
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: const Color(0xFF121824),
+          body: SafeArea(
+            child: _isDismissed && widget.prayerName == 'Fajr'
+                ? _buildDhikrView(l10n, prayerTitle)
+                : _buildRingingView(l10n, prayerTitle),
+          ),
         ),
       ),
     );

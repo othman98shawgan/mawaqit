@@ -35,6 +35,7 @@ void alarmActionBackgroundCallback(NotificationResponse response) async {
 class PrayerAlarmService {
   static const MethodChannel _alarmChannel = MethodChannel('com.othman.mawaqitquds/alarm');
   static final BehaviorSubject<String?> onNativeAlarmTriggered = BehaviorSubject<String?>();
+  static final BehaviorSubject<String?> onNativeAlarmSnoozed = BehaviorSubject<String?>();
   static bool _channelInitialized = false;
 
   static void initPlatformChannel() {
@@ -46,8 +47,24 @@ class PrayerAlarmService {
         if (payload != null) {
           onNativeAlarmTriggered.add(payload);
         }
+      } else if (call.method == 'onAlarmSnoozed') {
+        final prayer = call.arguments as String?;
+        if (prayer != null) {
+          onNativeAlarmSnoozed.add(prayer);
+        }
       }
     });
+  }
+
+  static Future<bool> snoozeCurrentAlarm() async {
+    if (kIsWeb || !Platform.isAndroid) return false;
+    try {
+      final res = await _alarmChannel.invokeMethod<bool>('snoozeCurrentAlarm');
+      return res ?? false;
+    } catch (e) {
+      debugPrint('Error snoozing current alarm: $e');
+      return false;
+    }
   }
 
   static Future<bool> canUseFullScreenIntent() async {
