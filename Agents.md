@@ -9,3 +9,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] fix: resolve Android release notifications and add dev indicator to app name
 - [x] fix: enforce single instance on Windows desktop and restore window on launch
 - [x] feat: add prayer alarms with custom audio, snooze, and battery guide
+- [x] fix: refresh today date and prayers when app resumes or midnight passes
