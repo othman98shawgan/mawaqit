@@ -71,7 +71,7 @@ inno_bundle:
   id: "0096E8C2-F27B-4878-81FC-DE960F0C687A"
   name: "Mawaqit Al-Quds"
   description: "Mawaqit Al-Quds Prayer Times"
-  version: "1.0.8"
+  version: "1.0.9"
   publisher: "Othman"
   icon: "windows/runner/resources/app_icon.ico"
   languages:
