@@ -1105,6 +1105,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daylight saving time is: '**
   String get daylightSavingStatus;
+
+  /// Header for prayer alarms section
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Alarms'**
+  String get alarmSection;
+
+  /// Fajr alarm title
+  ///
+  /// In en, this message translates to:
+  /// **'Fajr Alarm'**
+  String get fajrAlarm;
+
+  /// Prayer alarm title
+  ///
+  /// In en, this message translates to:
+  /// **'{prayer} Alarm'**
+  String prayerAlarmTitle(String prayer);
+
+  /// Toggle switch label for enabling alarm
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Alarm'**
+  String get enableAlarm;
+
+  /// Label for alarm sound selection
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm Sound'**
+  String get alarmSound;
+
+  /// Al-Aqsa Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Al-Aqsa Mosque Adhan'**
+  String get soundAlaqsa;
+
+  /// Makkah Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Makkah Adhan'**
+  String get soundMakkah;
+
+  /// Madinah Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Madinah Adhan'**
+  String get soundMadina;
+
+  /// System default alarm option
+  ///
+  /// In en, this message translates to:
+  /// **'System Default Alarm'**
+  String get soundSystem;
+
+  /// Silent alarm option with vibration only
+  ///
+  /// In en, this message translates to:
+  /// **'Silent (Vibrate only)'**
+  String get soundSilent;
+
+  /// Label for alarm offset
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm Time'**
+  String get alarmOffset;
+
+  /// Alarm at exact prayer time
+  ///
+  /// In en, this message translates to:
+  /// **'At prayer time (0m)'**
+  String get alarmOffsetExact;
+
+  /// Alarm before prayer time
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min before'**
+  String alarmOffsetBefore(int minutes);
+
+  /// Snooze button label
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze'**
+  String get alarmSnooze;
+
+  /// Snooze duration label
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze Duration'**
+  String get alarmSnoozeDuration;
+
+  /// Minutes for snooze
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes'**
+  String alarmSnoozeMinutes(int minutes);
+
+  /// Snooze disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get alarmSnoozeOff;
+
+  /// Dismiss button label
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get alarmDismiss;
+
+  /// Ringing alarm title
+  ///
+  /// In en, this message translates to:
+  /// **'{prayer} Alarm'**
+  String alarmRingingTitle(String prayer);
+
+  /// Alarm message when prayer time has arrived
+  ///
+  /// In en, this message translates to:
+  /// **'It is now time for {prayer}'**
+  String alarmNowTimeMessage(String prayer);
+
+  /// Alarm message showing minutes left before prayer
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes remaining until {prayer}'**
+  String alarmRemainingTimeMessage(int minutes, String prayer);
+
+  /// Wake-up dhikr upon dismissing Fajr alarm
+  ///
+  /// In en, this message translates to:
+  /// **'All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.'**
+  String get alarmWakeupDhikr;
+
+  /// Battery optimization title
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Optimization'**
+  String get batteryOptimizationTitle;
+
+  /// Battery optimization description
+  ///
+  /// In en, this message translates to:
+  /// **'To ensure your prayer alarms ring reliably even when the phone is locked, please exempt Mawaqit from battery optimizations.'**
+  String get batteryOptimizationDesc;
+
+  /// Battery optimization exempted status
+  ///
+  /// In en, this message translates to:
+  /// **'Exempted (Alarms Reliable)'**
+  String get batteryOptimizationDisabled;
+
+  /// Battery optimization active status
+  ///
+  /// In en, this message translates to:
+  /// **'Optimization Active (Alarms May Delay)'**
+  String get batteryOptimizationEnabled;
+
+  /// Disable battery optimization button
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Battery Optimization'**
+  String get disableBatteryOptimization;
+
+  /// Abdulbasit Abdusamad Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Abdulbasit Abdusamad'**
+  String get soundAbdulbasit;
+
+  /// El-Minshawi Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Mohamed Siddiq El-Minshawi'**
+  String get soundMinshawi;
+
+  /// Al-Hussary Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Mahmoud Khalil Al-Hussary'**
+  String get soundHussary;
+
+  /// Ahmad Al-Nafees Adhan option
+  ///
+  /// In en, this message translates to:
+  /// **'Ahmad Al-Nafees'**
+  String get soundNafees;
+
+  /// Title for test alarm card
+  ///
+  /// In en, this message translates to:
+  /// **'Test Prayer Alarm'**
+  String get testAlarmTitle;
+
+  /// Description for test alarm
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger a test alarm to verify looping audio, lock screen wake-up, and dismiss/snooze actions.'**
+  String get testAlarmDesc;
+
+  /// Button to trigger alarm with delay
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger Alarm in {seconds}s'**
+  String triggerAlarmInSeconds(int seconds);
+
+  /// Hint to lock phone for testing
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Lock your phone right after pressing to verify lock-screen wake-up!'**
+  String get testAlarmLockHint;
+
+  /// Title for configured prayer alarms list in testing page
+  ///
+  /// In en, this message translates to:
+  /// **'Configured Prayer Alarms'**
+  String get configuredPrayerAlarms;
+
+  /// Description for configured prayer alarms list
+  ///
+  /// In en, this message translates to:
+  /// **'Status and configuration of in-app prayer alarms for each prayer.'**
+  String get configuredPrayerAlarmsDesc;
+
+  /// Snackbar message when test alarm scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Test alarm scheduled in {seconds} seconds. Lock your phone now!'**
+  String alarmScheduledInSeconds(int seconds);
+
+  /// Badge showing alarm is active in OS scheduler
+  ///
+  /// In en, this message translates to:
+  /// **'Active in OS'**
+  String get activeInOs;
+
+  /// Quick button to test alarm
+  ///
+  /// In en, this message translates to:
+  /// **'Test Alarm (5s)'**
+  String get testAlarmButton;
+
+  /// Title for full screen intent permission card
+  ///
+  /// In en, this message translates to:
+  /// **'Full-Screen Alarm Permission'**
+  String get fullScreenIntentTitle;
+
+  /// Description for full screen intent permission
+  ///
+  /// In en, this message translates to:
+  /// **'Android 14 requires permission to wake up the screen and show the alarm when your device is locked.'**
+  String get fullScreenIntentDesc;
+
+  /// Button to open full screen intent settings
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get fullScreenIntentAction;
+
+  /// Label for alarm delay dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Delay'**
+  String get alarmDelay;
+
+  /// Status text when full screen intent permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Full-screen alarm permission granted'**
+  String get fullScreenIntentGranted;
 }
 
 class _AppLocalizationsDelegate

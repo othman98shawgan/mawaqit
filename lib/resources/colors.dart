@@ -14,6 +14,8 @@ const Color color3 = Color.fromRGBO(88, 129, 87, 1);
 const Color color4 = Color.fromRGBO(58, 90, 64, 1);
 const Color color5 = Color.fromRGBO(52, 78, 65, 1);
 
+const Color prayerColor = color3;
+
 // Dark mode prayer tile background suggestions (uncomment the one you prefer):
 const Color prayerBgColorDark = Color(0xF51A1D20); // 6. Rich Ebony #1A1D20 (96% opacity)
 // const Color prayerBgColorDark = Color(0xF02B3131); // Or 0xFF2B3131 solid

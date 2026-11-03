@@ -600,4 +600,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get daylightSavingStatus => 'Daylight saving time is: ';
+
+  @override
+  String get alarmSection => 'Prayer Alarms';
+
+  @override
+  String get fajrAlarm => 'Fajr Alarm';
+
+  @override
+  String prayerAlarmTitle(String prayer) {
+    return '$prayer Alarm';
+  }
+
+  @override
+  String get enableAlarm => 'Enable Alarm';
+
+  @override
+  String get alarmSound => 'Alarm Sound';
+
+  @override
+  String get soundAlaqsa => 'Al-Aqsa Mosque Adhan';
+
+  @override
+  String get soundMakkah => 'Makkah Adhan';
+
+  @override
+  String get soundMadina => 'Madinah Adhan';
+
+  @override
+  String get soundSystem => 'System Default Alarm';
+
+  @override
+  String get soundSilent => 'Silent (Vibrate only)';
+
+  @override
+  String get alarmOffset => 'Alarm Time';
+
+  @override
+  String get alarmOffsetExact => 'At prayer time (0m)';
+
+  @override
+  String alarmOffsetBefore(int minutes) {
+    return '$minutes min before';
+  }
+
+  @override
+  String get alarmSnooze => 'Snooze';
+
+  @override
+  String get alarmSnoozeDuration => 'Snooze Duration';
+
+  @override
+  String alarmSnoozeMinutes(int minutes) {
+    return '$minutes minutes';
+  }
+
+  @override
+  String get alarmSnoozeOff => 'Disabled';
+
+  @override
+  String get alarmDismiss => 'Dismiss';
+
+  @override
+  String alarmRingingTitle(String prayer) {
+    return '$prayer Alarm';
+  }
+
+  @override
+  String alarmNowTimeMessage(String prayer) {
+    return 'It is now time for $prayer';
+  }
+
+  @override
+  String alarmRemainingTimeMessage(int minutes, String prayer) {
+    return '$minutes minutes remaining until $prayer';
+  }
+
+  @override
+  String get alarmWakeupDhikr =>
+      'All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.';
+
+  @override
+  String get batteryOptimizationTitle => 'Battery Optimization';
+
+  @override
+  String get batteryOptimizationDesc =>
+      'To ensure your prayer alarms ring reliably even when the phone is locked, please exempt Mawaqit from battery optimizations.';
+
+  @override
+  String get batteryOptimizationDisabled => 'Exempted (Alarms Reliable)';
+
+  @override
+  String get batteryOptimizationEnabled =>
+      'Optimization Active (Alarms May Delay)';
+
+  @override
+  String get disableBatteryOptimization => 'Disable Battery Optimization';
+
+  @override
+  String get soundAbdulbasit => 'Abdulbasit Abdusamad';
+
+  @override
+  String get soundMinshawi => 'Mohamed Siddiq El-Minshawi';
+
+  @override
+  String get soundHussary => 'Mahmoud Khalil Al-Hussary';
+
+  @override
+  String get soundNafees => 'Ahmad Al-Nafees';
+
+  @override
+  String get testAlarmTitle => 'Test Prayer Alarm';
+
+  @override
+  String get testAlarmDesc =>
+      'Trigger a test alarm to verify looping audio, lock screen wake-up, and dismiss/snooze actions.';
+
+  @override
+  String triggerAlarmInSeconds(int seconds) {
+    return 'Trigger Alarm in ${seconds}s';
+  }
+
+  @override
+  String get testAlarmLockHint =>
+      'Tip: Lock your phone right after pressing to verify lock-screen wake-up!';
+
+  @override
+  String get configuredPrayerAlarms => 'Configured Prayer Alarms';
+
+  @override
+  String get configuredPrayerAlarmsDesc =>
+      'Status and configuration of in-app prayer alarms for each prayer.';
+
+  @override
+  String alarmScheduledInSeconds(int seconds) {
+    return 'Test alarm scheduled in $seconds seconds. Lock your phone now!';
+  }
+
+  @override
+  String get activeInOs => 'Active in OS';
+
+  @override
+  String get testAlarmButton => 'Test Alarm (5s)';
+
+  @override
+  String get fullScreenIntentTitle => 'Full-Screen Alarm Permission';
+
+  @override
+  String get fullScreenIntentDesc =>
+      'Android 14 requires permission to wake up the screen and show the alarm when your device is locked.';
+
+  @override
+  String get fullScreenIntentAction => 'Grant Permission';
+
+  @override
+  String get alarmDelay => 'Delay';
+
+  @override
+  String get fullScreenIntentGranted => 'Full-screen alarm permission granted';
 }

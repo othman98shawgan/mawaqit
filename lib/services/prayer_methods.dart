@@ -292,8 +292,48 @@ String getPrayerTranslation(String label, BuildContext context) {
     'Asr': AppLocalizations.of(context)!.asrString,
     'Maghrib': AppLocalizations.of(context)!.maghribString,
     'Isha': AppLocalizations.of(context)!.ishaString,
+    'Test': AppLocalizations.of(context)!.testAlarmTitle,
   };
-  return map[label]!;
+  return map[label] ?? label;
+}
+
+Map<String, String> getLocalizedPrayerAlarmTitles(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return {
+    'Fajr': l10n.prayerAlarmTitle(getPrayerTranslation('Fajr', context)),
+    'Shuruq': l10n.prayerAlarmTitle(getPrayerTranslation('Shuruq', context)),
+    'Duhr': l10n.prayerAlarmTitle(getPrayerTranslation('Duhr', context)),
+    'Asr': l10n.prayerAlarmTitle(getPrayerTranslation('Asr', context)),
+    'Maghrib': l10n.prayerAlarmTitle(getPrayerTranslation('Maghrib', context)),
+    'Isha': l10n.prayerAlarmTitle(getPrayerTranslation('Isha', context)),
+  };
+}
+
+String getPrayerAlarmMessage({
+  required BuildContext context,
+  required String prayerName,
+  required int offsetMinutes,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  final prayerTitle = getPrayerTranslation(prayerName, context);
+  if (offsetMinutes.abs() == 0) {
+    return l10n.alarmNowTimeMessage(prayerTitle);
+  } else {
+    return l10n.alarmRemainingTimeMessage(offsetMinutes.abs(), prayerTitle);
+  }
+}
+
+Map<String, String> getLocalizedPrayerAlarmMessages(
+  BuildContext context,
+  Map<String, int> offsets,
+) {
+  final prayers = ['Fajr', 'Shuruq', 'Duhr', 'Asr', 'Maghrib', 'Isha'];
+  final Map<String, String> messages = {};
+  for (final p in prayers) {
+    final offset = offsets[p] ?? 0;
+    messages[p] = getPrayerAlarmMessage(context: context, prayerName: p, offsetMinutes: offset);
+  }
+  return messages;
 }
 
 String adjustTime(BuildContext context, String time, [DateTime? forDate]) {

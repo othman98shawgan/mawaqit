@@ -83,6 +83,7 @@ flutter:
     - lib/data/prayer-time.json
     - images/
     - lib/data/mathurat.json
+    - assets/audio/
 
   fonts:
     - family: Tajawal

@@ -13,6 +13,9 @@
 
 ### 2. Step-by-Step Workflow for Every Task
 
+**Step 0: Scope Alignment (Mandatory Before Coding)**
+Before creating a branch or writing any code, always showcase the whole scope of the feature or fix (architecture, UI/UX flows, edge cases, cross-platform behavior, and audio/data models), especially for big features. Only begin coding after aligning with the user on the approach.
+
 **Step 1: Start New Task**
 Before writing any code for a new task, run:
 ```bash
@@ -39,13 +42,19 @@ git push -u origin <branch-name>
 ```
 
 **Step 4: Remind User to Open a PR (Mandatory Stop)**
-Immediately after pushing the branch, **STOP working** and output this exact message to the user in chat:
+Immediately after pushing the branch, **STOP working** and output this exact message to the user in chat (format the PR Description in a markdown code block for easy one-click copying):
 
 > **🚀 Ready for Pull Request**
 > - **Branch:** `<branch-name>` → `main`
 > - **PR Title:** `<type>: <short summary>`
 > - **PR Description:**
->   - <Bullet changes list made of>
+> ````markdown
+> ### Overview
+> <High-level summary>
+>
+> ### Key Changes
+> - <Bullet changes list>
+> ````
 >
 > **Your Next Steps:**
 > 1. Go to GitHub Web and open a PR from `<branch-name>` into `main`.

@@ -10,6 +10,7 @@ import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
 import '../services/notifications_service.dart';
+import '../services/prayer_alarm_service.dart';
 
 import '../services/store_manager.dart';
 import '../services/theme_service.dart';
@@ -35,12 +36,19 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _isDevMode = false;
+  bool _isBatteryOptIgnored = true;
   int _devTapCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadDevMode();
+    _loadBatteryOpt();
+  }
+
+  void _loadBatteryOpt() async {
+    final ignored = await PrayerAlarmService.isBatteryOptimizationIgnored();
+    if (mounted) setState(() => _isBatteryOptIgnored = ignored);
   }
 
   void _loadDevMode() async {
@@ -333,6 +341,40 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                             },
                           ),
+                          if (isAndroid)
+                            SettingsTile.navigation(
+                              title: Text(
+                                AppLocalizations.of(context)!.alarmSection,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              leading: const Icon(Icons.alarm),
+                              onPressed: (context) {
+                                Navigator.pushNamed(context, '/alarms_settings');
+                              },
+                            ),
+                          if (isAndroid)
+                            SettingsTile.navigation(
+                              title: Text(
+                                AppLocalizations.of(context)!.batteryOptimizationTitle,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              leading: const Icon(Icons.battery_alert),
+                              value: Text(
+                                _isBatteryOptIgnored
+                                    ? AppLocalizations.of(context)!.batteryOptimizationDisabled
+                                    : AppLocalizations.of(context)!.batteryOptimizationEnabled,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              onPressed: (context) async {
+                                final granted = await PrayerAlarmService.requestIgnoreBatteryOptimization();
+                                setState(() {
+                                  _isBatteryOptIgnored = granted;
+                                });
+                              },
+                            ),
                           if (_isDevMode)
                             SettingsTile.navigation(
                               title: Text(

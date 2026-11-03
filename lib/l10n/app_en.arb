@@ -778,4 +778,239 @@
    "@daylightSavingStatus": {
       "description": "Status label inside daylight saving dialog"
    }
+,
+   "alarmSection": "Prayer Alarms",
+   "@alarmSection": {
+      "description": "Header for prayer alarms section"
+   },
+   "fajrAlarm": "Fajr Alarm",
+   "@fajrAlarm": {
+      "description": "Fajr alarm title"
+   },
+   "prayerAlarmTitle": "{prayer} Alarm",
+   "@prayerAlarmTitle": {
+      "description": "Prayer alarm title",
+      "placeholders": {
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "enableAlarm": "Enable Alarm",
+   "@enableAlarm": {
+      "description": "Toggle switch label for enabling alarm"
+   },
+   "alarmSound": "Alarm Sound",
+   "@alarmSound": {
+      "description": "Label for alarm sound selection"
+   },
+   "soundAlaqsa": "Al-Aqsa Mosque Adhan",
+   "@soundAlaqsa": {
+      "description": "Al-Aqsa Adhan option"
+   },
+   "soundMakkah": "Makkah Adhan",
+   "@soundMakkah": {
+      "description": "Makkah Adhan option"
+   },
+   "soundMadina": "Madinah Adhan",
+   "@soundMadina": {
+      "description": "Madinah Adhan option"
+   },
+   "soundSystem": "System Default Alarm",
+   "@soundSystem": {
+      "description": "System default alarm option"
+   },
+   "soundSilent": "Silent (Vibrate only)",
+   "@soundSilent": {
+      "description": "Silent alarm option with vibration only"
+   },
+   "alarmOffset": "Alarm Time",
+   "@alarmOffset": {
+      "description": "Label for alarm offset"
+   },
+   "alarmOffsetExact": "At prayer time (0m)",
+   "@alarmOffsetExact": {
+      "description": "Alarm at exact prayer time"
+   },
+   "alarmOffsetBefore": "{minutes} min before",
+   "@alarmOffsetBefore": {
+      "description": "Alarm before prayer time",
+      "placeholders": {
+         "minutes": {
+            "type": "int",
+            "example": "15"
+         }
+      }
+   },
+   "alarmSnooze": "Snooze",
+   "@alarmSnooze": {
+      "description": "Snooze button label"
+   },
+   "alarmSnoozeDuration": "Snooze Duration",
+   "@alarmSnoozeDuration": {
+      "description": "Snooze duration label"
+   },
+   "alarmSnoozeMinutes": "{minutes} minutes",
+   "@alarmSnoozeMinutes": {
+      "description": "Minutes for snooze",
+      "placeholders": {
+         "minutes": {
+            "type": "int",
+            "example": "10"
+         }
+      }
+   },
+   "alarmSnoozeOff": "Disabled",
+   "@alarmSnoozeOff": {
+      "description": "Snooze disabled"
+   },
+   "alarmDismiss": "Dismiss",
+   "@alarmDismiss": {
+      "description": "Dismiss button label"
+   },
+   "alarmRingingTitle": "{prayer} Alarm",
+   "@alarmRingingTitle": {
+      "description": "Ringing alarm title",
+      "placeholders": {
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "alarmNowTimeMessage": "It is now time for {prayer}",
+   "@alarmNowTimeMessage": {
+      "description": "Alarm message when prayer time has arrived",
+      "placeholders": {
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "alarmRemainingTimeMessage": "{minutes} minutes remaining until {prayer}",
+   "@alarmRemainingTimeMessage": {
+      "description": "Alarm message showing minutes left before prayer",
+      "placeholders": {
+         "minutes": {
+            "type": "int",
+            "example": "15"
+         },
+         "prayer": {
+            "type": "String",
+            "example": "Fajr"
+         }
+      }
+   },
+   "alarmWakeupDhikr": "All praise is for Allah who gave us life after having taken it, and unto Him is the resurrection.",
+   "@alarmWakeupDhikr": {
+      "description": "Wake-up dhikr upon dismissing Fajr alarm"
+   },
+   "batteryOptimizationTitle": "Battery Optimization",
+   "@batteryOptimizationTitle": {
+      "description": "Battery optimization title"
+   },
+   "batteryOptimizationDesc": "To ensure your prayer alarms ring reliably even when the phone is locked, please exempt Mawaqit from battery optimizations.",
+   "@batteryOptimizationDesc": {
+      "description": "Battery optimization description"
+   },
+   "batteryOptimizationDisabled": "Exempted (Alarms Reliable)",
+   "@batteryOptimizationDisabled": {
+      "description": "Battery optimization exempted status"
+   },
+   "batteryOptimizationEnabled": "Optimization Active (Alarms May Delay)",
+   "@batteryOptimizationEnabled": {
+      "description": "Battery optimization active status"
+   },
+   "disableBatteryOptimization": "Disable Battery Optimization",
+   "@disableBatteryOptimization": {
+      "description": "Disable battery optimization button"
+   }
+,
+   "soundAbdulbasit": "Abdulbasit Abdusamad",
+   "@soundAbdulbasit": {
+      "description": "Abdulbasit Abdusamad Adhan option"
+   },
+   "soundMinshawi": "Mohamed Siddiq El-Minshawi",
+   "@soundMinshawi": {
+      "description": "El-Minshawi Adhan option"
+   },
+   "soundHussary": "Mahmoud Khalil Al-Hussary",
+   "@soundHussary": {
+      "description": "Al-Hussary Adhan option"
+   },
+   "soundNafees": "Ahmad Al-Nafees",
+   "@soundNafees": {
+      "description": "Ahmad Al-Nafees Adhan option"
+   }
+,
+   "testAlarmTitle": "Test Prayer Alarm",
+   "@testAlarmTitle": {
+      "description": "Title for test alarm card"
+   },
+   "testAlarmDesc": "Trigger a test alarm to verify looping audio, lock screen wake-up, and dismiss/snooze actions.",
+   "@testAlarmDesc": {
+      "description": "Description for test alarm"
+   },
+   "triggerAlarmInSeconds": "Trigger Alarm in {seconds}s",
+   "@triggerAlarmInSeconds": {
+      "description": "Button to trigger alarm with delay",
+      "placeholders": {
+         "seconds": {
+            "type": "int",
+            "example": "5"
+         }
+      }
+   },
+   "testAlarmLockHint": "Tip: Lock your phone right after pressing to verify lock-screen wake-up!",
+   "@testAlarmLockHint": {
+      "description": "Hint to lock phone for testing"
+   },
+   "configuredPrayerAlarms": "Configured Prayer Alarms",
+   "@configuredPrayerAlarms": {
+      "description": "Title for configured prayer alarms list in testing page"
+   },
+   "configuredPrayerAlarmsDesc": "Status and configuration of in-app prayer alarms for each prayer.",
+   "@configuredPrayerAlarmsDesc": {
+      "description": "Description for configured prayer alarms list"
+   },
+   "alarmScheduledInSeconds": "Test alarm scheduled in {seconds} seconds. Lock your phone now!",
+   "@alarmScheduledInSeconds": {
+      "description": "Snackbar message when test alarm scheduled",
+      "placeholders": {
+         "seconds": {
+            "type": "int",
+            "example": "5"
+         }
+      }
+   },
+   "activeInOs": "Active in OS",
+   "@activeInOs": {
+      "description": "Badge showing alarm is active in OS scheduler"
+   },
+   "testAlarmButton": "Test Alarm (5s)",
+   "@testAlarmButton": {
+      "description": "Quick button to test alarm"
+   },
+   "fullScreenIntentTitle": "Full-Screen Alarm Permission",
+   "@fullScreenIntentTitle": {
+      "description": "Title for full screen intent permission card"
+   },
+   "fullScreenIntentDesc": "Android 14 requires permission to wake up the screen and show the alarm when your device is locked.",
+   "@fullScreenIntentDesc": {
+      "description": "Description for full screen intent permission"
+   },
+   "fullScreenIntentAction": "Grant Permission",
+   "@fullScreenIntentAction": {
+      "description": "Button to open full screen intent settings"
+   },
+   "alarmDelay": "Delay",
+   "@alarmDelay": {
+      "description": "Label for alarm delay dropdown"
+   },
+   "fullScreenIntentGranted": "Full-screen alarm permission granted",
+   "@fullScreenIntentGranted": {
+      "description": "Status text when full screen intent permission is granted"
+   }
 }
