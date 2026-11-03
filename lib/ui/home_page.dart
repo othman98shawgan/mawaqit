@@ -19,6 +19,7 @@ import '../main.dart';
 import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
+import '../services/desktop_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_alarm_service.dart';
 import 'alarm_ringing_page.dart';
@@ -52,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   StreamSubscription? _notificationsSub;
   StreamSubscription? _nativeAlarmSub;
   bool _isAlarmRingingOpen = false;
+  Timer? _midnightTimer;
 
   void _openAlarmRingingPage(String payload) {
     if (_isAlarmRingingOpen || !mounted) return;
@@ -302,13 +304,41 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void readJson() {
     dayInYear = dayOfYear(DateTime.now());
 
-    // final String response = await rootBundle.loadString('lib/data/prayer-time.json');
-    final data = json.decode(prayersJson);
+    final data = _prayerList.isNotEmpty ? _prayerList : (json.decode(prayersJson) as List);
 
     setState(() {
       _prayerList = data;
       prayersToday = PrayersModel.fromJson(data[dayInYear]);
     });
+  }
+
+  void checkAndRefreshDay({bool force = false}) {
+    if (!mounted) return;
+    final currentDay = dayOfYear(DateTime.now());
+    if (force || currentDay != dayInYear) {
+      readJson();
+      scheduleNextPrayers(DateTime.now());
+      _setupMidnightTimer();
+    } else {
+      setState(() {});
+    }
+  }
+
+  void _setupMidnightTimer() {
+    _midnightTimer?.cancel();
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final durationUntilMidnight = tomorrow.difference(now) + const Duration(seconds: 1);
+
+    _midnightTimer = Timer(durationUntilMidnight, () {
+      if (mounted) {
+        checkAndRefreshDay(force: true);
+      }
+    });
+  }
+
+  void _onWindowRestored() {
+    checkAndRefreshDay();
   }
 
   @override
@@ -339,6 +369,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     NotificationsService.ensureInitialized();
     readJson();
     listenNotifications();
+    _setupMidnightTimer();
+    if (isWindows) {
+      DesktopService.windowRestoredNotifier.addListener(_onWindowRestored);
+    }
   }
 
   void listenNotifications() {
@@ -359,6 +393,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      checkAndRefreshDay();
       PrayerAlarmService.getPendingAlarmPayload().then((payload) {
         if (payload != null && mounted) {
           _openAlarmRingingPage(payload);
@@ -370,6 +405,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (isWindows) {
+      DesktopService.windowRestoredNotifier.removeListener(_onWindowRestored);
+    }
+    _midnightTimer?.cancel();
     _notificationsSub?.cancel();
     _nativeAlarmSub?.cancel();
     super.dispose();

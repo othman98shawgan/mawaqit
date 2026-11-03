@@ -10,6 +10,12 @@ class DesktopService with TrayListener, WindowListener {
   factory DesktopService() => _instance;
   DesktopService._internal();
 
+  static final ValueNotifier<int> windowRestoredNotifier = ValueNotifier<int>(0);
+
+  static void notifyWindowRestored() {
+    windowRestoredNotifier.value++;
+  }
+
   bool _isInitialized = false;
 
   Future<String> _resolveTrayIconPath() async {
@@ -102,6 +108,16 @@ class DesktopService with TrayListener, WindowListener {
   }
 
   @override
+  void onWindowFocus() {
+    notifyWindowRestored();
+  }
+
+  @override
+  void onWindowRestore() {
+    notifyWindowRestored();
+  }
+
+  @override
   void onTrayIconMouseDown() async {
     try {
       final isVisible = await windowManager.isVisible();
@@ -110,6 +126,7 @@ class DesktopService with TrayListener, WindowListener {
       } else {
         await windowManager.show();
         await windowManager.focus();
+        notifyWindowRestored();
       }
     } catch (_) {}
   }
@@ -126,6 +143,7 @@ class DesktopService with TrayListener, WindowListener {
     if (menuItem.key == 'show_window') {
       await windowManager.show();
       await windowManager.focus();
+      notifyWindowRestored();
     } else if (menuItem.key == 'exit_app') {
       trayManager.removeListener(this);
       windowManager.removeListener(this);
