@@ -74,6 +74,9 @@ inno_bundle:
   version: "1.0.8"
   publisher: "Othman"
   icon: "windows/runner/resources/app_icon.ico"
+  languages:
+    - english
+    - arabic
 
 flutter:
   uses-material-design: true
