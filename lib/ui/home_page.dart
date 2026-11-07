@@ -108,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void updatePrayers() {
-    if (!isAndroid && !isWindows) {
+    if (!isAndroid && !isWindows && !isIOS) {
       return;
     }
     Future.delayed(Duration.zero, () {
@@ -152,9 +152,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> scheduleNextPrayers(DateTime time) async {
     try {
-      if (!isAndroid && !isWindows) {
-      return;
-    }
+      if (!isAndroid && !isWindows && !isIOS) {
+        return;
+      }
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
     final migrated = await StorageManager.readData('autoDstScheduleMigrated_v1');
@@ -197,8 +197,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     await _scheduleDstTransitionNotification();
     if (!mounted) return;
 
-    if ((reminderStatus && _scheduledPrayers.length > 71) ||
-        (!reminderStatus && _scheduledPrayers.length > 35)) {
+    final earlyReturnLimit = reminderStatus ? (isIOS ? 45 : 71) : (isIOS ? 30 : 35);
+    if (_scheduledPrayers.length > earlyReturnLimit) {
       return;
     }
     List<Prayer> prayersToSchedule = [];
@@ -207,6 +207,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     summerTime = dstNotifier.getSummerTime();
     timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
+    final int maxDays = (isIOS && reminderStatus) ? 4 : 6;
     prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
     prayersToSchedule.addAll(getNextWeekPrayers(
       prayersToday,
@@ -215,6 +216,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       summerTime,
       timeDiff,
       isAutoMode: dstNotifier.isAutoDst,
+      daysCount: maxDays,
     ));
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
@@ -361,6 +363,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
     if (isAndroid) {
       checkForUpdate();
+      WakelockPlus.enable();
+    } else if (isIOS) {
       WakelockPlus.enable();
     } else if (isWindows) {
       setScheduledPrayers([]);
@@ -599,7 +603,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     Navigator.pushNamed(context, '/calendar');
                   },
                 ),
-                (isAndroid || isWindows)
+                (isAndroid || isWindows || isIOS)
                     ? ListTile(
                         minLeadingWidth: 0,
                         leading: Image.asset(
@@ -619,7 +623,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         },
                       )
                     : Container(),
-                (isAndroid || isWindows)
+                (isAndroid || isWindows || isIOS)
                     ? ListTile(
                         minLeadingWidth: 0,
                         leading: Image.asset(
@@ -655,21 +659,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   },
                 ),
                 const Divider(thickness: 1),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Icon(Icons.apps, color: iconColor),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.ourAppsString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                if (!isIOS)
+                  ListTile(
+                    minLeadingWidth: 0,
+                    leading: Icon(Icons.apps, color: iconColor),
+                    title: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        AppLocalizations.of(context)!.ourAppsString,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
                     ),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/apps');
+                    },
                   ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/apps');
-                  },
-                ),
                 ListTile(
                   minLeadingWidth: 0,
                   leading: Icon(Icons.email, color: iconColor),

@@ -34,6 +34,7 @@ import 'package:intl/date_symbol_data_local.dart';
 bool isWeb = false;
 bool isAndroid = false;
 bool isWindows = false;
+bool isIOS = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +49,8 @@ Future<void> main() async {
     isAndroid = true;
   } else if (Platform.isWindows) {
     isWindows = true;
+  } else if (Platform.isIOS) {
+    isIOS = true;
   }
 
   if (!kIsWeb && !Platform.isWindows) {

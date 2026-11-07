@@ -215,11 +215,11 @@ List<Prayer> getTodayPrayers(PrayersModel prayersToday, bool summerTime, int tim
 
 List<Prayer> getNextWeekPrayers(
     PrayersModel prayersToday, List prayerList, int dayInYear, bool summerTime, int timeDiff,
-    {bool isAutoMode = true}) {
+    {bool isAutoMode = true, int daysCount = 6}) {
   List<Prayer> prayersList = [];
   final now = DateTime.now();
 
-  for (int i = 1; i <= 6; i++) {
+  for (int i = 1; i <= daysCount; i++) {
     final day = now.add(Duration(days: i));
     final daySummer = isAutoMode ? DaylightSavingNotifier.isDstOnDate(day) : summerTime;
     final dayPrayers = PrayersModel.fromJson(prayerList[dayOfYear(day)]);
