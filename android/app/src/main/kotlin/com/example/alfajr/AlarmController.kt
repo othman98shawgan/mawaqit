@@ -4,8 +4,10 @@ import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -17,14 +19,36 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 
+data class ActiveAlarmInfo(
+    val id: Int,
+    val prayerName: String,
+    val soundName: String,
+    val title: String,
+    val body: String,
+    val offsetMinutes: Int = 0,
+    val dismissLabel: String = "Dismiss",
+    val snoozeLabel: String = "Snooze",
+    val snoozeMinutes: Int = 10,
+    val vibrate: Boolean = true,
+    val triggeredAtMillis: Long = System.currentTimeMillis()
+)
+
 object AlarmController {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var previousAlarmVolume: Int? = null
 
+    private var currentActiveAlarm: ActiveAlarmInfo? = null
+    private var isSnoozing: Boolean = false
+    private var screenOffReceiver: BroadcastReceiver? = null
+
+    val isAlarmRinging: Boolean
+        get() = currentActiveAlarm != null || mediaPlayer?.isPlaying == true
+
     var pendingAlarmPayload: String? = null
     var onAlarmTriggeredCallback: ((String) -> Unit)? = null
+    var onAlarmSnoozedCallback: ((String) -> Unit)? = null
 
     fun startAlarm(
         context: Context,
@@ -44,6 +68,20 @@ object AlarmController {
 
         val payload = "alarm|$prayerName|$soundName|$snoozeMinutes|$offsetMinutes"
         pendingAlarmPayload = payload
+        isSnoozing = false
+        currentActiveAlarm = ActiveAlarmInfo(
+            id = id,
+            prayerName = prayerName,
+            soundName = soundName,
+            title = title,
+            body = body,
+            offsetMinutes = offsetMinutes,
+            dismissLabel = dismissLabel,
+            snoozeLabel = snoozeLabel,
+            snoozeMinutes = snoozeMinutes,
+            vibrate = vibrate
+        )
+        registerScreenOffReceiver(appContext)
 
         // 1. Start continuous looping audio at max volume on STREAM_ALARM (skip if silent)
         if (soundName != "silent") {
@@ -244,6 +282,9 @@ object AlarmController {
         val appContext = context.applicationContext
         stopAudioOnly(appContext)
         pendingAlarmPayload = null
+        currentActiveAlarm = null
+        isSnoozing = false
+        unregisterScreenOffReceiver(appContext)
         val nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         if (id != null) {
             nm?.cancel(id)
@@ -255,6 +296,115 @@ object AlarmController {
                 nm?.cancel(alarmId)
             }
         }
+    }
+
+    fun setActiveAlarm(
+        context: Context,
+        id: Int = 810999,
+        prayerName: String = "Fajr",
+        soundName: String = "alaqsa",
+        title: String = "$prayerName Alarm",
+        body: String = "",
+        offsetMinutes: Int = 0,
+        dismissLabel: String = "Dismiss",
+        snoozeLabel: String = "Snooze",
+        snoozeMinutes: Int = 10,
+        vibrate: Boolean = true
+    ) {
+        val appContext = context.applicationContext
+        isSnoozing = false
+        currentActiveAlarm = ActiveAlarmInfo(
+            id = id,
+            prayerName = prayerName,
+            soundName = soundName,
+            title = title,
+            body = body,
+            offsetMinutes = offsetMinutes,
+            dismissLabel = dismissLabel,
+            snoozeLabel = snoozeLabel,
+            snoozeMinutes = snoozeMinutes,
+            vibrate = vibrate
+        )
+        registerScreenOffReceiver(appContext)
+    }
+
+    private fun registerScreenOffReceiver(context: Context) {
+        if (screenOffReceiver != null) return
+        val appContext = context.applicationContext
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent?) {
+                if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                    val active = currentActiveAlarm ?: return
+                    // Guard: ignore screen-off broadcast if it happened within 1000ms of alarm triggering
+                    if (System.currentTimeMillis() - active.triggeredAtMillis < 1000L) {
+                        return
+                    }
+                    snoozeCurrentAlarm(ctx)
+                }
+            }
+        }
+        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                appContext.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                appContext.registerReceiver(receiver, filter)
+            }
+            screenOffReceiver = receiver
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun unregisterScreenOffReceiver(context: Context) {
+        screenOffReceiver?.let {
+            try {
+                context.applicationContext.unregisterReceiver(it)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            screenOffReceiver = null
+        }
+    }
+
+    fun snoozeCurrentAlarm(context: Context): Boolean {
+        val active = currentActiveAlarm ?: return false
+        if (isSnoozing) return true
+        isSnoozing = true
+
+        val appContext = context.applicationContext
+        val prayerName = active.prayerName
+        val soundName = active.soundName
+        val snoozeMinutes = if (active.snoozeMinutes > 0) active.snoozeMinutes else 5
+
+        stopAlarm(appContext, active.id)
+
+        if (active.snoozeMinutes > 0) {
+            val triggerAtMillis = System.currentTimeMillis() + (snoozeMinutes * 60 * 1000L)
+            val title = "Snooze: $prayerName"
+            val body = "Alarm snoozed for $snoozeMinutes minutes"
+            val snoozeAlarmId = if (active.id in 810010..810060) {
+                810090 + ((active.id - 810010) / 10)
+            } else {
+                active.id
+            }
+            scheduleExactAlarm(
+                context = appContext,
+                id = snoozeAlarmId,
+                triggerAtMillis = triggerAtMillis,
+                prayerName = if (prayerName.startsWith("Snooze:")) prayerName else "Snooze: $prayerName",
+                soundName = soundName,
+                title = title,
+                body = body,
+                dismissLabel = active.dismissLabel,
+                snoozeLabel = active.snoozeLabel,
+                snoozeMinutes = snoozeMinutes,
+                vibrate = active.vibrate
+            )
+        }
+
+        onAlarmSnoozedCallback?.invoke(prayerName)
+        return true
     }
 
     private fun showAlarmNotification(

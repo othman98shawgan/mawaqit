@@ -10,3 +10,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] fix: enforce single instance on Windows desktop and restore window on launch
 - [x] feat: add prayer alarms with custom audio, snooze, and battery guide
 - [x] fix: refresh today date and prayers when app resumes or midnight passes
+- [x] fix: snooze prayer alarms with volume and power buttons

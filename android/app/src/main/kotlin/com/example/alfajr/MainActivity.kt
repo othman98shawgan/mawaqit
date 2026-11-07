@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.KeyEvent
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -55,9 +56,23 @@ class MainActivity : FlutterActivity() {
             wakeScreen()
             val clean = payload.substring(payload.indexOf("alarm|"))
             val parts = clean.split("|")
+            val prayerName = if (parts.size >= 2) parts[1] else "Fajr"
             val soundName = if (parts.size >= 3) parts[2] else "alaqsa"
+            val snoozeMinutes = if (parts.size >= 4) parts[3].toIntOrNull() ?: 10 else 10
+            val offsetMinutes = if (parts.size >= 5) parts[4].toIntOrNull() ?: 0 else 0
             if (soundName != "silent") {
                 AlarmController.startAudio(applicationContext, soundName)
+            }
+            if (!AlarmController.isAlarmRinging) {
+                val alarmId = intent?.getIntExtra("alarm_id", 810999) ?: 810999
+                AlarmController.setActiveAlarm(
+                    context = applicationContext,
+                    id = alarmId,
+                    prayerName = prayerName,
+                    soundName = soundName,
+                    snoozeMinutes = snoozeMinutes,
+                    offsetMinutes = offsetMinutes
+                )
             }
             AlarmController.pendingAlarmPayload = clean
             methodChannel?.invokeMethod("onAlarmTriggered", clean)
@@ -70,6 +85,12 @@ class MainActivity : FlutterActivity() {
             runOnUiThread {
                 wakeScreen()
                 methodChannel?.invokeMethod("onAlarmTriggered", payload)
+            }
+        }
+        AlarmController.onAlarmSnoozedCallback = { prayerName ->
+            runOnUiThread {
+                clearScreenWakeFlags()
+                methodChannel?.invokeMethod("onAlarmSnoozed", prayerName)
             }
         }
 
@@ -85,12 +106,23 @@ class MainActivity : FlutterActivity() {
                         if (soundName != "silent") {
                             AlarmController.startAudio(applicationContext, soundName)
                         }
+                        if (!AlarmController.isAlarmRinging) {
+                            AlarmController.setActiveAlarm(
+                                context = applicationContext,
+                                soundName = soundName
+                            )
+                        }
                         result.success(true)
                     }
                     "stopAlarmAudio" -> {
                         AlarmController.stopAlarm(applicationContext)
-                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        clearScreenWakeFlags()
                         result.success(true)
+                    }
+                    "snoozeCurrentAlarm" -> {
+                        val ok = AlarmController.snoozeCurrentAlarm(applicationContext)
+                        clearScreenWakeFlags()
+                        result.success(ok)
                     }
                     "scheduleNativeAlarm" -> {
                         val id = call.argument<Int>("id") ?: 810999
@@ -206,9 +238,36 @@ class MainActivity : FlutterActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
+    private fun clearScreenWakeFlags() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(false)
+            setTurnScreenOn(false)
+        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (AlarmController.isAlarmRinging) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_VOLUME_DOWN,
+                KeyEvent.KEYCODE_VOLUME_UP,
+                KeyEvent.KEYCODE_POWER -> {
+                    if (event.action == KeyEvent.ACTION_DOWN) {
+                        AlarmController.snoozeCurrentAlarm(applicationContext)
+                    }
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onDestroy() {
         if (AlarmController.onAlarmTriggeredCallback != null) {
             AlarmController.onAlarmTriggeredCallback = null
+        }
+        if (AlarmController.onAlarmSnoozedCallback != null) {
+            AlarmController.onAlarmSnoozedCallback = null
         }
         super.onDestroy()
     }

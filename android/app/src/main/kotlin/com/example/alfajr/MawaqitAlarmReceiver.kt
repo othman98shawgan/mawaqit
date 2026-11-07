@@ -73,6 +73,7 @@ class MawaqitAlarmReceiver : BroadcastReceiver() {
                     snoozeMinutes = snoozeMinutes,
                     vibrate = true
                 )
+                AlarmController.onAlarmSnoozedCallback?.invoke(prayerName)
             }
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
