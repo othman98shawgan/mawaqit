@@ -80,12 +80,12 @@ class _CalendarPageState extends State<CalendarPage> {
       textDirection: localeNotifier.getTextDirection(localeNotifier.locale),
       style: TextStyle(
           fontWeight: FontWeight.w400,
-          fontSize: 36,
+          fontSize: 40,
           color: themeMode == ThemeMode.dark ? colorTextDark : colorTextLight),
     );
 
     var dateTextButtonWidget = Padding(
-        padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
+        padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
         child: TextButton(
           onPressed: () async {
             final date = await pickDate();
@@ -142,9 +142,13 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           body: LayoutBuilder(
             builder: (context, constraints) {
-              final double bodyHeight = constraints.maxHeight;
-              final double prayerCardHeight = bodyHeight * 0.105;
-              final double mainCardHeight = bodyHeight * 0.21;
+              final double screenHeight = MediaQuery.of(context).size.height;
+              final EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+              final double height3 = screenHeight - viewPadding.top - kToolbarHeight;
+              final double idealTotal = height3 * 0.86;
+              final double scale = idealTotal > constraints.maxHeight ? (constraints.maxHeight / idealTotal) : 1.0;
+              final double prayerCardHeight = height3 * 0.11 * scale;
+              final double mainCardHeight = height3 * 0.20 * scale;
 
               return FutureBuilder<List>(
                 future: Future.wait([

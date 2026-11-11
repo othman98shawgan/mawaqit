@@ -442,9 +442,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final double bodyHeight = constraints.maxHeight;
-          final double prayerCardHeight = bodyHeight * 0.1;
-          final double mainCardHeight = bodyHeight * 0.29;
+          final double screenHeight = MediaQuery.of(context).size.height;
+          final EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+          final double height3 = screenHeight - viewPadding.top - kToolbarHeight;
+          final double idealTotal = height3 * 0.9;
+          final double scale = idealTotal > constraints.maxHeight ? (constraints.maxHeight / idealTotal) : 1.0;
+          final double prayerCardHeight = height3 * 0.1 * scale;
+          final double mainCardHeight = height3 * 0.3 * scale;
 
           return FutureBuilder<List>(
             future: Future.wait([

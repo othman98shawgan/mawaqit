@@ -29,10 +29,12 @@ class _MyCardState extends State<MyCard> {
               color: bgColor,
               child: DefaultTextStyle.merge(
                 style: const TextStyle(color: Colors.white),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[widget.widget],
-                ),
+                child: widget.height > 0
+                    ? Center(child: widget.widget)
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[widget.widget],
+                      ),
               ),
             ),
           ),
