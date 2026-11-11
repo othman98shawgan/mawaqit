@@ -1375,6 +1375,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full-screen alarm permission granted'**
   String get fullScreenIntentGranted;
+
+  /// Bottom navigation label for Prayers tab
+  ///
+  /// In en, this message translates to:
+  /// **'Prayers'**
+  String get prayersTabString;
+
+  /// Bottom navigation label for Calendar tab
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTabString;
+
+  /// Bottom navigation label and page title for More tab
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreString;
 }
 
 class _AppLocalizationsDelegate

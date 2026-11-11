@@ -760,4 +760,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fullScreenIntentGranted => 'إذن منبه شاشة القفل مفعّل';
+
+  @override
+  String get prayersTabString => 'المواقيت';
+
+  @override
+  String get calendarTabString => 'التقويم';
+
+  @override
+  String get moreString => 'المزيد';
 }

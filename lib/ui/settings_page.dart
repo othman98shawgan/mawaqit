@@ -401,7 +401,9 @@ class _SettingsPageState extends State<SettingsPage> {
                               leading: const Icon(Icons.restart_alt),
                               onPressed: (context) async {
                                 widget.updatePrayers!();
-                                Navigator.pop(context);
+                                if (Navigator.canPop(context)) {
+                                  Navigator.pop(context);
+                                }
                               },
                             ),
                           ]),

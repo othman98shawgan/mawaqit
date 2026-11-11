@@ -1012,5 +1012,17 @@
    "fullScreenIntentGranted": "Full-screen alarm permission granted",
    "@fullScreenIntentGranted": {
       "description": "Status text when full screen intent permission is granted"
+   },
+   "prayersTabString": "Prayers",
+   "@prayersTabString": {
+      "description": "Bottom navigation label for Prayers tab"
+   },
+   "calendarTabString": "Calendar",
+   "@calendarTabString": {
+      "description": "Bottom navigation label for Calendar tab"
+   },
+   "moreString": "More",
+   "@moreString": {
+      "description": "Bottom navigation label and page title for More tab"
    }
 }

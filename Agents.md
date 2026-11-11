@@ -12,3 +12,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] fix: refresh today date and prayers when app resumes or midnight passes
 - [x] fix: snooze prayer alarms with volume and power buttons
 - [x] feat: add iOS support with notifications, reminders, and scheduling
+- [x] feat: replace navigation drawer with 5-tab bottom navigation bar

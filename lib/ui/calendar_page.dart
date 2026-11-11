@@ -70,14 +70,7 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    var padding = MediaQuery.of(context).viewPadding;
-    // Height (without status and toolbar)
-    double height3 = height - padding.top - kToolbarHeight;
-    double prayerCardHeight = height3 * 0.11;
-    double mainCardHeight = height3 * 0.20;
     var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
     var localeNotifier = Provider.of<LocaleNotifier>(context, listen: false);
     var locale = localeNotifier.locale.toString();
@@ -87,12 +80,12 @@ class _CalendarPageState extends State<CalendarPage> {
       textDirection: localeNotifier.getTextDirection(localeNotifier.locale),
       style: TextStyle(
           fontWeight: FontWeight.w400,
-          fontSize: 40,
+          fontSize: 36,
           color: themeMode == ThemeMode.dark ? colorTextDark : colorTextLight),
     );
 
     var dateTextButtonWidget = Padding(
-        padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+        padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
         child: TextButton(
           onPressed: () async {
             final date = await pickDate();
@@ -147,102 +140,114 @@ class _CalendarPageState extends State<CalendarPage> {
               ),
             ],
           ),
-          body: FutureBuilder<List>(
-            future: Future.wait([
-              readJson(),
-            ]),
-            builder: (buildContext, snapshot) {
-              if (snapshot.hasData) {
-                return Container(
-                  decoration: BoxDecoration(
-                      image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      MyCard(
-                          height: mainCardHeight,
-                          widget: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(DateFormat('EEEE', localeProvider.locale.toString()).format(pickedDate)),
-                                  const Text('  -  '),
-                                  Text((HijriCalendar.fromDate(pickedDate).toFormat('dd MMMM yyyy'))),
-                                ],
-                              ),
-                              Directionality(
-                                textDirection: ui.TextDirection.ltr,
-                                child: Row(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final double bodyHeight = constraints.maxHeight;
+              final double prayerCardHeight = bodyHeight * 0.105;
+              final double mainCardHeight = bodyHeight * 0.21;
+
+              return FutureBuilder<List>(
+                future: Future.wait([
+                  readJson(),
+                ]),
+                builder: (buildContext, snapshot) {
+                  if (snapshot.hasData) {
+                    return Container(
+                      decoration: BoxDecoration(
+                          image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          MyCard(
+                              height: mainCardHeight,
+                              widget: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: 36,
-                                      icon: const Icon(Icons.navigate_before),
-                                      onPressed: () {
-                                        setState(() {
-                                          pickedDate = pickedDate.subtract(const Duration(days: 1));
-                                          summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
-                                        });
-                                      },
-                                      tooltip: AppLocalizations.of(context)!.prevoiusDayTooltip,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(DateFormat('EEEE', localeProvider.locale.toString()).format(pickedDate)),
+                                        const Text('  -  '),
+                                        Text((HijriCalendar.fromDate(pickedDate).toFormat('dd MMMM yyyy'))),
+                                      ],
                                     ),
-                                    dateTextButtonWidget,
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: 36,
-                                      icon: const Icon(Icons.navigate_next),
-                                      onPressed: () {
-                                        setState(() {
-                                          pickedDate = pickedDate.add(const Duration(days: 1));
-                                          summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
-                                        });
-                                      },
-                                      tooltip: AppLocalizations.of(context)!.nextDayTooltip,
-                                    ),
+                                    Directionality(
+                                      textDirection: ui.TextDirection.ltr,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 36,
+                                            icon: const Icon(Icons.navigate_before),
+                                            onPressed: () {
+                                              setState(() {
+                                                pickedDate = pickedDate.subtract(const Duration(days: 1));
+                                                summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
+                                              });
+                                            },
+                                            tooltip: AppLocalizations.of(context)!.prevoiusDayTooltip,
+                                          ),
+                                          dateTextButtonWidget,
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 36,
+                                            icon: const Icon(Icons.navigate_next),
+                                            onPressed: () {
+                                              setState(() {
+                                                pickedDate = pickedDate.add(const Duration(days: 1));
+                                                summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
+                                              });
+                                            },
+                                            tooltip: AppLocalizations.of(context)!.nextDayTooltip,
+                                          ),
+                                        ],
+                                      ),
+                                    )
                                   ],
                                 ),
-                              )
-                            ],
-                          )),
-                      PrayerWidget(
-                        label: "Fajr",
-                        time: adjustTime(prayersToday.fajr),
-                        height: prayerCardHeight,
+                              )),
+                          PrayerWidget(
+                            label: "Fajr",
+                            time: adjustTime(prayersToday.fajr),
+                            height: prayerCardHeight,
+                          ),
+                          PrayerWidget(
+                            label: "Shuruq",
+                            time: adjustTime(prayersToday.shuruq),
+                            height: prayerCardHeight,
+                          ),
+                          PrayerWidget(
+                            label: "Duhr",
+                            time: adjustTime(prayersToday.duhr),
+                            height: prayerCardHeight,
+                          ),
+                          PrayerWidget(
+                            label: "Asr",
+                            time: adjustTime(prayersToday.asr),
+                            height: prayerCardHeight,
+                          ),
+                          PrayerWidget(
+                            label: "Maghrib",
+                            time: adjustTime(prayersToday.maghrib),
+                            height: prayerCardHeight,
+                          ),
+                          PrayerWidget(
+                            label: "Isha",
+                            time: adjustTime(prayersToday.isha),
+                            height: prayerCardHeight,
+                          ),
+                        ],
                       ),
-                      PrayerWidget(
-                        label: "Shuruq",
-                        time: adjustTime(prayersToday.shuruq),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Duhr",
-                        time: adjustTime(prayersToday.duhr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Asr",
-                        time: adjustTime(prayersToday.asr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Maghrib",
-                        time: adjustTime(prayersToday.maghrib),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Isha",
-                        time: adjustTime(prayersToday.isha),
-                        height: prayerCardHeight,
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                // Return loading screen while reading preferences
-                return const Center(child: CircularProgressIndicator());
-              }
+                    );
+                  } else {
+                    // Return loading screen while reading preferences
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              );
             },
           ),
         ),

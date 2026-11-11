@@ -758,4 +758,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fullScreenIntentGranted => 'Full-screen alarm permission granted';
+
+  @override
+  String get prayersTabString => 'Prayers';
+
+  @override
+  String get calendarTabString => 'Calendar';
+
+  @override
+  String get moreString => 'More';
 }
