@@ -66,6 +66,11 @@ class NotificationsService {
         priority: Priority.high,
         vibrationPattern: vibrationPattern,
       ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
       windows: const WindowsNotificationDetails(),
     );
   }
@@ -110,7 +115,7 @@ class NotificationsService {
   }
 
   static Future<bool> canScheduleExactNotifications() async {
-    if (!kIsWeb && Platform.isWindows) {
+    if (!kIsWeb && (Platform.isWindows || Platform.isIOS)) {
       return true;
     }
     final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -118,7 +123,7 @@ class NotificationsService {
   }
 
   static Future<bool?> requestExactAlarmsPermission() async {
-    if (!kIsWeb && Platform.isWindows) {
+    if (!kIsWeb && (Platform.isWindows || Platform.isIOS)) {
       return true;
     }
     final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -145,6 +150,11 @@ class NotificationsService {
 
     try {
       const android = AndroidInitializationSettings('@drawable/launcher_icon');
+      const darwin = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
       const windows = WindowsInitializationSettings(
         appName: 'Mawaqit Al-Quds',
         appUserModelId: 'com.othman.mawaqitquds',
@@ -152,6 +162,7 @@ class NotificationsService {
       );
       const settings = InitializationSettings(
         android: android,
+        iOS: darwin,
         windows: windows,
       );
       await _notifications.initialize(
@@ -309,6 +320,12 @@ class NotificationsStatusNotifier with ChangeNotifier {
     }
     if (_notificationsAlreadyRequested) {
       AppSettings.openAppSettings(type: AppSettingsType.notification);
+    }
+
+    if (!kIsWeb && Platform.isIOS) {
+      final ios = NotificationsService.notificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+      await ios?.requestPermissions(alert: true, badge: true, sound: true);
     }
 
     await Permission.notification.isDenied.then((value) {
