@@ -1024,5 +1024,21 @@
    "moreString": "More",
    "@moreString": {
       "description": "Bottom navigation label and page title for More tab"
+   },
+   "daylightDuration": "Daylight: {hours}h {minutes}m",
+   "@daylightDuration": {
+      "description": "Daylight duration from Shuruq to Maghrib",
+      "placeholders": {
+         "hours": { "type": "int" },
+         "minutes": { "type": "int" }
+      }
+   },
+   "fastingDuration": "Fasting: {hours}h {minutes}m",
+   "@fastingDuration": {
+      "description": "Fasting duration from Fajr to Maghrib",
+      "placeholders": {
+         "hours": { "type": "int" },
+         "minutes": { "type": "int" }
+      }
    }
 }

@@ -217,5 +217,7 @@
    "fullScreenIntentGranted": "إذن منبه شاشة القفل مفعّل",
    "prayersTabString": "المواقيت",
    "calendarTabString": "التقويم",
-   "moreString": "المزيد"
+   "moreString": "المزيد",
+   "daylightDuration": "النهار: {hours} س {minutes} د",
+   "fastingDuration": "الصيام: {hours} س {minutes} د"
 }

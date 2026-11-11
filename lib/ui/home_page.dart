@@ -377,6 +377,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     readJson();
     listenNotifications();
     _setupMidnightTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        scheduleNextPrayers(DateTime.now());
+      }
+    });
     if (isWindows) {
       DesktopService.windowRestoredNotifier.addListener(_onWindowRestored);
     }
@@ -450,100 +455,88 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           final double prayerCardHeight = height3 * 0.1 * scale;
           final double mainCardHeight = height3 * 0.3 * scale;
 
-          return FutureBuilder<List>(
-            future: Future.wait([
-              scheduleNextPrayers(DateTime.now()),
-            ]),
-            builder: (buildContext, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done || snapshot.hasData || snapshot.hasError) {
-                summerTime = daylightSaving.getSummerTime();
-                reminderValue = reminder.getReminderTime();
-                timeDiff = localeProvider.timeDiff;
-                return Container(
-                  decoration: BoxDecoration(
-                      image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
-                  child: Column(
-                    children: <Widget>[
-                      MyCard(
-                          height: mainCardHeight,
-                          widget: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 6.0, bottom: 4.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        DateFormat('dd MMM yyyy', localeProvider.locale.toString())
-                                            .format(DateTime.now()),
-                                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                                        style: const TextStyle(fontSize: 16, color: Colors.white),
-                                      ),
-                                      const Text(
-                                        "  -  ",
-                                        style: TextStyle(fontSize: 16, color: Colors.white),
-                                      ),
-                                      Text(
-                                        (HijriCalendar.now().toFormat('dd MMMM yyyy')),
-                                        locale: localeProvider.locale,
-                                        strutStyle: const StrutStyle(forceStrutHeight: true),
-                                        style: const TextStyle(fontSize: 16, color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                  const Padding(
-                                      padding: EdgeInsets.only(top: 4.0, bottom: 4.0), child: ClockWidget()),
-                                  PrayerClockWidget(
-                                    prayersToday: prayersToday,
-                                    summerTime: summerTime,
-                                    timeDiff: timeDiff,
-                                    prayerList: _prayerList,
-                                  ),
-                                ],
-                              ),
+          summerTime = daylightSaving.getSummerTime();
+          reminderValue = reminder.getReminderTime();
+          timeDiff = localeProvider.timeDiff;
+          return Container(
+            decoration: BoxDecoration(
+                image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
+            child: Column(
+              children: <Widget>[
+                MyCard(
+                    height: mainCardHeight,
+                    widget: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 6.0, bottom: 4.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  DateFormat('dd MMM yyyy', localeProvider.locale.toString())
+                                      .format(DateTime.now()),
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                                ),
+                                const Text(
+                                  "  -  ",
+                                  style: TextStyle(fontSize: 16, color: Colors.white),
+                                ),
+                                Text(
+                                  (HijriCalendar.now().toFormat('dd MMMM yyyy')),
+                                  locale: localeProvider.locale,
+                                  strutStyle: const StrutStyle(forceStrutHeight: true),
+                                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                                ),
+                              ],
                             ),
-                          )),
-                      PrayerWidget(
-                        label: "Fajr",
-                        time: adjustTime(prayersToday.fajr),
-                        height: prayerCardHeight,
+                            const Padding(
+                                padding: EdgeInsets.only(top: 4.0, bottom: 4.0), child: ClockWidget()),
+                            PrayerClockWidget(
+                              prayersToday: prayersToday,
+                              summerTime: summerTime,
+                              timeDiff: timeDiff,
+                              prayerList: _prayerList,
+                            ),
+                          ],
+                        ),
                       ),
-                      PrayerWidget(
-                        label: "Shuruq",
-                        time: adjustTime(prayersToday.shuruq),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Duhr",
-                        time: adjustTime(prayersToday.duhr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Asr",
-                        time: adjustTime(prayersToday.asr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Maghrib",
-                        time: adjustTime(prayersToday.maghrib),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Isha",
-                        time: adjustTime(prayersToday.isha),
-                        height: prayerCardHeight,
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                // Return loading screen while reading preferences
-                return const SizedBox.shrink();
-              }
-            },
+                    )),
+                PrayerWidget(
+                  label: "Fajr",
+                  time: adjustTime(prayersToday.fajr),
+                  height: prayerCardHeight,
+                ),
+                PrayerWidget(
+                  label: "Shuruq",
+                  time: adjustTime(prayersToday.shuruq),
+                  height: prayerCardHeight,
+                ),
+                PrayerWidget(
+                  label: "Duhr",
+                  time: adjustTime(prayersToday.duhr),
+                  height: prayerCardHeight,
+                ),
+                PrayerWidget(
+                  label: "Asr",
+                  time: adjustTime(prayersToday.asr),
+                  height: prayerCardHeight,
+                ),
+                PrayerWidget(
+                  label: "Maghrib",
+                  time: adjustTime(prayersToday.maghrib),
+                  height: prayerCardHeight,
+                ),
+                PrayerWidget(
+                  label: "Isha",
+                  time: adjustTime(prayersToday.isha),
+                  height: prayerCardHeight,
+                ),
+              ],
+            ),
           );
         },
       ),

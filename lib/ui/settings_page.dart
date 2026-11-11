@@ -34,7 +34,7 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {
   bool _isDevMode = false;
   bool _isBatteryOptIgnored = true;
   int _devTapCount = 0;
@@ -42,8 +42,22 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDevMode();
     _loadBatteryOpt();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadBatteryOpt();
+    }
   }
 
   void _loadBatteryOpt() async {
@@ -147,41 +161,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     var fontFamily = 'Tajawal';
 
-    var citiesList = {
-      'alQuds': AppLocalizations.of(context)!.alQuds,
-      'kfarKama': AppLocalizations.of(context)!.kfarKama,
-      'ramallah': AppLocalizations.of(context)!.ramallah,
-      'bethlehem': AppLocalizations.of(context)!.bethlehem,
-      'jenin': AppLocalizations.of(context)!.jenin,
-      'nablus': AppLocalizations.of(context)!.nablus,
-      'nazareth': AppLocalizations.of(context)!.nazareth,
-      'ummAlFahm': AppLocalizations.of(context)!.ummAlFahm,
-      'jericho': AppLocalizations.of(context)!.jericho,
-      'tiberias': AppLocalizations.of(context)!.tiberias,
-      'safad': AppLocalizations.of(context)!.safad,
-      'beisan': AppLocalizations.of(context)!.beisan,
-      'haifa': AppLocalizations.of(context)!.haifa,
-      'acre': AppLocalizations.of(context)!.acre,
-      'tulkarm': AppLocalizations.of(context)!.tulkarm,
-      'kafrQasim': AppLocalizations.of(context)!.kafrQasim,
-      'tayibe': AppLocalizations.of(context)!.tayibe,
-      'alKhalil': AppLocalizations.of(context)!.alKhalil,
-      'alLid': AppLocalizations.of(context)!.alLid,
-      'ramla': AppLocalizations.of(context)!.ramla,
-      'qalqilya': AppLocalizations.of(context)!.qalqilya,
-      'birAsSaba': AppLocalizations.of(context)!.birAsSaba,
-      'jaffa': AppLocalizations.of(context)!.jaffa,
-      'gaza': AppLocalizations.of(context)!.gaza,
-      'rafah': AppLocalizations.of(context)!.rafah,
-      'khanYunis': AppLocalizations.of(context)!.khanYunis,
-      'deirAlBalah': AppLocalizations.of(context)!.deirAlBalah,
-      'min1BeforeAlQuds': AppLocalizations.of(context)!.min1BeforeAlQuds,
-      'min2BeforeAlQuds': AppLocalizations.of(context)!.min2BeforeAlQuds,
-      'min3BeforeAlQuds': AppLocalizations.of(context)!.min3BeforeAlQuds,
-      'min1AfterAlQuds': AppLocalizations.of(context)!.min1AfterAlQuds,
-      'min2AfterAlQuds': AppLocalizations.of(context)!.min2AfterAlQuds,
-      'min3AfterAlQuds': AppLocalizations.of(context)!.min3AfterAlQuds,
-    };
+    var citiesList = getCitiesMap(AppLocalizations.of(context)!);
 
     return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
         NotificationsStatusNotifier, LocaleNotifier>(
@@ -349,30 +329,31 @@ class _SettingsPageState extends State<SettingsPage> {
                                 style: TextStyle(fontFamily: fontFamily),
                               ),
                               leading: const Icon(Icons.alarm),
-                              onPressed: (context) {
-                                Navigator.pushNamed(context, '/alarms_settings');
+                              onPressed: (context) async {
+                                await Navigator.pushNamed(context, '/alarms_settings');
+                                _loadBatteryOpt();
                               },
                             ),
-                          if (isAndroid)
+                          if (isAndroid && !_isBatteryOptIgnored)
                             SettingsTile.navigation(
                               title: Text(
-                                AppLocalizations.of(context)!.batteryOptimizationTitle,
+                                AppLocalizations.of(context)!.disableBatteryOptimization,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w600),
+                              ),
+                              description: Text(
+                                AppLocalizations.of(context)!.batteryOptimizationDesc,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily),
                               ),
-                              leading: const Icon(Icons.battery_alert),
-                              value: Text(
-                                _isBatteryOptIgnored
-                                    ? AppLocalizations.of(context)!.batteryOptimizationDisabled
-                                    : AppLocalizations.of(context)!.batteryOptimizationEnabled,
-                                strutStyle: const StrutStyle(forceStrutHeight: true),
-                                style: TextStyle(fontFamily: fontFamily),
-                              ),
+                              leading: const Icon(Icons.battery_alert, color: Colors.orangeAccent),
                               onPressed: (context) async {
                                 final granted = await PrayerAlarmService.requestIgnoreBatteryOptimization();
-                                setState(() {
-                                  _isBatteryOptIgnored = granted;
-                                });
+                                if (mounted) {
+                                  setState(() {
+                                    _isBatteryOptIgnored = granted;
+                                  });
+                                }
                               },
                             ),
                           if (_isDevMode)

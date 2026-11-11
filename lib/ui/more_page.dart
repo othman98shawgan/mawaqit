@@ -28,7 +28,7 @@ Future<void> showMoreBottomSheet(
       final localeProvider = Provider.of<LocaleNotifier>(sheetContext, listen: false);
       final textDirection = localeProvider.getTextDirection(localeProvider.locale);
       final textColor = isDark ? colorTextDark : Colors.black87;
-      final iconColor = isDark ? Colors.tealAccent : color5;
+      final iconColor = isDark ? Colors.white : color5;
 
       return Directionality(
         textDirection: textDirection,

@@ -1393,6 +1393,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get moreString;
+
+  /// Daylight duration from Shuruq to Maghrib
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight: {hours}h {minutes}m'**
+  String daylightDuration(int hours, int minutes);
+
+  /// Fasting duration from Fajr to Maghrib
+  ///
+  /// In en, this message translates to:
+  /// **'Fasting: {hours}h {minutes}m'**
+  String fastingDuration(int hours, int minutes);
 }
 
 class _AppLocalizationsDelegate
