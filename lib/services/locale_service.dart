@@ -1,7 +1,44 @@
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:alfajr/services/store_manager.dart';
 import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 import 'dart:ui' as ui;
+
+Map<String, String> getCitiesMap(AppLocalizations l10n) => {
+      'alQuds': l10n.alQuds,
+      'kfarKama': l10n.kfarKama,
+      'ramallah': l10n.ramallah,
+      'bethlehem': l10n.bethlehem,
+      'jenin': l10n.jenin,
+      'nablus': l10n.nablus,
+      'nazareth': l10n.nazareth,
+      'ummAlFahm': l10n.ummAlFahm,
+      'jericho': l10n.jericho,
+      'tiberias': l10n.tiberias,
+      'safad': l10n.safad,
+      'beisan': l10n.beisan,
+      'haifa': l10n.haifa,
+      'acre': l10n.acre,
+      'tulkarm': l10n.tulkarm,
+      'kafrQasim': l10n.kafrQasim,
+      'tayibe': l10n.tayibe,
+      'alKhalil': l10n.alKhalil,
+      'alLid': l10n.alLid,
+      'ramla': l10n.ramla,
+      'qalqilya': l10n.qalqilya,
+      'birAsSaba': l10n.birAsSaba,
+      'jaffa': l10n.jaffa,
+      'gaza': l10n.gaza,
+      'rafah': l10n.rafah,
+      'khanYunis': l10n.khanYunis,
+      'deirAlBalah': l10n.deirAlBalah,
+      'min1BeforeAlQuds': l10n.min1BeforeAlQuds,
+      'min2BeforeAlQuds': l10n.min2BeforeAlQuds,
+      'min3BeforeAlQuds': l10n.min3BeforeAlQuds,
+      'min1AfterAlQuds': l10n.min1AfterAlQuds,
+      'min2AfterAlQuds': l10n.min2AfterAlQuds,
+      'min3AfterAlQuds': l10n.min3AfterAlQuds,
+    };
 
 class LocaleNotifier extends ChangeNotifier {
   Locale _locale;

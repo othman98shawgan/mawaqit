@@ -1375,6 +1375,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full-screen alarm permission granted'**
   String get fullScreenIntentGranted;
+
+  /// Bottom navigation label for Prayers tab
+  ///
+  /// In en, this message translates to:
+  /// **'Prayers'**
+  String get prayersTabString;
+
+  /// Bottom navigation label for Calendar tab
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTabString;
+
+  /// Bottom navigation label and page title for More tab
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreString;
+
+  /// Daylight duration from Shuruq to Maghrib
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight: {hours}h {minutes}m'**
+  String daylightDuration(int hours, int minutes);
+
+  /// Fasting duration from Fajr to Maghrib
+  ///
+  /// In en, this message translates to:
+  /// **'Fasting: {hours}h {minutes}m'**
+  String fastingDuration(int hours, int minutes);
+
+  /// Settings label for bottom navigation bar style
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation Bar'**
+  String get settingsNavBarStyle;
+
+  /// Floating pill navigation bar style option
+  ///
+  /// In en, this message translates to:
+  /// **'Floating'**
+  String get navBarStyleFloating;
+
+  /// Docked Material 3 navigation bar style option
+  ///
+  /// In en, this message translates to:
+  /// **'Docked'**
+  String get navBarStyleDocked;
 }
 
 class _AppLocalizationsDelegate

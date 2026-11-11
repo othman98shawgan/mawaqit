@@ -1012,5 +1012,45 @@
    "fullScreenIntentGranted": "Full-screen alarm permission granted",
    "@fullScreenIntentGranted": {
       "description": "Status text when full screen intent permission is granted"
+   },
+   "prayersTabString": "Prayers",
+   "@prayersTabString": {
+      "description": "Bottom navigation label for Prayers tab"
+   },
+   "calendarTabString": "Calendar",
+   "@calendarTabString": {
+      "description": "Bottom navigation label for Calendar tab"
+   },
+   "moreString": "More",
+   "@moreString": {
+      "description": "Bottom navigation label and page title for More tab"
+   },
+   "daylightDuration": "Daylight: {hours}h {minutes}m",
+   "@daylightDuration": {
+      "description": "Daylight duration from Shuruq to Maghrib",
+      "placeholders": {
+         "hours": { "type": "int" },
+         "minutes": { "type": "int" }
+      }
+   },
+   "fastingDuration": "Fasting: {hours}h {minutes}m",
+   "@fastingDuration": {
+      "description": "Fasting duration from Fajr to Maghrib",
+      "placeholders": {
+         "hours": { "type": "int" },
+         "minutes": { "type": "int" }
+      }
+   },
+   "settingsNavBarStyle": "Navigation Bar",
+   "@settingsNavBarStyle": {
+      "description": "Settings label for bottom navigation bar style"
+   },
+   "navBarStyleFloating": "Floating",
+   "@navBarStyleFloating": {
+      "description": "Floating pill navigation bar style option"
+   },
+   "navBarStyleDocked": "Docked",
+   "@navBarStyleDocked": {
+      "description": "Docked Material 3 navigation bar style option"
    }
 }

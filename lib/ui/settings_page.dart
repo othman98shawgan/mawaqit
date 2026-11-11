@@ -9,6 +9,7 @@ import 'package:alfajr/l10n/app_localizations.dart';
 import '../main.dart';
 import '../resources/colors.dart';
 import '../services/dhikr_service.dart';
+import '../services/nav_style_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_alarm_service.dart';
 
@@ -34,7 +35,7 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {
   bool _isDevMode = false;
   bool _isBatteryOptIgnored = true;
   int _devTapCount = 0;
@@ -42,8 +43,22 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDevMode();
     _loadBatteryOpt();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadBatteryOpt();
+    }
   }
 
   void _loadBatteryOpt() async {
@@ -101,14 +116,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  CustomSettingsSection _buildVersionSection(String fontFamily) {
+  CustomSettingsSection _buildVersionSection(String fontFamily, bool isFloatingNav) {
     return CustomSettingsSection(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _onVersionTap,
         onLongPress: _onVersionLongPress,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
+          padding: EdgeInsets.fromLTRB(0, 24, 0, isFloatingNav ? MediaQuery.of(context).padding.bottom + 24 : 24),
           child: Center(
             child: Text(
               AppLocalizations.of(context)!.appVersion('1.0.9'),
@@ -147,45 +162,18 @@ class _SettingsPageState extends State<SettingsPage> {
 
     var fontFamily = 'Tajawal';
 
-    var citiesList = {
-      'alQuds': AppLocalizations.of(context)!.alQuds,
-      'kfarKama': AppLocalizations.of(context)!.kfarKama,
-      'ramallah': AppLocalizations.of(context)!.ramallah,
-      'bethlehem': AppLocalizations.of(context)!.bethlehem,
-      'jenin': AppLocalizations.of(context)!.jenin,
-      'nablus': AppLocalizations.of(context)!.nablus,
-      'nazareth': AppLocalizations.of(context)!.nazareth,
-      'ummAlFahm': AppLocalizations.of(context)!.ummAlFahm,
-      'jericho': AppLocalizations.of(context)!.jericho,
-      'tiberias': AppLocalizations.of(context)!.tiberias,
-      'safad': AppLocalizations.of(context)!.safad,
-      'beisan': AppLocalizations.of(context)!.beisan,
-      'haifa': AppLocalizations.of(context)!.haifa,
-      'acre': AppLocalizations.of(context)!.acre,
-      'tulkarm': AppLocalizations.of(context)!.tulkarm,
-      'kafrQasim': AppLocalizations.of(context)!.kafrQasim,
-      'tayibe': AppLocalizations.of(context)!.tayibe,
-      'alKhalil': AppLocalizations.of(context)!.alKhalil,
-      'alLid': AppLocalizations.of(context)!.alLid,
-      'ramla': AppLocalizations.of(context)!.ramla,
-      'qalqilya': AppLocalizations.of(context)!.qalqilya,
-      'birAsSaba': AppLocalizations.of(context)!.birAsSaba,
-      'jaffa': AppLocalizations.of(context)!.jaffa,
-      'gaza': AppLocalizations.of(context)!.gaza,
-      'rafah': AppLocalizations.of(context)!.rafah,
-      'khanYunis': AppLocalizations.of(context)!.khanYunis,
-      'deirAlBalah': AppLocalizations.of(context)!.deirAlBalah,
-      'min1BeforeAlQuds': AppLocalizations.of(context)!.min1BeforeAlQuds,
-      'min2BeforeAlQuds': AppLocalizations.of(context)!.min2BeforeAlQuds,
-      'min3BeforeAlQuds': AppLocalizations.of(context)!.min3BeforeAlQuds,
-      'min1AfterAlQuds': AppLocalizations.of(context)!.min1AfterAlQuds,
-      'min2AfterAlQuds': AppLocalizations.of(context)!.min2AfterAlQuds,
-      'min3AfterAlQuds': AppLocalizations.of(context)!.min3AfterAlQuds,
-    };
+    var citiesList = getCitiesMap(AppLocalizations.of(context)!);
 
     return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, DhikrNotifier,
         NotificationsStatusNotifier, LocaleNotifier>(
-      builder: (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) => Center(
+      builder: (context, theme, daylightSaving, reminder, dhikr, notifications, localeProvider, child) {
+        final navStyleNotifier = Provider.of<NavStyleNotifier>(context);
+        final isFloatingNav = navStyleNotifier.isFloating;
+        final navStyleLabel = isFloatingNav
+            ? AppLocalizations.of(context)!.navBarStyleFloating
+            : AppLocalizations.of(context)!.navBarStyleDocked;
+
+        return Center(
           child: Directionality(
         textDirection: TextDirection.ltr,
         child: Scaffold(
@@ -293,6 +281,23 @@ class _SettingsPageState extends State<SettingsPage> {
                               showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
                             },
                           ),
+                          if (_isDevMode)
+                            SettingsTile.navigation(
+                              leading: const Icon(Icons.space_dashboard_outlined),
+                              title: Text(
+                                AppLocalizations.of(context)!.settingsNavBarStyle,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              value: Text(
+                                navStyleLabel,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              onPressed: (context) {
+                                showNavStyleDialog(context, navStyleNotifier);
+                              },
+                            ),
                         ],
                       ),
                       SettingsSection(
@@ -349,30 +354,31 @@ class _SettingsPageState extends State<SettingsPage> {
                                 style: TextStyle(fontFamily: fontFamily),
                               ),
                               leading: const Icon(Icons.alarm),
-                              onPressed: (context) {
-                                Navigator.pushNamed(context, '/alarms_settings');
+                              onPressed: (context) async {
+                                await Navigator.pushNamed(context, '/alarms_settings');
+                                _loadBatteryOpt();
                               },
                             ),
-                          if (isAndroid)
+                          if (isAndroid && !_isBatteryOptIgnored)
                             SettingsTile.navigation(
                               title: Text(
-                                AppLocalizations.of(context)!.batteryOptimizationTitle,
+                                AppLocalizations.of(context)!.disableBatteryOptimization,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w600),
+                              ),
+                              description: Text(
+                                AppLocalizations.of(context)!.batteryOptimizationDesc,
                                 strutStyle: const StrutStyle(forceStrutHeight: true),
                                 style: TextStyle(fontFamily: fontFamily),
                               ),
-                              leading: const Icon(Icons.battery_alert),
-                              value: Text(
-                                _isBatteryOptIgnored
-                                    ? AppLocalizations.of(context)!.batteryOptimizationDisabled
-                                    : AppLocalizations.of(context)!.batteryOptimizationEnabled,
-                                strutStyle: const StrutStyle(forceStrutHeight: true),
-                                style: TextStyle(fontFamily: fontFamily),
-                              ),
+                              leading: const Icon(Icons.battery_alert, color: Colors.orangeAccent),
                               onPressed: (context) async {
                                 final granted = await PrayerAlarmService.requestIgnoreBatteryOptimization();
-                                setState(() {
-                                  _isBatteryOptIgnored = granted;
-                                });
+                                if (mounted) {
+                                  setState(() {
+                                    _isBatteryOptIgnored = granted;
+                                  });
+                                }
                               },
                             ),
                           if (_isDevMode)
@@ -401,11 +407,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               leading: const Icon(Icons.restart_alt),
                               onPressed: (context) async {
                                 widget.updatePrayers!();
-                                Navigator.pop(context);
+                                if (Navigator.canPop(context)) {
+                                  Navigator.pop(context);
+                                }
                               },
                             ),
                           ]),
-                      _buildVersionSection(fontFamily),
+                      _buildVersionSection(fontFamily, isFloatingNav),
                     ],
                   )
                 : SettingsList(
@@ -502,12 +510,30 @@ class _SettingsPageState extends State<SettingsPage> {
                               showCitiesDialog(context, localeProvider.city, citiesList, widget.updatePrayers!);
                             },
                           ),
+                          if (_isDevMode)
+                            SettingsTile.navigation(
+                              leading: const Icon(Icons.space_dashboard_outlined),
+                              title: Text(
+                                AppLocalizations.of(context)!.settingsNavBarStyle,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              value: Text(
+                                navStyleLabel,
+                                strutStyle: const StrutStyle(forceStrutHeight: true),
+                                style: TextStyle(fontFamily: fontFamily),
+                              ),
+                              onPressed: (context) {
+                                showNavStyleDialog(context, navStyleNotifier);
+                              },
+                            ),
                         ],
                       ),
-                      _buildVersionSection(fontFamily),
+                      _buildVersionSection(fontFamily, isFloatingNav),
                     ],
                   )),
-      )),
+        ));
+      },
     );
   }
 }
@@ -668,6 +694,73 @@ Future<void> showLocaleDialog(BuildContext context, Locale locale, Function upda
     context: context,
     builder: (BuildContext context) {
       return alert;
+    },
+  );
+}
+
+Future<void> showNavStyleDialog(BuildContext context, NavStyleNotifier navStyleNotifier) async {
+  NavBarStyle selectedStyle = navStyleNotifier.style;
+  final l10n = AppLocalizations.of(context)!;
+  final isLight = Theme.of(context).brightness == Brightness.light;
+  final textColor = isLight ? Colors.black : Colors.white;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text(l10n.settingsNavBarStyle, style: TextStyle(color: textColor)),
+        contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancelString)),
+          ElevatedButton(
+            onPressed: () {
+              navStyleNotifier.setStyle(selectedStyle);
+              Navigator.pop(dialogContext);
+            },
+            child: Text(l10n.confirmString),
+          ),
+        ],
+        content: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<NavBarStyle>(
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: const VisualDensity(
+                      horizontal: VisualDensity.minimumDensity,
+                      vertical: VisualDensity.minimumDensity,
+                    ),
+                    value: NavBarStyle.floating,
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(l10n.navBarStyleFloating, style: TextStyle(color: textColor)),
+                    groupValue: selectedStyle,
+                    onChanged: (val) {
+                      if (val != null) setState(() => selectedStyle = val);
+                    },
+                  ),
+                  RadioListTile<NavBarStyle>(
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: const VisualDensity(
+                      horizontal: VisualDensity.minimumDensity,
+                      vertical: VisualDensity.minimumDensity,
+                    ),
+                    value: NavBarStyle.docked,
+                    activeColor: isLight ? color3 : darkThemeSwatch,
+                    title: Text(l10n.navBarStyleDocked, style: TextStyle(color: textColor)),
+                    groupValue: selectedStyle,
+                    onChanged: (val) {
+                      if (val != null) setState(() => selectedStyle = val);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
     },
   );
 }

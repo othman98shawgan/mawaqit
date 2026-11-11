@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:alfajr/services/day_of_year_service.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/theme_service.dart';
+import 'package:alfajr/ui/calendar_page.dart';
+import 'package:alfajr/ui/more_page.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +22,7 @@ import '../models/prayer.dart';
 import '../models/prayers.dart';
 import '../services/daylight_time_service.dart';
 import '../services/desktop_service.dart';
+import '../services/nav_style_service.dart';
 import '../services/notifications_service.dart';
 import '../services/prayer_alarm_service.dart';
 import 'alarm_ringing_page.dart';
@@ -54,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   StreamSubscription? _nativeAlarmSub;
   bool _isAlarmRingingOpen = false;
   Timer? _midnightTimer;
+  int _currentTabIndex = 0;
 
   void _openAlarmRingingPage(String payload) {
     if (_isAlarmRingingOpen || !mounted) return;
@@ -67,7 +71,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     final offsetMinutes = parts.length >= 5 ? int.tryParse(parts[4]) : null;
 
     _isAlarmRingingOpen = true;
-    Navigator.of(context).push(
+    Navigator.of(context)
+        .push(
       MaterialPageRoute(
         builder: (context) => AlarmRingingPage(
           prayerName: prayer,
@@ -77,7 +82,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         ),
         fullscreenDialog: true,
       ),
-    ).then((_) {
+    )
+        .then((_) {
       _isAlarmRingingOpen = false;
     });
   }
@@ -155,137 +161,138 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       if (!isAndroid && !isWindows && !isIOS) {
         return;
       }
-    // prayersToday = dummyDay; //TODO: FOR TESTING
+      // prayersToday = dummyDay; //TODO: FOR TESTING
 
-    final migrated = await StorageManager.readData('autoDstScheduleMigrated_v1');
-    if (migrated != true) {
-      await cancelAllPrayers();
-      StorageManager.saveData('autoDstScheduleMigrated_v1', true);
-    }
+      final migrated = await StorageManager.readData('autoDstScheduleMigrated_v1');
+      if (migrated != true) {
+        await cancelAllPrayers();
+        StorageManager.saveData('autoDstScheduleMigrated_v1', true);
+      }
 
-    _scheduledPrayers = await getScheduledPrayers();
-    if (removePassedPrayers(_scheduledPrayers)) {
-      setScheduledPrayers(_scheduledPrayers);
-    }
-    if (!mounted) return; //Make sure widget is mounted
+      _scheduledPrayers = await getScheduledPrayers();
+      if (removePassedPrayers(_scheduledPrayers)) {
+        setScheduledPrayers(_scheduledPrayers);
+      }
+      if (!mounted) return; //Make sure widget is mounted
 
-    if (isAndroid) {
-      final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
-      final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
-      final titles = getLocalizedPrayerAlarmTitles(context);
-      final alarmSettingsMap = await PrayerAlarmService.loadAllAlarmSettings();
+      if (isAndroid) {
+        final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+        final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+        final titles = getLocalizedPrayerAlarmTitles(context);
+        final alarmSettingsMap = await PrayerAlarmService.loadAllAlarmSettings();
+        if (!mounted) return;
+        final offsets = alarmSettingsMap.map((k, v) => MapEntry(k, v.offsetMinutes));
+        final localizedBodies = getLocalizedPrayerAlarmMessages(context, offsets);
+        await PrayerAlarmService.scheduleUpcomingAlarms(
+          prayerList: _prayerList,
+          summerTime: dstNotifier.getSummerTime(),
+          timeDiff: diff,
+          localizedTitles: titles,
+          localizedBodies: localizedBodies,
+        );
+      }
       if (!mounted) return;
-      final offsets = alarmSettingsMap.map((k, v) => MapEntry(k, v.offsetMinutes));
-      final localizedBodies = getLocalizedPrayerAlarmMessages(context, offsets);
-      await PrayerAlarmService.scheduleUpcomingAlarms(
-        prayerList: _prayerList,
-        summerTime: dstNotifier.getSummerTime(),
-        timeDiff: diff,
-        localizedTitles: titles,
-        localizedBodies: localizedBodies,
-      );
-    }
-    if (!mounted) return;
 
-    var notifiactionsStatus = Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
-    var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
+      var notifiactionsStatus =
+          Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
+      var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
 
-    if (!notifiactionsStatus) {
-      return;
-    }
-
-    await _scheduleDstTransitionNotification();
-    if (!mounted) return;
-
-    final earlyReturnLimit = reminderStatus ? (isIOS ? 45 : 71) : (isIOS ? 30 : 35);
-    if (_scheduledPrayers.length > earlyReturnLimit) {
-      return;
-    }
-    List<Prayer> prayersToSchedule = [];
-    reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
-    final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
-    summerTime = dstNotifier.getSummerTime();
-    timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
-
-    final int maxDays = (isIOS && reminderStatus) ? 4 : 6;
-    prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
-    prayersToSchedule.addAll(getNextWeekPrayers(
-      prayersToday,
-      _prayerList,
-      dayInYear,
-      summerTime,
-      timeDiff,
-      isAutoMode: dstNotifier.isAutoDst,
-      daysCount: maxDays,
-    ));
-    if (!mounted) return;
-    final l10n = AppLocalizations.of(context)!;
-    final Map<String, String> prayerLabels = {
-      'Fajr': getPrayerTranslation('Fajr', context),
-      'Shuruq': getPrayerTranslation('Shuruq', context),
-      'Duhr': getPrayerTranslation('Duhr', context),
-      'Asr': getPrayerTranslation('Asr', context),
-      'Maghrib': getPrayerTranslation('Maghrib', context),
-      'Isha': getPrayerTranslation('Isha', context),
-    };
-
-    for (final prayer in prayersToSchedule) {
-      var id = getPrayerNotificationId(prayer.time);
-      if (_scheduledPrayers.contains(id)) {
-        continue;
-      }
-      var prayerBody = '';
-      var pryaerTitle = '';
-      final localizedLabel = prayerLabels[prayer.label] ?? prayer.label;
-      if (prayer.label == 'Shuruq') {
-        prayerBody = l10n.notificationsShuruqBody;
-        pryaerTitle = l10n.notificationsShuruqPrayerTimeTitle;
-      } else {
-        pryaerTitle = l10n.notificationsPrayerTimeTitle(localizedLabel);
+      if (!notifiactionsStatus) {
+        return;
       }
 
-      NotificationsService.scheduleNotifications(
-          id: int.parse(id.substring(6)),
-          channelId: id,
-          title: pryaerTitle,
-          body: prayerBody,
-          payload: 'alfajr',
-          sheduledDate: prayer.time);
+      await _scheduleDstTransitionNotification();
+      if (!mounted) return;
 
-      _scheduledPrayers.add(id);
-      //Set reminder
-      if (reminderStatus) {
-        var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
-        if (reminderTime.isBefore(DateTime.now())) {
+      final earlyReturnLimit = reminderStatus ? (isIOS ? 45 : 71) : (isIOS ? 30 : 35);
+      if (_scheduledPrayers.length > earlyReturnLimit) {
+        return;
+      }
+      List<Prayer> prayersToSchedule = [];
+      reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
+      final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
+      summerTime = dstNotifier.getSummerTime();
+      timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
+
+      final int maxDays = (isIOS && reminderStatus) ? 4 : 6;
+      prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
+      prayersToSchedule.addAll(getNextWeekPrayers(
+        prayersToday,
+        _prayerList,
+        dayInYear,
+        summerTime,
+        timeDiff,
+        isAutoMode: dstNotifier.isAutoDst,
+        daysCount: maxDays,
+      ));
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      final Map<String, String> prayerLabels = {
+        'Fajr': getPrayerTranslation('Fajr', context),
+        'Shuruq': getPrayerTranslation('Shuruq', context),
+        'Duhr': getPrayerTranslation('Duhr', context),
+        'Asr': getPrayerTranslation('Asr', context),
+        'Maghrib': getPrayerTranslation('Maghrib', context),
+        'Isha': getPrayerTranslation('Isha', context),
+      };
+
+      for (final prayer in prayersToSchedule) {
+        var id = getPrayerNotificationId(prayer.time);
+        if (_scheduledPrayers.contains(id)) {
           continue;
         }
-        var reminderId = getPrayerNotificationId(reminderTime);
-        var reminderTitle = '';
+        var prayerBody = '';
+        var pryaerTitle = '';
+        final localizedLabel = prayerLabels[prayer.label] ?? prayer.label;
         if (prayer.label == 'Shuruq') {
-          reminderTitle = l10n.notificationsShuruqReminderTitle(reminderValue);
-          if (reminderValue <= 10) {
-            reminderTitle = l10n.notificationsShuruqReminderTitleMinutes(reminderValue);
-          }
+          prayerBody = l10n.notificationsShuruqBody;
+          pryaerTitle = l10n.notificationsShuruqPrayerTimeTitle;
         } else {
-          reminderTitle = l10n.notificationsReminderTitle(localizedLabel, reminderValue);
-          if (reminderValue <= 10) {
-            reminderTitle = l10n.notificationsReminderTitleMinutes(localizedLabel, reminderValue);
-          }
+          pryaerTitle = l10n.notificationsPrayerTimeTitle(localizedLabel);
         }
 
         NotificationsService.scheduleNotifications(
-          id: int.parse(reminderId.substring(6)),
-          channelId: reminderId,
-          title: reminderTitle,
-          payload: 'alfajr',
-          sheduledDate: reminderTime,
-        );
+            id: int.parse(id.substring(6)),
+            channelId: id,
+            title: pryaerTitle,
+            body: prayerBody,
+            payload: 'alfajr',
+            sheduledDate: prayer.time);
 
-        _scheduledPrayers.add(reminderId);
+        _scheduledPrayers.add(id);
+        //Set reminder
+        if (reminderStatus) {
+          var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
+          if (reminderTime.isBefore(DateTime.now())) {
+            continue;
+          }
+          var reminderId = getPrayerNotificationId(reminderTime);
+          var reminderTitle = '';
+          if (prayer.label == 'Shuruq') {
+            reminderTitle = l10n.notificationsShuruqReminderTitle(reminderValue);
+            if (reminderValue <= 10) {
+              reminderTitle = l10n.notificationsShuruqReminderTitleMinutes(reminderValue);
+            }
+          } else {
+            reminderTitle = l10n.notificationsReminderTitle(localizedLabel, reminderValue);
+            if (reminderValue <= 10) {
+              reminderTitle = l10n.notificationsReminderTitleMinutes(localizedLabel, reminderValue);
+            }
+          }
+
+          NotificationsService.scheduleNotifications(
+            id: int.parse(reminderId.substring(6)),
+            channelId: reminderId,
+            title: reminderTitle,
+            payload: 'alfajr',
+            sheduledDate: reminderTime,
+          );
+
+          _scheduledPrayers.add(reminderId);
+        }
       }
-    }
 
-    setScheduledPrayers(_scheduledPrayers);
+      setScheduledPrayers(_scheduledPrayers);
     } catch (e) {
       debugPrint("Error scheduling next prayers: $e");
     }
@@ -374,6 +381,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     readJson();
     listenNotifications();
     _setupMidnightTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        scheduleNextPrayers(DateTime.now());
+      }
+    });
     if (isWindows) {
       DesktopService.windowRestoredNotifier.addListener(_onWindowRestored);
     }
@@ -418,313 +430,324 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  Widget _buildPrayersTab(
+    BuildContext context,
+    ThemeNotifier theme,
+    DaylightSavingNotifier daylightSaving,
+    ReminderNotifier reminder,
+    LocaleNotifier localeProvider,
+    String title,
+  ) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double screenHeight = MediaQuery.of(context).size.height;
+          final EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+          final double safeBottom = MediaQuery.of(context).padding.bottom;
+          final double availableHeight = (constraints.maxHeight - safeBottom).clamp(0.0, double.infinity);
+          final double height3 = screenHeight - viewPadding.top - kToolbarHeight;
+          final double idealTotal = height3 * 0.9;
+          final double scale = idealTotal > availableHeight ? (availableHeight / idealTotal) : 1.0;
+          final double prayerCardHeight = height3 * 0.1 * scale;
+          final double mainCardHeight = height3 * 0.3 * scale;
+
+          summerTime = daylightSaving.getSummerTime();
+          reminderValue = reminder.getReminderTime();
+          timeDiff = localeProvider.timeDiff;
+          return Container(
+            decoration:
+                BoxDecoration(image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                children: <Widget>[
+                  MyCard(
+                      height: mainCardHeight,
+                      widget: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 6.0, bottom: 4.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    DateFormat('dd MMM yyyy', localeProvider.locale.toString()).format(DateTime.now()),
+                                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                                  ),
+                                  const Text(
+                                    "  -  ",
+                                    style: TextStyle(fontSize: 16, color: Colors.white),
+                                  ),
+                                  Text(
+                                    (HijriCalendar.now().toFormat('dd MMMM yyyy')),
+                                    locale: localeProvider.locale,
+                                    strutStyle: const StrutStyle(forceStrutHeight: true),
+                                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              const Padding(padding: EdgeInsets.only(top: 4.0, bottom: 4.0), child: ClockWidget()),
+                              PrayerClockWidget(
+                                prayersToday: prayersToday,
+                                summerTime: summerTime,
+                                timeDiff: timeDiff,
+                                prayerList: _prayerList,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )),
+                  PrayerWidget(
+                    label: "Fajr",
+                    time: adjustTime(prayersToday.fajr),
+                    height: prayerCardHeight,
+                  ),
+                  PrayerWidget(
+                    label: "Shuruq",
+                    time: adjustTime(prayersToday.shuruq),
+                    height: prayerCardHeight,
+                  ),
+                  PrayerWidget(
+                    label: "Duhr",
+                    time: adjustTime(prayersToday.duhr),
+                    height: prayerCardHeight,
+                  ),
+                  PrayerWidget(
+                    label: "Asr",
+                    time: adjustTime(prayersToday.asr),
+                    height: prayerCardHeight,
+                  ),
+                  PrayerWidget(
+                    label: "Maghrib",
+                    time: adjustTime(prayersToday.maghrib),
+                    height: prayerCardHeight,
+                  ),
+                  PrayerWidget(
+                    label: "Isha",
+                    time: adjustTime(prayersToday.isha),
+                    height: prayerCardHeight,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _onTabTap(int index) async {
+    if (index == 2) {
+      await _launchURL('https://qiblafinder.withgoogle.com/');
+      return;
+    }
+    if (index == 4) {
+      await showMoreBottomSheet(context, prayersToday);
+      return;
+    }
+    setState(() {
+      _currentTabIndex = index;
+    });
+  }
+
+  Widget _buildBottomNavBar(AppLocalizations l10n, bool isDark, bool isFloating) {
+    final bgColor = isDark ? appBarColor : color5;
+    final selectedColor = isDark ? Colors.tealAccent : Colors.white;
+    const unselectedColor = Colors.white60;
+
+    final items = [
+      (icon: Icons.access_time, activeIcon: Icons.access_time_filled, label: l10n.prayersTabString),
+      (icon: Icons.calendar_month_outlined, activeIcon: Icons.calendar_month, label: l10n.calendarTabString),
+      (icon: Icons.mosque_outlined, activeIcon: Icons.mosque, label: l10n.qiblaString),
+      (icon: Icons.settings_outlined, activeIcon: Icons.settings, label: l10n.settingsString),
+      (icon: Icons.more_horiz, activeIcon: Icons.more_horiz, label: l10n.moreString),
+    ];
+
+    if (!isFloating) {
+      return NavigationBar(
+        selectedIndex: _currentTabIndex,
+        height: 66,
+        backgroundColor: bgColor,
+        indicatorColor: isDark ? Colors.teal.withValues(alpha: 0.35) : color3,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final isSelected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? selectedColor : unselectedColor,
+          );
+        }),
+        onDestinationSelected: _onTabTap,
+        destinations: [
+          for (final item in items)
+            NavigationDestination(
+              icon: Icon(item.icon, color: unselectedColor),
+              selectedIcon: Icon(item.activeIcon, color: selectedColor),
+              label: item.label,
+            ),
+        ],
+      );
+    }
+
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: bgColor.withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 16,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(items.length, (i) {
+            final selected = i == _currentTabIndex;
+            final item = items[i];
+            return Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: () => _onTabTap(i),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 280),
+                            curve: Curves.easeOutCubic,
+                            height: 30,
+                            width: selected ? 54 : 0,
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? (isDark
+                                      ? Colors.teal.withValues(alpha: 0.35)
+                                      : Colors.white.withValues(alpha: 0.22))
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          AnimatedScale(
+                            scale: selected ? 1.18 : 1.0,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutBack,
+                            child: Icon(
+                              selected ? item.activeIcon : item.icon,
+                              color: selected ? selectedColor : unselectedColor,
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: selected ? 12 : 11,
+                          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                          color: selected ? selectedColor : unselectedColor,
+                        ),
+                        child: Text(
+                          item.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // prayersToday = dummyDay; //TODO: FOR TESTING
 
-    double height = MediaQuery.of(context).size.height;
-    var padding = MediaQuery.of(context).viewPadding;
-    // Height (without status and toolbar)
-    double height3 = height - padding.top - kToolbarHeight;
-    double prayerCardHeight = height3 * 0.1;
-    double mainCardHeight = height3 * 0.3;
-    var title = kDebugMode ? '[DEV] ${AppLocalizations.of(context)!.appName}' : AppLocalizations.of(context)!.appName;
+    final l10n = AppLocalizations.of(context)!;
+    final title = kDebugMode ? '[DEV] ${l10n.appName}' : l10n.appName;
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
 
     HijriCalendar.setLocal(Provider.of<LocaleNotifier>(context, listen: false).locale.toString());
-    var themeMode = Provider.of<ThemeNotifier>(context, listen: false).themeMode;
-    var iconColor = themeMode == ThemeMode.dark ? colorTextDark : colorTextLight;
 
-    return Consumer5<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
-        NotificationsStatusNotifier>(
-      builder: (context, theme, daylightSaving, reminder, localeProvider, notifications, child) => Directionality(
-        textDirection: ui.TextDirection.ltr,
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            title: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w500),
+    return Consumer6<ThemeNotifier, DaylightSavingNotifier, ReminderNotifier, LocaleNotifier,
+        NotificationsStatusNotifier, NavStyleNotifier>(
+      builder: (context, theme, daylightSaving, reminder, localeProvider, notifications, navStyle, child) {
+        final isDark = theme.themeMode == ThemeMode.dark;
+        final textDirection = localeProvider.getTextDirection(localeProvider.locale);
+        final isFloating = navStyle.isFloating;
+
+        return PopScope(
+          canPop: _currentTabIndex == 0,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop && _currentTabIndex != 0) {
+              setState(() {
+                _currentTabIndex = 0;
+              });
+            }
+          },
+          child: Directionality(
+            textDirection: ui.TextDirection.ltr,
+            child: Scaffold(
+              extendBody: isFloating,
+              body: IndexedStack(
+                index: _currentTabIndex,
+                children: [
+                  _buildPrayersTab(context, theme, daylightSaving, reminder, localeProvider, title),
+                  const CalendarPage(),
+                  const SizedBox.shrink(),
+                  SettingsPage(
+                    updatePrayers: updatePrayers,
+                    updateReminder: updateReminder,
+                    cancelNotifications: cancelAllPrayers,
+                  ),
+                  const SizedBox.shrink(),
+                ],
+              ),
+              bottomNavigationBar: Directionality(
+                textDirection: textDirection,
+                child: _buildBottomNavBar(l10n, isDark, isFloating),
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                tooltip: AppLocalizations.of(context)!.settingsString,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                        updatePrayers: updatePrayers,
-                        updateReminder: updateReminder,
-                        cancelNotifications: cancelAllPrayers,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
           ),
-          body: FutureBuilder<List>(
-            future: Future.wait([
-              scheduleNextPrayers(DateTime.now()),
-            ]),
-            builder: (buildContext, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done || snapshot.hasData || snapshot.hasError) {
-                summerTime = daylightSaving.getSummerTime();
-                reminderValue = reminder.getReminderTime();
-                timeDiff = localeProvider.timeDiff;
-                return Container(
-                  decoration: BoxDecoration(
-                      image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
-                  child: Column(
-                    children: <Widget>[
-                      MyCard(
-                          height: mainCardHeight,
-                          widget: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10.0),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          DateFormat('dd MMM yyyy', localeProvider.locale.toString())
-                                              .format(DateTime.now()),
-                                          strutStyle: const StrutStyle(forceStrutHeight: true),
-                                          style: const TextStyle(fontSize: 16, color: Colors.white),
-                                        ),
-                                        const Text(
-                                          "  -  ",
-                                          style: TextStyle(fontSize: 16, color: Colors.white),
-                                        ),
-                                        Text(
-                                          (HijriCalendar.now().toFormat('dd MMMM yyyy')),
-                                          locale: localeProvider.locale,
-                                          strutStyle: const StrutStyle(forceStrutHeight: true),
-                                          style: const TextStyle(fontSize: 16, color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                    const Padding(
-                                        padding: EdgeInsets.only(top: 5.0, bottom: 5.0), child: ClockWidget()),
-                                    PrayerClockWidget(
-                                      prayersToday: prayersToday,
-                                      summerTime: summerTime,
-                                      timeDiff: timeDiff,
-                                      prayerList: _prayerList,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )),
-                      PrayerWidget(
-                        label: "Fajr",
-                        time: adjustTime(prayersToday.fajr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Shuruq",
-                        time: adjustTime(prayersToday.shuruq),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Duhr",
-                        time: adjustTime(prayersToday.duhr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Asr",
-                        time: adjustTime(prayersToday.asr),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Maghrib",
-                        time: adjustTime(prayersToday.maghrib),
-                        height: prayerCardHeight,
-                      ),
-                      PrayerWidget(
-                        label: "Isha",
-                        time: adjustTime(prayersToday.isha),
-                        height: prayerCardHeight,
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                // Return loading screen while reading preferences
-                return const SizedBox.shrink();
-              }
-            },
-          ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(kDebugMode ? '[DEV] ${AppLocalizations.of(context)!.appName}' : AppLocalizations.of(context)!.appName, style: const TextStyle(color: Colors.white)),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Image.asset(
-                          'images/logo.png',
-                          height: 96,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Icon(Icons.calendar_month, color: iconColor),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.calendarString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/calendar');
-                  },
-                ),
-                (isAndroid || isWindows || isIOS)
-                    ? ListTile(
-                        minLeadingWidth: 0,
-                        leading: Image.asset(
-                          'images/misbaha.png',
-                          height: 24,
-                        ),
-                        title: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            AppLocalizations.of(context)!.dhikrString,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/counter');
-                        },
-                      )
-                    : Container(),
-                (isAndroid || isWindows || isIOS)
-                    ? ListTile(
-                        minLeadingWidth: 0,
-                        leading: Image.asset(
-                          'images/salah.png',
-                          height: 24,
-                        ),
-                        title: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            AppLocalizations.of(context)!.missedPrayersString,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/missed_prayer');
-                        },
-                      )
-                    : Container(),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Icon(Icons.mosque, color: iconColor),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.qiblaString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await _launchURL('https://qiblafinder.withgoogle.com/');
-                  },
-                ),
-                const Divider(thickness: 1),
-                if (!isIOS)
-                  ListTile(
-                    minLeadingWidth: 0,
-                    leading: Icon(Icons.apps, color: iconColor),
-                    title: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        AppLocalizations.of(context)!.ourAppsString,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/apps');
-                    },
-                  ),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Icon(Icons.email, color: iconColor),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.contactUsString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await _contactUs();
-                  },
-                ),
-                ListTile(
-                  minLeadingWidth: 0,
-                  leading: Icon(Icons.share, color: iconColor),
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.shareString,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    sharePrayerTimes(context, localeProvider, prayersToday, DateTime.now());
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Future<void> _launchURL(String urlAddress) async {
-    Uri url = Uri.parse(urlAddress);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Future<void> _contactUs() async {
-    final l10n = AppLocalizations.of(context)!;
-    final subject = Uri.encodeComponent(l10n.contactUsEmailSubject);
-    final body = Uri.encodeComponent(l10n.contactUsEmailBody);
-    String urlAddress = 'mailto:oth1998@gmail.com?subject=$subject&body=$body';
     Uri url = Uri.parse(urlAddress);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';

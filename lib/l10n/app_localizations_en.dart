@@ -758,4 +758,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fullScreenIntentGranted => 'Full-screen alarm permission granted';
+
+  @override
+  String get prayersTabString => 'Prayers';
+
+  @override
+  String get calendarTabString => 'Calendar';
+
+  @override
+  String get moreString => 'More';
+
+  @override
+  String daylightDuration(int hours, int minutes) {
+    return 'Daylight: ${hours}h ${minutes}m';
+  }
+
+  @override
+  String fastingDuration(int hours, int minutes) {
+    return 'Fasting: ${hours}h ${minutes}m';
+  }
+
+  @override
+  String get settingsNavBarStyle => 'Navigation Bar';
+
+  @override
+  String get navBarStyleFloating => 'Floating';
+
+  @override
+  String get navBarStyleDocked => 'Docked';
 }

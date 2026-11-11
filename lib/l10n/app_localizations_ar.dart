@@ -760,4 +760,32 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fullScreenIntentGranted => 'إذن منبه شاشة القفل مفعّل';
+
+  @override
+  String get prayersTabString => 'المواقيت';
+
+  @override
+  String get calendarTabString => 'التقويم';
+
+  @override
+  String get moreString => 'المزيد';
+
+  @override
+  String daylightDuration(int hours, int minutes) {
+    return 'النهار: $hours س $minutes د';
+  }
+
+  @override
+  String fastingDuration(int hours, int minutes) {
+    return 'الصيام: $hours س $minutes د';
+  }
+
+  @override
+  String get settingsNavBarStyle => 'شريط التنقل';
+
+  @override
+  String get navBarStyleFloating => 'عائم';
+
+  @override
+  String get navBarStyleDocked => 'مثبت';
 }

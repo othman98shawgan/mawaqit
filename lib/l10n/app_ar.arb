@@ -214,5 +214,13 @@
    "fullScreenIntentDesc": "يتطلب أندرويد 14 منح إذن لعرض المنبه وإيقاظ الشاشة تلقائياً أثناء قفل الهاتف.",
    "fullScreenIntentAction": "منح الإذن",
    "alarmDelay": "التأخير",
-   "fullScreenIntentGranted": "إذن منبه شاشة القفل مفعّل"
+   "fullScreenIntentGranted": "إذن منبه شاشة القفل مفعّل",
+   "prayersTabString": "المواقيت",
+   "calendarTabString": "التقويم",
+   "moreString": "المزيد",
+   "daylightDuration": "النهار: {hours} س {minutes} د",
+   "fastingDuration": "الصيام: {hours} س {minutes} د",
+   "settingsNavBarStyle": "شريط التنقل",
+   "navBarStyleFloating": "عائم",
+   "navBarStyleDocked": "مثبت"
 }

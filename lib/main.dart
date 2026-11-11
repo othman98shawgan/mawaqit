@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 
 import 'services/reminder_service.dart';
 import 'services/desktop_service.dart';
+import 'services/nav_style_service.dart';
 import 'services/theme_service.dart';
 import 'ui/home_page.dart';
 import 'ui/notifications_page.dart';
@@ -78,6 +79,9 @@ Future<void> main() async {
   String language = isArabic ? 'ar' : 'en';
   String city = StorageManager.readDataFromPrefs('City', prefs) ?? 'alQuds';
 
+  // Navigation Bar Style
+  var navBarStyle = NavStyleNotifier.parseStyle(StorageManager.readDataFromPrefs('navBarStyle', prefs));
+
   runApp(
     MultiProvider(
       providers: [
@@ -87,6 +91,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => DhikrNotifier()),
         ChangeNotifierProvider(create: (context) => NotificationsStatusNotifier(notificationsStatus)),
         ChangeNotifierProvider(create: (context) => LocaleNotifier(Locale(language), city)),
+        ChangeNotifierProvider(create: (context) => NavStyleNotifier(navBarStyle)),
       ],
       child: const MyApp(),
     ),
