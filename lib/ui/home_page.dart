@@ -592,7 +592,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     updateReminder: updateReminder,
                     cancelNotifications: cancelAllPrayers,
                   ),
-                  MorePage(prayersToday: prayersToday),
+                  const SizedBox.shrink(),
                 ],
               ),
               bottomNavigationBar: Directionality(
@@ -608,6 +608,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   onTap: (index) async {
                     if (index == 2) {
                       await _launchURL('https://qiblafinder.withgoogle.com/');
+                      return;
+                    }
+                    if (index == 4) {
+                      await showMoreBottomSheet(context, prayersToday);
                       return;
                     }
                     setState(() {

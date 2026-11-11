@@ -145,10 +145,10 @@ class _CalendarPageState extends State<CalendarPage> {
               final double screenHeight = MediaQuery.of(context).size.height;
               final EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
               final double height3 = screenHeight - viewPadding.top - kToolbarHeight;
-              final double idealTotal = height3 * 0.86;
+              final double idealTotal = height3 * 0.9;
               final double scale = idealTotal > constraints.maxHeight ? (constraints.maxHeight / idealTotal) : 1.0;
-              final double prayerCardHeight = height3 * 0.11 * scale;
-              final double mainCardHeight = height3 * 0.20 * scale;
+              final double prayerCardHeight = height3 * 0.1 * scale;
+              final double mainCardHeight = height3 * 0.3 * scale;
 
               return FutureBuilder<List>(
                 future: Future.wait([
@@ -217,31 +217,37 @@ class _CalendarPageState extends State<CalendarPage> {
                             label: "Fajr",
                             time: adjustTime(prayersToday.fajr),
                             height: prayerCardHeight,
+                            showAlarm: false,
                           ),
                           PrayerWidget(
                             label: "Shuruq",
                             time: adjustTime(prayersToday.shuruq),
                             height: prayerCardHeight,
+                            showAlarm: false,
                           ),
                           PrayerWidget(
                             label: "Duhr",
                             time: adjustTime(prayersToday.duhr),
                             height: prayerCardHeight,
+                            showAlarm: false,
                           ),
                           PrayerWidget(
                             label: "Asr",
                             time: adjustTime(prayersToday.asr),
                             height: prayerCardHeight,
+                            showAlarm: false,
                           ),
                           PrayerWidget(
                             label: "Maghrib",
                             time: adjustTime(prayersToday.maghrib),
                             height: prayerCardHeight,
+                            showAlarm: false,
                           ),
                           PrayerWidget(
                             label: "Isha",
                             time: adjustTime(prayersToday.isha),
                             height: prayerCardHeight,
+                            showAlarm: false,
                           ),
                         ],
                       ),

@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,175 +10,126 @@ import '../services/locale_service.dart';
 import '../services/prayer_methods.dart';
 import '../services/theme_service.dart';
 
-class MorePage extends StatelessWidget {
-  const MorePage({
-    super.key,
-    required this.prayersToday,
-  });
+Future<void> showMoreBottomSheet(
+  BuildContext context,
+  PrayersModel prayersToday,
+) {
+  final theme = Provider.of<ThemeNotifier>(context, listen: false);
+  final isDark = theme.themeMode == ThemeMode.dark;
 
-  final PrayersModel prayersToday;
+  return showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: isDark ? appBarColor : color1,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) {
+      final l10n = AppLocalizations.of(sheetContext)!;
+      final localeProvider = Provider.of<LocaleNotifier>(sheetContext, listen: false);
+      final textDirection = localeProvider.getTextDirection(localeProvider.locale);
+      final textColor = isDark ? colorTextDark : Colors.black87;
+      final iconColor = isDark ? Colors.tealAccent : color5;
 
-  Future<void> _contactUs(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final subject = Uri.encodeComponent(l10n.contactUsEmailSubject);
-    final body = Uri.encodeComponent(l10n.contactUsEmailBody);
-    final url = Uri.parse('mailto:oth1998@gmail.com?subject=$subject&body=$body');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Widget _buildMoreTile({
-    required BuildContext context,
-    required Widget leading,
-    required String title,
-    required VoidCallback onTap,
-    required bool isDark,
-    required Color textColor,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 2,
-      color: isDark ? prayerBgColorDark : color3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        leading: leading,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 18,
-              color: textColor,
+      return Directionality(
+        textDirection: textDirection,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.black26,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                if (isAndroid || isWindows || isIOS)
+                  ListTile(
+                    leading: Image.asset(
+                      'images/misbaha.png',
+                      height: 24,
+                      width: 24,
+                      color: isDark ? null : color5,
+                    ),
+                    title: Text(
+                      l10n.dhikrString,
+                      style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                    ),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.pushNamed(context, '/counter');
+                    },
+                  ),
+                if (isAndroid || isWindows || isIOS)
+                  ListTile(
+                    leading: Image.asset(
+                      'images/salah.png',
+                      height: 24,
+                      width: 24,
+                      color: isDark ? null : color5,
+                    ),
+                    title: Text(
+                      l10n.missedPrayersString,
+                      style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                    ),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.pushNamed(context, '/missed_prayer');
+                    },
+                  ),
+                if (!isIOS)
+                  ListTile(
+                    leading: Icon(Icons.apps, color: iconColor),
+                    title: Text(
+                      l10n.ourAppsString,
+                      style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                    ),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.pushNamed(context, '/apps');
+                    },
+                  ),
+                ListTile(
+                  leading: Icon(Icons.email, color: iconColor),
+                  title: Text(
+                    l10n.contactUsString,
+                    style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    final subject = Uri.encodeComponent(l10n.contactUsEmailSubject);
+                    final body = Uri.encodeComponent(l10n.contactUsEmailBody);
+                    final url = Uri.parse('mailto:oth1998@gmail.com?subject=$subject&body=$body');
+                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                      throw 'Could not launch $url';
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.share, color: iconColor),
+                  title: Text(
+                    l10n.shareString,
+                    style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                  ),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    sharePrayerTimes(
+                      context,
+                      localeProvider,
+                      prayersToday,
+                      DateTime.now(),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: textColor.withValues(alpha: 0.7),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Consumer2<ThemeNotifier, LocaleNotifier>(
-      builder: (context, theme, localeProvider, _) {
-        final isDark = theme.themeMode == ThemeMode.dark;
-        final textColor = isDark ? colorTextDark : colorTextLight;
-        final textDirection = localeProvider.getTextDirection(localeProvider.locale);
-
-        return Directionality(
-          textDirection: ui.TextDirection.ltr,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              title: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  l10n.moreString,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-            ),
-            body: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(theme.backgroundImage!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Directionality(
-                textDirection: textDirection,
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  children: [
-                    if (isAndroid || isWindows || isIOS)
-                      _buildMoreTile(
-                        context: context,
-                        leading: Image.asset(
-                          'images/misbaha.png',
-                          height: 28,
-                          width: 28,
-                        ),
-                        title: l10n.dhikrString,
-                        isDark: isDark,
-                        textColor: textColor,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/counter');
-                        },
-                      ),
-                    if (isAndroid || isWindows || isIOS)
-                      _buildMoreTile(
-                        context: context,
-                        leading: Image.asset(
-                          'images/salah.png',
-                          height: 28,
-                          width: 28,
-                        ),
-                        title: l10n.missedPrayersString,
-                        isDark: isDark,
-                        textColor: textColor,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/missed_prayer');
-                        },
-                      ),
-                    if (!isIOS)
-                      _buildMoreTile(
-                        context: context,
-                        leading: Icon(Icons.apps, color: textColor, size: 28),
-                        title: l10n.ourAppsString,
-                        isDark: isDark,
-                        textColor: textColor,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/apps');
-                        },
-                      ),
-                    _buildMoreTile(
-                      context: context,
-                      leading: Icon(Icons.email, color: textColor, size: 28),
-                      title: l10n.contactUsString,
-                      isDark: isDark,
-                      textColor: textColor,
-                      onTap: () async {
-                        await _contactUs(context);
-                      },
-                    ),
-                    _buildMoreTile(
-                      context: context,
-                      leading: Icon(Icons.share, color: textColor, size: 28),
-                      title: l10n.shareString,
-                      isDark: isDark,
-                      textColor: textColor,
-                      onTap: () {
-                        sharePrayerTimes(
-                          context,
-                          localeProvider,
-                          prayersToday,
-                          DateTime.now(),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+      );
+    },
+  );
 }

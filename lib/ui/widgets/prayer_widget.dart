@@ -16,12 +16,14 @@ class PrayerWidget extends StatefulWidget {
     required this.time,
     this.height = 0,
     this.rawPrayerTime,
+    this.showAlarm = true,
   });
 
   final String label;
   final String time;
   final double height;
   final DateTime? rawPrayerTime;
+  final bool showAlarm;
 
   @override
   State<PrayerWidget> createState() => PrayerState();
@@ -99,7 +101,7 @@ class PrayerState extends State<PrayerWidget> {
       widget: ListTile(
         textColor: Colors.white,
         iconColor: Colors.white,
-        onTap: (!kIsWeb && Platform.isAndroid) ? _openAlarmDialog : null,
+        onTap: (widget.showAlarm && !kIsWeb && Platform.isAndroid) ? _openAlarmDialog : null,
         leading: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
@@ -113,7 +115,7 @@ class PrayerState extends State<PrayerWidget> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!kIsWeb && Platform.isAndroid)
+              if (widget.showAlarm && !kIsWeb && Platform.isAndroid)
                 IconButton(
                   tooltip: _hasAlarm ? 'Alarm active' : 'Set alarm',
                   padding: EdgeInsets.zero,
@@ -125,7 +127,7 @@ class PrayerState extends State<PrayerWidget> {
                   ),
                   onPressed: _openAlarmDialog,
                 ),
-              if (!kIsWeb && Platform.isAndroid) const SizedBox(width: 8),
+              if (widget.showAlarm && !kIsWeb && Platform.isAndroid) const SizedBox(width: 8),
               Text(
                 widget.time,
                 style: timeStyle,
