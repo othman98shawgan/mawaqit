@@ -219,5 +219,8 @@
    "calendarTabString": "التقويم",
    "moreString": "المزيد",
    "daylightDuration": "النهار: {hours} س {minutes} د",
-   "fastingDuration": "الصيام: {hours} س {minutes} د"
+   "fastingDuration": "الصيام: {hours} س {minutes} د",
+   "settingsNavBarStyle": "شريط التنقل",
+   "navBarStyleFloating": "عائم",
+   "navBarStyleDocked": "مثبت"
 }

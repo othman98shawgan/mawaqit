@@ -187,9 +187,11 @@ class _CalendarPageState extends State<CalendarPage> {
             builder: (context, constraints) {
               final double screenHeight = MediaQuery.of(context).size.height;
               final EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+              final double safeBottom = MediaQuery.of(context).padding.bottom;
+              final double availableHeight = (constraints.maxHeight - safeBottom).clamp(0.0, double.infinity);
               final double height3 = screenHeight - viewPadding.top - kToolbarHeight;
               final double idealTotal = height3 * 0.9;
-              final double scale = idealTotal > constraints.maxHeight ? (constraints.maxHeight / idealTotal) : 1.0;
+              final double scale = idealTotal > availableHeight ? (availableHeight / idealTotal) : 1.0;
               final double prayerCardHeight = height3 * 0.1 * scale;
               final double mainCardHeight = height3 * 0.3 * scale;
 
@@ -202,9 +204,11 @@ class _CalendarPageState extends State<CalendarPage> {
                     return Container(
                       decoration: BoxDecoration(
                           image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
+                      child: SafeArea(
+                        top: false,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
                           Builder(builder: (context) {
                             final l10n = AppLocalizations.of(context)!;
                             final cityName = getCitiesMap(l10n)[localeProvider.city] ?? localeProvider.city;
@@ -324,6 +328,7 @@ class _CalendarPageState extends State<CalendarPage> {
                             showAlarm: false,
                           ),
                         ],
+                        ),
                       ),
                     );
                   } else {

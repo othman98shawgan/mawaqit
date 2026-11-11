@@ -1040,5 +1040,17 @@
          "hours": { "type": "int" },
          "minutes": { "type": "int" }
       }
+   },
+   "settingsNavBarStyle": "Navigation Bar",
+   "@settingsNavBarStyle": {
+      "description": "Settings label for bottom navigation bar style"
+   },
+   "navBarStyleFloating": "Floating",
+   "@navBarStyleFloating": {
+      "description": "Floating pill navigation bar style option"
+   },
+   "navBarStyleDocked": "Docked",
+   "@navBarStyleDocked": {
+      "description": "Docked Material 3 navigation bar style option"
    }
 }

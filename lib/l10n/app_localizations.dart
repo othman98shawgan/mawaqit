@@ -1405,6 +1405,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fasting: {hours}h {minutes}m'**
   String fastingDuration(int hours, int minutes);
+
+  /// Settings label for bottom navigation bar style
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation Bar'**
+  String get settingsNavBarStyle;
+
+  /// Floating pill navigation bar style option
+  ///
+  /// In en, this message translates to:
+  /// **'Floating'**
+  String get navBarStyleFloating;
+
+  /// Docked Material 3 navigation bar style option
+  ///
+  /// In en, this message translates to:
+  /// **'Docked'**
+  String get navBarStyleDocked;
 }
 
 class _AppLocalizationsDelegate

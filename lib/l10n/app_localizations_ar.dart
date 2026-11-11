@@ -779,4 +779,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String fastingDuration(int hours, int minutes) {
     return 'الصيام: $hours س $minutes د';
   }
+
+  @override
+  String get settingsNavBarStyle => 'شريط التنقل';
+
+  @override
+  String get navBarStyleFloating => 'عائم';
+
+  @override
+  String get navBarStyleDocked => 'مثبت';
 }

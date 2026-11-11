@@ -777,4 +777,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String fastingDuration(int hours, int minutes) {
     return 'Fasting: ${hours}h ${minutes}m';
   }
+
+  @override
+  String get settingsNavBarStyle => 'Navigation Bar';
+
+  @override
+  String get navBarStyleFloating => 'Floating';
+
+  @override
+  String get navBarStyleDocked => 'Docked';
 }
