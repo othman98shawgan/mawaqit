@@ -200,7 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             body: (isAndroid || isWindows || isIOS)
                 ? SettingsList(
-                    platform: isIOS ? DevicePlatform.iOS : DevicePlatform.android,
+                    platform: isIOS ? DevicePlatform.android : DevicePlatform.android,
                     contentPadding: const EdgeInsets.all(0),
                     lightTheme: SettingsThemeData(
                       settingsListBackground: color2.withValues(alpha: 0.2),
