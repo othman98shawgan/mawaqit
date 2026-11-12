@@ -7,6 +7,7 @@ import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/theme_service.dart';
 import 'package:alfajr/ui/calendar_page.dart';
 import 'package:alfajr/ui/more_page.dart';
+import 'package:alfajr/ui/qibla_page.dart';
 import 'package:alfajr/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +33,6 @@ import '../services/store_manager.dart';
 import 'widgets/card_widget.dart';
 import 'widgets/clock_widget.dart';
 import 'widgets/prayer_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
 
 // PrayersModel dummyDay =
@@ -551,10 +551,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _onTabTap(int index) async {
-    if (index == 2) {
-      await _launchURL('https://qiblafinder.withgoogle.com/');
-      return;
-    }
     if (index == 4) {
       await showMoreBottomSheet(context, prayersToday);
       return;
@@ -727,7 +723,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 children: [
                   _buildPrayersTab(context, theme, daylightSaving, reminder, localeProvider, title),
                   const CalendarPage(),
-                  const SizedBox.shrink(),
+                  QiblaPage(isActive: _currentTabIndex == 2),
                   SettingsPage(
                     updatePrayers: updatePrayers,
                     updateReminder: updateReminder,
@@ -745,12 +741,5 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         );
       },
     );
-  }
-
-  Future<void> _launchURL(String urlAddress) async {
-    Uri url = Uri.parse(urlAddress);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
   }
 }

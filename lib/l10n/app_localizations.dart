@@ -1423,6 +1423,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Docked'**
   String get navBarStyleDocked;
+
+  /// Label for Qibla direction angle
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla Direction'**
+  String get qiblaDirection;
+
+  /// Label for current device compass heading
+  ///
+  /// In en, this message translates to:
+  /// **'Heading'**
+  String get deviceHeading;
+
+  /// Distance in kilometers to the Kaaba in Makkah
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km to Makkah'**
+  String distanceToMakkah(String km);
+
+  /// Status message shown when device is aligned with the Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Facing the Qibla'**
+  String get qiblaAligned;
+
+  /// Instruction message when not yet aligned with the Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate your phone toward the Kaaba icon'**
+  String get qiblaTurnInstruction;
+
+  /// Banner hint when magnetometer needs figure-8 calibration
+  ///
+  /// In en, this message translates to:
+  /// **'Compass accuracy is low. Move your phone in a figure-8 motion to calibrate.'**
+  String get qiblaCalibrateHint;
+
+  /// Title when location permission is required for Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Location Permission Required'**
+  String get qiblaLocationPermissionTitle;
+
+  /// Description explaining why GPS location permission is needed for Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'We need your current GPS location to calculate the exact Qibla direction and distance to Makkah wherever you are.'**
+  String get qiblaLocationPermissionDesc;
+
+  /// Title when device GPS / location services are disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Location Services Disabled'**
+  String get qiblaLocationServicesDisabledTitle;
+
+  /// Description when device GPS / location services are disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable Location Services (GPS) on your device to determine your Qibla direction.'**
+  String get qiblaLocationServicesDisabledDesc;
+
+  /// Button label to open location settings
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Location'**
+  String get enableLocationServices;
+
+  /// Loading text while waiting for GPS fix
+  ///
+  /// In en, this message translates to:
+  /// **'Determining your GPS location...'**
+  String get qiblaSearchingLocation;
+
+  /// Message when device lacks a magnetometer sensor
+  ///
+  /// In en, this message translates to:
+  /// **'Compass sensor not detected on this device. Showing Qibla angle relative to North.'**
+  String get qiblaNoCompassSensor;
+
+  /// Button label to open Google AR Qibla Finder in browser
+  ///
+  /// In en, this message translates to:
+  /// **'Google AR Qibla Finder'**
+  String get openArQiblaFinder;
+
+  /// Cardinal North abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'N'**
+  String get northShort;
+
+  /// Cardinal East abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'E'**
+  String get eastShort;
+
+  /// Cardinal South abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get southShort;
+
+  /// Cardinal West abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get westShort;
+
+  /// Status pill text when magnetometer accuracy is low
+  ///
+  /// In en, this message translates to:
+  /// **'Low compass accuracy — move in a figure-8'**
+  String get qiblaCalibrateTitle;
+
+  /// Status pill text when compass sensor has not yet emitted a heading
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for compass signal...'**
+  String get qiblaWaitingForCompass;
+
+  /// Status pill text when device has no compass sensor
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla angle from True North'**
+  String get qiblaStaticNorthStatus;
+
+  /// Hint shown if GPS takes too long to lock indoors
+  ///
+  /// In en, this message translates to:
+  /// **'GPS signal is weak. Move near a window or outdoors, or use your selected city temporarily.'**
+  String get qiblaWeakGpsHint;
+
+  /// Button label to fall back to selected city coordinates when GPS is weak
+  ///
+  /// In en, this message translates to:
+  /// **'Use {city}'**
+  String useSelectedCityFallback(String city);
+
+  /// Banner shown when using city coordinates fallback while GPS continues searching
+  ///
+  /// In en, this message translates to:
+  /// **'Using {city} coordinates while waiting for GPS'**
+  String usingCityFallbackBanner(String city);
 }
 
 class _AppLocalizationsDelegate

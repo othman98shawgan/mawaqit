@@ -16,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.othman.mawaqitquds/alarm"
     private var methodChannel: MethodChannel? = null
+    private var qiblaSensorHandler: QiblaSensorHandler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -221,6 +222,11 @@ class MainActivity : FlutterActivity() {
         AlarmController.pendingAlarmPayload?.let {
             methodChannel?.invokeMethod("onAlarmTriggered", it)
         }
+
+        qiblaSensorHandler?.unregister()
+        qiblaSensorHandler = QiblaSensorHandler(applicationContext).also {
+            it.register(flutterEngine.dartExecutor.binaryMessenger)
+        }
     }
 
     private fun wakeScreen() {
@@ -263,6 +269,8 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
+        qiblaSensorHandler?.unregister()
+        qiblaSensorHandler = null
         if (AlarmController.onAlarmTriggeredCallback != null) {
             AlarmController.onAlarmTriggeredCallback = null
         }

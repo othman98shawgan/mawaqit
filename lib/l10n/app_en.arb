@@ -1052,5 +1052,110 @@
    "navBarStyleDocked": "Docked",
    "@navBarStyleDocked": {
       "description": "Docked Material 3 navigation bar style option"
+   },
+   "qiblaDirection": "Qibla Direction",
+   "@qiblaDirection": {
+      "description": "Label for Qibla direction angle"
+   },
+   "deviceHeading": "Heading",
+   "@deviceHeading": {
+      "description": "Label for current device compass heading"
+   },
+   "distanceToMakkah": "{km} km to Makkah",
+   "@distanceToMakkah": {
+      "description": "Distance in kilometers to the Kaaba in Makkah",
+      "placeholders": {
+         "km": { "type": "String" }
+      }
+   },
+   "qiblaAligned": "Facing the Qibla",
+   "@qiblaAligned": {
+      "description": "Status message shown when device is aligned with the Qibla"
+   },
+   "qiblaTurnInstruction": "Rotate your phone toward the Kaaba icon",
+   "@qiblaTurnInstruction": {
+      "description": "Instruction message when not yet aligned with the Qibla"
+   },
+   "qiblaCalibrateHint": "Compass accuracy is low. Move your phone in a figure-8 motion to calibrate.",
+   "@qiblaCalibrateHint": {
+      "description": "Banner hint when magnetometer needs figure-8 calibration"
+   },
+   "qiblaLocationPermissionTitle": "Location Permission Required",
+   "@qiblaLocationPermissionTitle": {
+      "description": "Title when location permission is required for Qibla"
+   },
+   "qiblaLocationPermissionDesc": "We need your current GPS location to calculate the exact Qibla direction and distance to Makkah wherever you are.",
+   "@qiblaLocationPermissionDesc": {
+      "description": "Description explaining why GPS location permission is needed for Qibla"
+   },
+   "qiblaLocationServicesDisabledTitle": "Location Services Disabled",
+   "@qiblaLocationServicesDisabledTitle": {
+      "description": "Title when device GPS / location services are disabled"
+   },
+   "qiblaLocationServicesDisabledDesc": "Please enable Location Services (GPS) on your device to determine your Qibla direction.",
+   "@qiblaLocationServicesDisabledDesc": {
+      "description": "Description when device GPS / location services are disabled"
+   },
+   "enableLocationServices": "Enable Location",
+   "@enableLocationServices": {
+      "description": "Button label to open location settings"
+   },
+   "qiblaSearchingLocation": "Determining your GPS location...",
+   "@qiblaSearchingLocation": {
+      "description": "Loading text while waiting for GPS fix"
+   },
+   "qiblaNoCompassSensor": "Compass sensor not detected on this device. Showing Qibla angle relative to North.",
+   "@qiblaNoCompassSensor": {
+      "description": "Message when device lacks a magnetometer sensor"
+   },
+   "openArQiblaFinder": "Google AR Qibla Finder",
+   "@openArQiblaFinder": {
+      "description": "Button label to open Google AR Qibla Finder in browser"
+   },
+   "northShort": "N",
+   "@northShort": {
+      "description": "Cardinal North abbreviation"
+   },
+   "eastShort": "E",
+   "@eastShort": {
+      "description": "Cardinal East abbreviation"
+   },
+   "southShort": "S",
+   "@southShort": {
+      "description": "Cardinal South abbreviation"
+   },
+   "westShort": "W",
+   "@westShort": {
+      "description": "Cardinal West abbreviation"
+   },
+   "qiblaCalibrateTitle": "Low compass accuracy — move in a figure-8",
+   "@qiblaCalibrateTitle": {
+      "description": "Status pill text when magnetometer accuracy is low"
+   },
+   "qiblaWaitingForCompass": "Waiting for compass signal...",
+   "@qiblaWaitingForCompass": {
+      "description": "Status pill text when compass sensor has not yet emitted a heading"
+   },
+   "qiblaStaticNorthStatus": "Qibla angle from True North",
+   "@qiblaStaticNorthStatus": {
+      "description": "Status pill text when device has no compass sensor"
+   },
+   "qiblaWeakGpsHint": "GPS signal is weak. Move near a window or outdoors, or use your selected city temporarily.",
+   "@qiblaWeakGpsHint": {
+      "description": "Hint shown if GPS takes too long to lock indoors"
+   },
+   "useSelectedCityFallback": "Use {city}",
+   "@useSelectedCityFallback": {
+      "description": "Button label to fall back to selected city coordinates when GPS is weak",
+      "placeholders": {
+         "city": { "type": "String" }
+      }
+   },
+   "usingCityFallbackBanner": "Using {city} coordinates while waiting for GPS",
+   "@usingCityFallbackBanner": {
+      "description": "Banner shown when using city coordinates fallback while GPS continues searching",
+      "placeholders": {
+         "city": { "type": "String" }
+      }
    }
 }

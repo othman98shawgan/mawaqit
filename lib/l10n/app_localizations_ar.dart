@@ -788,4 +788,88 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get navBarStyleDocked => 'مثبت';
+
+  @override
+  String get qiblaDirection => 'اتجاه القبلة';
+
+  @override
+  String get deviceHeading => 'اتجاه الهاتف';
+
+  @override
+  String distanceToMakkah(String km) {
+    return '$km كم إلى مكة المكرمة';
+  }
+
+  @override
+  String get qiblaAligned => 'أنت باتجاه القبلة';
+
+  @override
+  String get qiblaTurnInstruction => 'أدِر هاتفك باتجاه رمز الكعبة المشرفة';
+
+  @override
+  String get qiblaCalibrateHint =>
+      'دقة البوصلة منخفضة. حرّك الهاتف على شكل رقم 8 للمعايرة.';
+
+  @override
+  String get qiblaLocationPermissionTitle => 'مطلوب إذن الموقع';
+
+  @override
+  String get qiblaLocationPermissionDesc =>
+      'نحتاج إلى موقعك الحالي عبر GPS لحساب اتجاه القبلة الدقيق والمسافة إلى مكة المكرمة أينما كنت.';
+
+  @override
+  String get qiblaLocationServicesDisabledTitle => 'خدمات الموقع معطلة';
+
+  @override
+  String get qiblaLocationServicesDisabledDesc =>
+      'يرجى تفعيل خدمات الموقع (GPS) في جهازك لتحديد اتجاه القبلة.';
+
+  @override
+  String get enableLocationServices => 'تفعيل الموقع';
+
+  @override
+  String get qiblaSearchingLocation => 'جاري تحديد موقعك عبر GPS...';
+
+  @override
+  String get qiblaNoCompassSensor =>
+      'لم يتم العثور على مستشعر البوصلة في هذا الجهاز. يتم عرض زاوية القبلة بالنسبة للشمال.';
+
+  @override
+  String get openArQiblaFinder => 'قبلة الواقع المعزز (Google)';
+
+  @override
+  String get northShort => 'ش';
+
+  @override
+  String get eastShort => 'ق';
+
+  @override
+  String get southShort => 'ج';
+
+  @override
+  String get westShort => 'غ';
+
+  @override
+  String get qiblaCalibrateTitle =>
+      'دقة البوصلة منخفضة — حرّك الهاتف على شكل 8';
+
+  @override
+  String get qiblaWaitingForCompass => 'بانتظار إشارة البوصلة...';
+
+  @override
+  String get qiblaStaticNorthStatus => 'زاوية القبلة بالنسبة للشمال الحقيقي';
+
+  @override
+  String get qiblaWeakGpsHint =>
+      'إشارة GPS ضعيفة. اقترب من نافذة أو اخرج لمكان مفتوح، أو استخدم مدينتك المحددة مؤقتاً.';
+
+  @override
+  String useSelectedCityFallback(String city) {
+    return 'استخدام $city';
+  }
+
+  @override
+  String usingCityFallbackBanner(String city) {
+    return 'يتم استخدام إحداثيات $city بانتظار إشارة GPS';
+  }
 }
