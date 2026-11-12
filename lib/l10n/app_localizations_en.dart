@@ -786,4 +786,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navBarStyleDocked => 'Docked';
+
+  @override
+  String get qiblaDirection => 'Qibla Direction';
+
+  @override
+  String get deviceHeading => 'Heading';
+
+  @override
+  String distanceToMakkah(String km) {
+    return '$km km to Makkah';
+  }
+
+  @override
+  String get qiblaAligned => 'Facing the Qibla';
+
+  @override
+  String get qiblaTurnInstruction => 'Rotate your phone toward the Kaaba icon';
+
+  @override
+  String get qiblaCalibrateHint =>
+      'Compass accuracy is low. Move your phone in a figure-8 motion to calibrate.';
+
+  @override
+  String get qiblaLocationPermissionTitle => 'Location Permission Required';
+
+  @override
+  String get qiblaLocationPermissionDesc =>
+      'We need your current GPS location to calculate the exact Qibla direction and distance to Makkah wherever you are.';
+
+  @override
+  String get qiblaLocationServicesDisabledTitle => 'Location Services Disabled';
+
+  @override
+  String get qiblaLocationServicesDisabledDesc =>
+      'Please enable Location Services (GPS) on your device to determine your Qibla direction.';
+
+  @override
+  String get enableLocationServices => 'Enable Location';
+
+  @override
+  String get qiblaSearchingLocation => 'Determining your GPS location...';
+
+  @override
+  String get qiblaNoCompassSensor =>
+      'Compass sensor not detected on this device. Showing Qibla angle relative to North.';
+
+  @override
+  String get openArQiblaFinder => 'Google AR Qibla Finder';
+
+  @override
+  String get northShort => 'N';
+
+  @override
+  String get eastShort => 'E';
+
+  @override
+  String get southShort => 'S';
+
+  @override
+  String get westShort => 'W';
+
+  @override
+  String get qiblaCalibrateTitle => 'Low compass accuracy — move in a figure-8';
+
+  @override
+  String get qiblaWaitingForCompass => 'Waiting for compass signal...';
+
+  @override
+  String get qiblaStaticNorthStatus => 'Qibla angle from True North';
+
+  @override
+  String get qiblaWeakGpsHint =>
+      'GPS signal is weak. Move near a window or outdoors, or use your selected city temporarily.';
+
+  @override
+  String useSelectedCityFallback(String city) {
+    return 'Use $city';
+  }
+
+  @override
+  String usingCityFallbackBanner(String city) {
+    return 'Using $city coordinates while waiting for GPS';
+  }
 }
