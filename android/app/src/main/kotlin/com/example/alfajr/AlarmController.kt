@@ -35,6 +35,7 @@ data class ActiveAlarmInfo(
 
 object AlarmController {
     private var mediaPlayer: MediaPlayer? = null
+    private var previewPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var previousAlarmVolume: Int? = null
@@ -170,33 +171,7 @@ object AlarmController {
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build()
             player.setAudioAttributes(attributes)
-
-            val rawResName = when (soundName) {
-                "alaqsa" -> "adhan_alaqsa"
-                "makkah" -> "adhan_makkah"
-                "madina" -> "adhan_madina"
-                "abdulbasit" -> "adhan_abdulbasit"
-                "minshawi" -> "adhan_minshawi"
-                "hussary" -> "adhan_hussary"
-                "nafees" -> "adhan_nafees"
-                else -> soundName
-            }
-
-            if (soundName == "system") {
-                val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                player.setDataSource(appContext, alarmUri)
-            } else {
-                val resId = appContext.resources.getIdentifier(rawResName, "raw", appContext.packageName)
-                if (resId != 0) {
-                    val afd = appContext.resources.openRawResourceFd(resId)
-                    player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                    afd.close()
-                } else {
-                    val defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                    player.setDataSource(appContext, defaultUri)
-                }
-            }
+            configurePlayerDataSource(appContext, player, soundName)
 
             player.isLooping = true
             player.prepare()
@@ -204,6 +179,73 @@ object AlarmController {
             mediaPlayer = player
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun configurePlayerDataSource(appContext: Context, player: MediaPlayer, soundName: String) {
+        val rawResName = when (soundName) {
+            "alaqsa" -> "adhan_alaqsa"
+            "makkah" -> "adhan_makkah"
+            "madina" -> "adhan_madina"
+            "abdulbasit" -> "adhan_abdulbasit"
+            "minshawi" -> "adhan_minshawi"
+            "hussary" -> "adhan_hussary"
+            "nafees" -> "adhan_nafees"
+            else -> soundName
+        }
+
+        if (soundName == "system") {
+            val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            player.setDataSource(appContext, alarmUri)
+        } else {
+            val resId = appContext.resources.getIdentifier(rawResName, "raw", appContext.packageName)
+            if (resId != 0) {
+                val afd = appContext.resources.openRawResourceFd(resId)
+                player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                afd.close()
+            } else {
+                val defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                player.setDataSource(appContext, defaultUri)
+            }
+        }
+    }
+
+    fun startPreviewAudio(context: Context, soundName: String) {
+        if (soundName == "silent") return
+        stopPreviewAudio()
+        try {
+            val appContext = context.applicationContext
+            val player = MediaPlayer()
+            val attributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+            player.setAudioAttributes(attributes)
+            configurePlayerDataSource(appContext, player, soundName)
+            player.isLooping = false
+            player.setOnCompletionListener {
+                stopPreviewAudio()
+            }
+            player.prepare()
+            player.start()
+            previewPlayer = player
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun stopPreviewAudio() {
+        try {
+            previewPlayer?.let {
+                if (it.isPlaying) {
+                    it.stop()
+                }
+                it.release()
+            }
+        } catch (_: Exception) {
+        } finally {
+            previewPlayer = null
         }
     }
 

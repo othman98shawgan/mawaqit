@@ -1157,5 +1157,63 @@
       "placeholders": {
          "city": { "type": "String" }
       }
+   },
+   "alarmModeAdhan": "Adhan",
+   "@alarmModeAdhan": {
+      "description": "Short label for Adhan alarm mode card"
+   },
+   "alarmModeDefault": "Default",
+   "@alarmModeDefault": {
+      "description": "Short label for system default alarm mode card"
+   },
+   "alarmModeSilent": "Silent",
+   "@alarmModeSilent": {
+      "description": "Short label for silent/off alarm mode card"
+   },
+   "alarmBeforePrayerSection": "Pre-prayer alarm",
+   "@alarmBeforePrayerSection": {
+      "description": "Section header above the pre-prayer offset stepper"
+   },
+   "alarmBeforeLabel": "Alert before",
+   "@alarmBeforeLabel": {
+      "description": "Label on the left of the pre-prayer offset stepper"
+   },
+   "alarmNoPreAlert": "At prayer time",
+   "@alarmNoPreAlert": {
+      "description": "Label when pre-prayer offset is 0 minutes"
+   },
+   "alarmMinutesValue": "{minutes} min",
+   "@alarmMinutesValue": {
+      "description": "Short minute value in stepper",
+      "placeholders": {
+         "minutes": { "type": "int" }
+      }
+   },
+   "alarmApplyToAll": "Apply this to all prayers",
+   "@alarmApplyToAll": {
+      "description": "Button to apply current prayer alarm settings to all prayers"
+   },
+   "alarmAppliedToAll": "Applied to all prayers",
+   "@alarmAppliedToAll": {
+      "description": "Snackbar/feedback when alarm settings are applied to all prayers"
+   },
+   "alarmsNotRingingTitle": "Alarms not ringing?",
+   "@alarmsNotRingingTitle": {
+      "description": "Title of battery optimization troubleshooting card in alarm sheet"
+   },
+   "alarmsNotRingingDesc": "Some Android phones restrict background apps. Tap to exempt Mawaqit from battery optimization.",
+   "@alarmsNotRingingDesc": {
+      "description": "Subtitle of battery optimization troubleshooting card in alarm sheet"
+   },
+   "alarmVibrateOnly": "Vibrate only",
+   "@alarmVibrateOnly": {
+      "description": "Chip/toggle label for vibrate-only mode under Default alarm"
+   },
+   "alarmRingsAt": "Rings at {time}",
+   "@alarmRingsAt": {
+      "description": "Shows calculated alarm ring time",
+      "placeholders": {
+         "time": { "type": "String" }
+      }
    }
 }

@@ -36,6 +36,7 @@ class PrayerAlarmService {
   static const MethodChannel _alarmChannel = MethodChannel('com.othman.mawaqitquds/alarm');
   static final BehaviorSubject<String?> onNativeAlarmTriggered = BehaviorSubject<String?>();
   static final BehaviorSubject<String?> onNativeAlarmSnoozed = BehaviorSubject<String?>();
+  static final ValueNotifier<int> alarmSettingsVersion = ValueNotifier<int>(0);
   static bool _channelInitialized = false;
 
   static void initPlatformChannel() {
@@ -120,6 +121,24 @@ class PrayerAlarmService {
       await _alarmChannel.invokeMethod('stopAlarmAudio');
     } catch (e) {
       debugPrint('Error stopping alarm audio: $e');
+    }
+  }
+
+  static Future<void> startPreviewAudio(String soundName) async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('startPreviewAudio', {'soundName': soundName});
+    } catch (e) {
+      debugPrint('Error starting preview audio: $e');
+    }
+  }
+
+  static Future<void> stopPreviewAudio() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _alarmChannel.invokeMethod('stopPreviewAudio');
+    } catch (e) {
+      debugPrint('Error stopping preview audio: $e');
     }
   }
 
@@ -211,6 +230,7 @@ class PrayerAlarmService {
     final key = '$_prefsPrefix${settings.prayerName}';
     final raw = json.encode(settings.toJson());
     await StorageManager.saveData(key, raw);
+    alarmSettingsVersion.value++;
   }
 
   static Future<Map<String, PrayerAlarmSettings>> loadAllAlarmSettings() async {

@@ -246,5 +246,18 @@
    "qiblaStaticNorthStatus": "زاوية القبلة بالنسبة للشمال الحقيقي",
    "qiblaWeakGpsHint": "إشارة GPS ضعيفة. اقترب من نافذة أو اخرج لمكان مفتوح، أو استخدم مدينتك المحددة مؤقتاً.",
    "useSelectedCityFallback": "استخدام {city}",
-   "usingCityFallbackBanner": "يتم استخدام إحداثيات {city} بانتظار إشارة GPS"
+   "usingCityFallbackBanner": "يتم استخدام إحداثيات {city} بانتظار إشارة GPS",
+   "alarmModeAdhan": "أذان",
+   "alarmModeDefault": "نغمة النظام",
+   "alarmModeSilent": "إيقاف",
+   "alarmBeforePrayerSection": "منبه قبل الصلاة",
+   "alarmBeforeLabel": "تنبيه قبل",
+   "alarmNoPreAlert": "في موعد الصلاة",
+   "alarmMinutesValue": "{minutes} د",
+   "alarmApplyToAll": "تعيين هذا لكل الصلوات",
+   "alarmAppliedToAll": "تم التعيين لكل الصلوات",
+   "alarmsNotRingingTitle": "المنبهات لا تصل؟",
+   "alarmsNotRingingDesc": "بعض هواتف أندرويد تغلق التطبيقات في الخلفية بشكل صارم. اضغط لاستثناء مواقيت.",
+   "alarmVibrateOnly": "اهتزاز فقط",
+   "alarmRingsAt": "المنبه الساعة {time}"
 }

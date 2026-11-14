@@ -872,4 +872,48 @@ class AppLocalizationsAr extends AppLocalizations {
   String usingCityFallbackBanner(String city) {
     return 'يتم استخدام إحداثيات $city بانتظار إشارة GPS';
   }
+
+  @override
+  String get alarmModeAdhan => 'أذان';
+
+  @override
+  String get alarmModeDefault => 'نغمة النظام';
+
+  @override
+  String get alarmModeSilent => 'إيقاف';
+
+  @override
+  String get alarmBeforePrayerSection => 'منبه قبل الصلاة';
+
+  @override
+  String get alarmBeforeLabel => 'تنبيه قبل';
+
+  @override
+  String get alarmNoPreAlert => 'في موعد الصلاة';
+
+  @override
+  String alarmMinutesValue(int minutes) {
+    return '$minutes د';
+  }
+
+  @override
+  String get alarmApplyToAll => 'تعيين هذا لكل الصلوات';
+
+  @override
+  String get alarmAppliedToAll => 'تم التعيين لكل الصلوات';
+
+  @override
+  String get alarmsNotRingingTitle => 'المنبهات لا تصل؟';
+
+  @override
+  String get alarmsNotRingingDesc =>
+      'بعض هواتف أندرويد تغلق التطبيقات في الخلفية بشكل صارم. اضغط لاستثناء مواقيت.';
+
+  @override
+  String get alarmVibrateOnly => 'اهتزاز فقط';
+
+  @override
+  String alarmRingsAt(String time) {
+    return 'المنبه الساعة $time';
+  }
 }

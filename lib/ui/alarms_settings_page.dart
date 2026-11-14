@@ -115,13 +115,10 @@ class _AlarmsSettingsPageState extends State<AlarmsSettingsPage> with WidgetsBin
   }
 
   void _openAlarmDialog(String prayerName) {
-    showDialog(
-      context: context,
-      builder: (context) => AlarmDialog(
-        prayerName: prayerName,
-        prayerTime: DateTime.now(),
-        onSaved: _loadAll,
-      ),
+    showAlarmBottomSheet(
+      context,
+      initialPrayerName: prayerName,
+      onSaved: _loadAll,
     );
   }
 
