@@ -236,16 +236,24 @@ class ThemeNotifier with ChangeNotifier {
   );
 
   ThemeData get darkTheme => ThemeData(
+        useMaterial3: true,
         fontFamily: 'Tajawal',
         appBarTheme: const AppBarTheme(backgroundColor: appBarColor, foregroundColor: Colors.white),
         brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: darkThemeSwatch,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: darkThemeSwatch,
           brightness: Brightness.dark,
-        ).copyWith(
-          brightness: Brightness.dark,
+          primary: darkThemeSwatch,
+          onPrimary: Colors.white,
           onSurface: Colors.white,
           onSurfaceVariant: Colors.white70,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: appBarColor,
+          showDragHandle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
         ),
         listTileTheme: const ListTileThemeData(
           textColor: Colors.white,
@@ -264,6 +272,12 @@ class ThemeNotifier with ChangeNotifier {
         ),
         toggleButtonsTheme: const ToggleButtonsThemeData(
           selectedColor: Colors.white,
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: darkThemeSwatch,
+            foregroundColor: Colors.white,
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -314,13 +328,18 @@ class ThemeNotifier with ChangeNotifier {
   );
 
   ThemeData get lightTheme => ThemeData(
+        useMaterial3: true,
         fontFamily: 'Tajawal',
         appBarTheme: AppBarTheme(backgroundColor: color5, foregroundColor: colorTextLight),
         brightness: Brightness.light,
-        drawerTheme: const DrawerThemeData(
-          backgroundColor: color3,
-        ),
         scaffoldBackgroundColor: color1,
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: color1,
+          showDragHandle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+        ),
         radioTheme: RadioThemeData(
           fillColor: WidgetStateProperty.all(Colors.black),
         ),
@@ -361,6 +380,12 @@ class ThemeNotifier with ChangeNotifier {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: color3,
+            foregroundColor: Colors.white,
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: color3,
@@ -378,9 +403,14 @@ class ThemeNotifier with ChangeNotifier {
           disabledInactiveTrackColor: Colors.grey.shade300,
           disabledThumbColor: Colors.grey.shade400,
         ),
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: greenMaterialColor).copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: color3,
+          brightness: Brightness.light,
           primary: color3,
+          onPrimary: Colors.white,
           secondary: color3,
+          onSecondary: Colors.white,
+          surface: color1,
           onSurface: Colors.black87,
           onSurfaceVariant: Colors.black54,
         ),

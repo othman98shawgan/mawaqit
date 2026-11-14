@@ -82,6 +82,8 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.developerModeSteps(remaining)),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: const Duration(seconds: 1),
         ),
       );
@@ -94,6 +96,8 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.developerModeEnabled),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -111,6 +115,8 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.developerModeDisabled),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -540,225 +546,210 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
 
 Future<void> showCitiesDialog(
     BuildContext context, String city, Map<String, String> citiesMap, Function updatePrayers) async {
-  String currentCity = city;
-  var currentCityValue = citiesMap.values.firstWhere((element) => element == citiesMap[currentCity]);
+  final l10n = AppLocalizations.of(context)!;
+  final currentCityValue = citiesMap[city];
+  final citiesList = citiesMap.values.toList()
+    ..sort((a, b) {
+      if (a == l10n.alQuds) return -1;
+      if (b == l10n.alQuds) return 1;
+      if (a.contains(RegExp(r'[0-9]')) && !b.contains(RegExp(r'[0-9]'))) return 1;
+      if (b.contains(RegExp(r'[0-9]')) && !a.contains(RegExp(r'[0-9]'))) return -1;
+      return a.compareTo(b);
+    });
 
-  int selected = 0;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final textColor = isDark ? Colors.white : Colors.black87;
+  final accentColor = isDark ? darkThemeSwatch : color3;
+  final localeProvider = Provider.of<LocaleNotifier>(context, listen: false);
+  final textDirection = localeProvider.getTextDirection(localeProvider.locale);
 
-  var citiesList = citiesMap.values.toList();
-  citiesList.sort((a, b) {
-    if (a == AppLocalizations.of(context)!.alQuds) {
-      return -1;
-    } else if (b == AppLocalizations.of(context)!.alQuds) {
-      return 1;
-    }
-    if (a.contains(RegExp(r'[0-9]')) && !b.contains(RegExp(r'[0-9]'))) {
-      return 1;
-    }
-    if (b.contains(RegExp(r'[0-9]')) && !a.contains(RegExp(r'[0-9]'))) {
-      return -1;
-    }
-    return a.compareTo(b);
-  });
-
-  for (int i = 0; i < citiesList.length; i++) {
-    if (citiesList[i] == currentCityValue) {
-      selected = i;
-      break;
-    }
-  }
-
-  var confirmMethod = (() async {
-    Navigator.pop(context);
-    currentCity = citiesMap.keys.firstWhere((element) => citiesMap[element] == citiesList[selected]);
-    Provider.of<LocaleNotifier>(context, listen: false).setCity(currentCity);
-    updatePrayers();
-  });
-  var cityDialogTitle = AppLocalizations.of(context)!.citySelect;
-  var confirmString = AppLocalizations.of(context)!.confirmString;
-  var cancelString = AppLocalizations.of(context)!.cancelString;
-  var isLight = Theme.of(context).brightness == Brightness.light;
-  var textColor = isLight ? Colors.black : Colors.white;
-
-  AlertDialog alert = AlertDialog(
-      title: Text(cityDialogTitle, style: TextStyle(color: textColor)),
-      // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
-      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
-      ],
-      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return SingleChildScrollView(
-          child: SizedBox(
-            width: double.maxFinite,
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: isDark ? appBarColor : color1,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      final maxHeight = MediaQuery.of(sheetContext).size.height * 0.65;
+      return Directionality(
+        textDirection: textDirection,
+        child: SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.4,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                  child: Text(
+                    l10n.citySelect,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
                   ),
+                ),
+                Flexible(
                   child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: citiesList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return RadioListTile(
-                            title: Text(citiesList.elementAt(index), style: TextStyle(color: textColor)),
-                            activeColor: isLight ? color3 : darkThemeSwatch,
-                            value: index,
-                            groupValue: selected,
-                            onChanged: (value) {
-                              setState(() {
-                                selected = index;
-                              });
-                            });
-                      }),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.only(bottom: 12),
+                    itemCount: citiesList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final cityLabel = citiesList[index];
+                      final isSelected = cityLabel == currentCityValue;
+                      return ListTile(
+                        title: Text(
+                          cityLabel,
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                          ),
+                        ),
+                        trailing: isSelected ? Icon(Icons.check, color: accentColor) : null,
+                        onTap: () {
+                          final selectedKey = citiesMap.keys.firstWhere((k) => citiesMap[k] == cityLabel);
+                          Navigator.pop(sheetContext);
+                          Provider.of<LocaleNotifier>(context, listen: false).setCity(selectedKey);
+                          updatePrayers();
+                        },
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
           ),
-        );
-      }));
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
+        ),
+      );
     },
   );
 }
 
 Future<void> showLocaleDialog(BuildContext context, Locale locale, Function updatePrayers) async {
-  Locale? currentLocale = locale;
+  final l10n = AppLocalizations.of(context)!;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final textColor = isDark ? Colors.white : Colors.black87;
+  final accentColor = isDark ? darkThemeSwatch : color3;
+  final localeProvider = Provider.of<LocaleNotifier>(context, listen: false);
+  final textDirection = localeProvider.getTextDirection(localeProvider.locale);
 
-  var confirmMethod = (() async {
-    Navigator.pop(context);
-    Provider.of<LocaleNotifier>(context, listen: false).setLocale(currentLocale!);
-    updatePrayers();
-  });
-  var languageDialogTitle = AppLocalizations.of(context)!.languageDialogTitle;
-  var confirmString = AppLocalizations.of(context)!.confirmString;
-  var cancelString = AppLocalizations.of(context)!.cancelString;
-  var isLight = Theme.of(context).brightness == Brightness.light;
-  var textColor = isLight ? Colors.black : Colors.white;
-
-  AlertDialog alert = AlertDialog(
-      title: Text(languageDialogTitle, style: TextStyle(color: textColor)),
-      // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
-      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        ElevatedButton(onPressed: confirmMethod, child: Text(confirmString)),
-      ],
-      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 20.0),
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    backgroundColor: isDark ? appBarColor : color1,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      return Directionality(
+        textDirection: textDirection,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                RadioListTile(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
-                    value: const Locale('ar'),
-                    activeColor: isLight ? color3 : darkThemeSwatch,
-                    title: Text(localeMap['ar']!, style: TextStyle(color: textColor)),
-                    groupValue: currentLocale,
-                    onChanged: (val) {
-                      setState(() {
-                        currentLocale = val;
-                      });
-                    }),
-                RadioListTile(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity, vertical: VisualDensity.minimumDensity),
-                    value: const Locale('en'),
-                    activeColor: isLight ? color3 : darkThemeSwatch,
-                    title: Text(localeMap['en']!, style: TextStyle(color: textColor)),
-                    groupValue: currentLocale,
-                    onChanged: (val) {
-                      setState(() {
-                        currentLocale = val;
-                      });
-                    }),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    l10n.languageDialogTitle,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                for (final code in ['ar', 'en'])
+                  ListTile(
+                    title: Text(
+                      localeMap[code]!,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: locale.languageCode == code ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                    trailing: locale.languageCode == code ? Icon(Icons.check, color: accentColor) : null,
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Provider.of<LocaleNotifier>(context, listen: false).setLocale(Locale(code));
+                      updatePrayers();
+                    },
+                  ),
               ],
             ),
           ),
-        ]);
-      }));
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
+        ),
+      );
     },
   );
 }
 
 Future<void> showNavStyleDialog(BuildContext context, NavStyleNotifier navStyleNotifier) async {
-  NavBarStyle selectedStyle = navStyleNotifier.style;
   final l10n = AppLocalizations.of(context)!;
-  final isLight = Theme.of(context).brightness == Brightness.light;
-  final textColor = isLight ? Colors.black : Colors.white;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final textColor = isDark ? Colors.white : Colors.black87;
+  final accentColor = isDark ? darkThemeSwatch : color3;
+  final currentStyle = navStyleNotifier.style;
+  final localeProvider = Provider.of<LocaleNotifier>(context, listen: false);
+  final textDirection = localeProvider.getTextDirection(localeProvider.locale);
 
-  showDialog(
+  final options = [
+    (style: NavBarStyle.floating, label: l10n.navBarStyleFloating),
+    (style: NavBarStyle.docked, label: l10n.navBarStyleDocked),
+  ];
+
+  await showModalBottomSheet<void>(
     context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        title: Text(l10n.settingsNavBarStyle, style: TextStyle(color: textColor)),
-        contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancelString)),
-          ElevatedButton(
-            onPressed: () {
-              navStyleNotifier.setStyle(selectedStyle);
-              Navigator.pop(dialogContext);
-            },
-            child: Text(l10n.confirmString),
+    showDragHandle: true,
+    backgroundColor: isDark ? appBarColor : color1,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      return Directionality(
+        textDirection: textDirection,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    l10n.settingsNavBarStyle,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                for (final option in options)
+                  ListTile(
+                    title: Text(
+                      option.label,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: currentStyle == option.style ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                    trailing: currentStyle == option.style ? Icon(Icons.check, color: accentColor) : null,
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      navStyleNotifier.setStyle(option.style);
+                    },
+                  ),
+              ],
+            ),
           ),
-        ],
-        content: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RadioListTile<NavBarStyle>(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                      horizontal: VisualDensity.minimumDensity,
-                      vertical: VisualDensity.minimumDensity,
-                    ),
-                    value: NavBarStyle.floating,
-                    activeColor: isLight ? color3 : darkThemeSwatch,
-                    title: Text(l10n.navBarStyleFloating, style: TextStyle(color: textColor)),
-                    groupValue: selectedStyle,
-                    onChanged: (val) {
-                      if (val != null) setState(() => selectedStyle = val);
-                    },
-                  ),
-                  RadioListTile<NavBarStyle>(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                      horizontal: VisualDensity.minimumDensity,
-                      vertical: VisualDensity.minimumDensity,
-                    ),
-                    value: NavBarStyle.docked,
-                    activeColor: isLight ? color3 : darkThemeSwatch,
-                    title: Text(l10n.navBarStyleDocked, style: TextStyle(color: textColor)),
-                    groupValue: selectedStyle,
-                    onChanged: (val) {
-                      if (val != null) setState(() => selectedStyle = val);
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
         ),
       );
     },

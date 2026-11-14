@@ -140,6 +140,8 @@ class _AlarmsSettingsPageState extends State<AlarmsSettingsPage> with WidgetsBin
         SnackBar(
           content: Text(l10n.alarmScheduledInSeconds(_testDelay)),
           backgroundColor: prayerColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: const Duration(seconds: 4),
         ),
       );
@@ -320,21 +322,22 @@ class _AlarmsSettingsPageState extends State<AlarmsSettingsPage> with WidgetsBin
                             children: [
                               Expanded(
                                 flex: 3,
-                                child: DropdownButtonFormField<String>(
-                                  value: _testSound,
-                                  isExpanded: true,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.alarmSound,
-                                    border: const OutlineInputBorder(),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                child: DropdownMenu<String>(
+                                  initialSelection: _testSound,
+                                  expandedInsets: EdgeInsets.zero,
+                                  label: Text(l10n.alarmSound),
+                                  textStyle: const TextStyle(fontSize: 13),
+                                  inputDecorationTheme: const InputDecorationTheme(
+                                    border: OutlineInputBorder(),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   ),
-                                  items: _soundOptions.map((s) {
-                                    return DropdownMenuItem<String>(
+                                  dropdownMenuEntries: _soundOptions.map((s) {
+                                    return DropdownMenuEntry<String>(
                                       value: s,
-                                      child: Text(_getSoundTitle(s, l10n), style: const TextStyle(fontSize: 13)),
+                                      label: _getSoundTitle(s, l10n),
                                     );
                                   }).toList(),
-                                  onChanged: (val) {
+                                  onSelected: (val) {
                                     if (val != null) setState(() => _testSound = val);
                                   },
                                 ),
@@ -342,19 +345,20 @@ class _AlarmsSettingsPageState extends State<AlarmsSettingsPage> with WidgetsBin
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 2,
-                                child: DropdownButtonFormField<int>(
-                                  value: _testDelay,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.alarmDelay,
-                                    border: const OutlineInputBorder(),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                child: DropdownMenu<int>(
+                                  initialSelection: _testDelay,
+                                  expandedInsets: EdgeInsets.zero,
+                                  label: Text(l10n.alarmDelay),
+                                  inputDecorationTheme: const InputDecorationTheme(
+                                    border: OutlineInputBorder(),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   ),
-                                  items: const [
-                                    DropdownMenuItem(value: 5, child: Text("5s")),
-                                    DropdownMenuItem(value: 10, child: Text("10s")),
-                                    DropdownMenuItem(value: 15, child: Text("15s")),
+                                  dropdownMenuEntries: const [
+                                    DropdownMenuEntry(value: 5, label: "5s"),
+                                    DropdownMenuEntry(value: 10, label: "10s"),
+                                    DropdownMenuEntry(value: 15, label: "15s"),
                                   ],
-                                  onChanged: (val) {
+                                  onSelected: (val) {
                                     if (val != null) setState(() => _testDelay = val);
                                   },
                                 ),
@@ -364,8 +368,8 @@ class _AlarmsSettingsPageState extends State<AlarmsSettingsPage> with WidgetsBin
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
+                            child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
                                 backgroundColor: prayerColor,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 12),

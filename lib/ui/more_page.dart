@@ -19,9 +19,10 @@ Future<void> showMoreBottomSheet(
 
   return showModalBottomSheet<void>(
     context: context,
+    showDragHandle: true,
     backgroundColor: isDark ? appBarColor : color1,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
     builder: (sheetContext) {
       final l10n = AppLocalizations.of(sheetContext)!;
@@ -34,19 +35,10 @@ Future<void> showMoreBottomSheet(
         textDirection: textDirection,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white24 : Colors.black26,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
                 if (isAndroid || isWindows || isIOS)
                   ListTile(
                     leading: Image.asset(

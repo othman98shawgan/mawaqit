@@ -602,43 +602,48 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                           Row(
                             children: [
                               Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: innerTileBg,
-                                    borderRadius: BorderRadius.circular(14),
+                                child: DropdownMenu<String>(
+                                  initialSelection: _adhanOptions.contains(_current.soundType)
+                                      ? _current.soundType
+                                      : 'alaqsa',
+                                  expandedInsets: EdgeInsets.zero,
+                                  trailingIcon: Icon(Icons.keyboard_arrow_down, color: textSecondary),
+                                  selectedTrailingIcon: Icon(Icons.keyboard_arrow_up, color: textSecondary),
+                                  textStyle: TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: textPrimary,
                                   ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: _adhanOptions.contains(_current.soundType)
-                                          ? _current.soundType
-                                          : 'alaqsa',
-                                      isExpanded: true,
-                                      dropdownColor: isDark ? const Color(0xFF2B343E) : Colors.white,
-                                      icon: Icon(Icons.keyboard_arrow_down, color: textSecondary),
-                                      style: TextStyle(
-                                        fontFamily: 'Tajawal',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: textPrimary,
-                                      ),
-                                      items: _adhanOptions.map((sound) {
-                                        return DropdownMenuItem<String>(
-                                          value: sound,
-                                          child: Text(_getSoundTitle(sound, l10n)),
-                                        );
-                                      }).toList(),
-                                      onChanged: (val) async {
-                                        if (val != null) {
-                                          final wasPreviewing = _previewingSound != null;
-                                          await _updateCurrent(_current.copyWith(isEnabled: true, soundType: val));
-                                          if (wasPreviewing) {
-                                            await _togglePreviewAudio(val);
-                                          }
-                                        }
-                                      },
+                                  inputDecorationTheme: InputDecorationTheme(
+                                    filled: true,
+                                    fillColor: innerTileBg,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      borderSide: BorderSide.none,
                                     ),
                                   ),
+                                  menuStyle: MenuStyle(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                      isDark ? const Color(0xFF2B343E) : Colors.white,
+                                    ),
+                                  ),
+                                  dropdownMenuEntries: _adhanOptions.map((sound) {
+                                    return DropdownMenuEntry<String>(
+                                      value: sound,
+                                      label: _getSoundTitle(sound, l10n),
+                                    );
+                                  }).toList(),
+                                  onSelected: (val) async {
+                                    if (val != null) {
+                                      final wasPreviewing = _previewingSound != null;
+                                      await _updateCurrent(_current.copyWith(isEnabled: true, soundType: val));
+                                      if (wasPreviewing) {
+                                        await _togglePreviewAudio(val);
+                                      }
+                                    }
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 8),
