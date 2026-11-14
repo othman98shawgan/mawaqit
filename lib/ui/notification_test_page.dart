@@ -368,6 +368,8 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -651,31 +653,28 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
-            Wrap(
-              spacing: 8,
-              children: _delayOptions.map((seconds) {
-                final isSelected = _selectedDelaySeconds == seconds;
-                return ChoiceChip(
+            SegmentedButton<int>(
+              segments: _delayOptions.map((seconds) {
+                return ButtonSegment<int>(
+                  value: seconds,
                   label: Text(
                     seconds >= 60 ? l10n.oneMinute : l10n.secondsCount(seconds),
                   ),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _selectedDelaySeconds = seconds;
-                      });
-                    }
-                  },
                 );
               }).toList(),
+              selected: {_selectedDelaySeconds},
+              onSelectionChanged: (selection) {
+                setState(() {
+                  _selectedDelaySeconds = selection.first;
+                });
+              },
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -687,8 +686,8 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
+                  child: FilledButton.tonalIcon(
+                    style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: const Icon(Icons.schedule, size: 18),

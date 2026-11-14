@@ -1,3 +1,5 @@
+import 'package:alfajr/resources/colors.dart';
+import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/reminder_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,81 +9,100 @@ Future<void> showReminderDialog(BuildContext context, bool reminderStatus, int r
   var currentReminderValue = reminderValue;
   var currentReminderStatus = reminderStatus;
 
-  var confirmMethod = (() {
-    Navigator.pop(context);
-    Provider.of<ReminderNotifier>(context, listen: false).setReminderStatus(currentReminderStatus);
-    updateReminder(currentReminderValue);
-  });
+  final l10n = AppLocalizations.of(context)!;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final textColor = isDark ? Colors.white : Colors.black87;
+  final localeProvider = Provider.of<LocaleNotifier>(context, listen: false);
+  final textDirection = localeProvider.getTextDirection(localeProvider.locale);
 
-  var dialogTitle = AppLocalizations.of(context)!.reminderDialogTitle;
-  var reminderSetMessage = AppLocalizations.of(context)!.reminderDialogMessage;
-  var confirmString = AppLocalizations.of(context)!.confirmString;
-  var cancelString = AppLocalizations.of(context)!.cancelString;
-  var isLight = Theme.of(context).brightness == Brightness.light;
-  var textColor = isLight ? Colors.black : Colors.white;
-
-  AlertDialog alert = AlertDialog(
-      title: Text(dialogTitle, style: TextStyle(color: textColor)),
-      // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
-      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(cancelString),
-        ),
-        ElevatedButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
-      ],
-      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: SwitchListTile(
-              title: Text(reminderSetMessage, style: TextStyle(color: textColor)),
-              value: currentReminderStatus,
-              onChanged: (bool value) {
-                setState(() {
-                  currentReminderStatus = value;
-                });
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
-            child: Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.reminderPrayerMessage(currentReminderValue.toInt()),
-                  textAlign: TextAlign.start,
-                  style: TextStyle(color: currentReminderStatus ? textColor : Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Slider(
-                value: currentReminderValue.toDouble(),
-                max: 30,
-                divisions: 30,
-                label: currentReminderValue.round().toString(),
-                onChanged: currentReminderStatus
-                    ? (double value) {
-                        setState(() {
-                          currentReminderValue = value.toInt();
-                        });
-                      }
-                    : null),
-          ),
-        ]);
-      }));
-
-  showDialog(
+  await showModalBottomSheet<void>(
     context: context,
-    builder: (BuildContext context) {
-      return alert;
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: isDark ? appBarColor : color1,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      return Directionality(
+        textDirection: textDirection,
+        child: SafeArea(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.reminderDialogTitle,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.reminderDialogMessage, style: TextStyle(color: textColor)),
+                      value: currentReminderStatus,
+                      onChanged: (bool value) {
+                        setState(() {
+                          currentReminderStatus = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.reminderPrayerMessage(currentReminderValue.toInt()),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(color: currentReminderStatus ? textColor : Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Slider(
+                        value: currentReminderValue.toDouble(),
+                        max: 30,
+                        divisions: 30,
+                        label: currentReminderValue.round().toString(),
+                        onChanged: currentReminderStatus
+                            ? (double value) {
+                                setState(() {
+                                  currentReminderValue = value.toInt();
+                                });
+                              }
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(sheetContext),
+                          child: Text(l10n.cancelString),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.pop(sheetContext);
+                            Provider.of<ReminderNotifier>(context, listen: false).setReminderStatus(currentReminderStatus);
+                            updateReminder(currentReminderValue);
+                          },
+                          child: Text(l10n.confirmString),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
     },
   );
 }

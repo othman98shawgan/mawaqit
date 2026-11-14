@@ -15,3 +15,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] feat: replace navigation drawer with 5-tab bottom navigation bar
 - [x] feat: add in-app GPS Qibla finder with compass and distance to Makkah
 - [x] feat: refactor prayer alarm dialog into modal bottom sheet
+- [x] chore: migrate UI components and themes to Material 3 conventions

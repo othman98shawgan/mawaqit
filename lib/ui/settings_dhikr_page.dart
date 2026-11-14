@@ -123,75 +123,61 @@ class _SettingsDhikrPageState extends State<SettingsDhikrPage> {
 }
 
 Future<void> showTargetDialog(BuildContext context, int target) async {
-  int? currentTarget = target;
+  final l10n = AppLocalizations.of(context)!;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final textColor = isDark ? Colors.white : Colors.black87;
+  final accentColor = isDark ? darkThemeSwatch : color3;
+  final localeProvider = Provider.of<LocaleNotifier>(context, listen: false);
+  final textDirection = localeProvider.getTextDirection(localeProvider.locale);
 
-  var confirmMethod = (() {
-    Navigator.pop(context);
-    Provider.of<DhikrNotifier>(context, listen: false).setDhikrCount(currentTarget!);
-  });
-
-  var targetDialogTitle = AppLocalizations.of(context)!.targetDialogTitle;
-  var confirmString = AppLocalizations.of(context)!.confirmString;
-  var cancelString = AppLocalizations.of(context)!.cancelString;
-  var isLight = Theme.of(context).brightness == Brightness.light;
-  var textColor = isLight ? Colors.black : Colors.white;
-
-  AlertDialog alert = AlertDialog(
-      title: Text(targetDialogTitle, style: TextStyle(color: textColor)),
-      // titlePadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
-      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 24.0),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-        ElevatedButton(
-          onPressed: confirmMethod,
-          child: Text(confirmString),
-        ),
-      ],
-      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 20.0),
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    backgroundColor: isDark ? appBarColor : color1,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      return Directionality(
+        textDirection: textDirection,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                RadioListTile(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
-                    value: 33,
-                    activeColor: isLight ? color3 : darkThemeSwatch,
-                    title: Text('33', style: TextStyle(color: textColor)),
-                    groupValue: currentTarget,
-                    onChanged: (val) {
-                      setState(() {
-                        currentTarget = (val ?? 0) as int?;
-                      });
-                    }),
-                RadioListTile(
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
-                    value: 100,
-                    activeColor: isLight ? color3 : darkThemeSwatch,
-                    title: Text('100', style: TextStyle(color: textColor)),
-                    groupValue: currentTarget,
-                    onChanged: (val) {
-                      setState(() {
-                        currentTarget = (val ?? 0) as int?;
-                      });
-                    }),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    l10n.targetDialogTitle,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                for (final value in [33, 100])
+                  ListTile(
+                    title: Text(
+                      '$value',
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: target == value ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                    trailing: target == value ? Icon(Icons.check, color: accentColor) : null,
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Provider.of<DhikrNotifier>(context, listen: false).setDhikrCount(value);
+                    },
+                  ),
               ],
             ),
           ),
-        ]);
-      }));
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
+        ),
+      );
     },
   );
 }

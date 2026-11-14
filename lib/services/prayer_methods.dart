@@ -14,6 +14,8 @@ import 'daylight_time_service.dart';
 void printSnackBar(String message, BuildContext context, {int durationInSeconds = 1}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(message),
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     duration: Duration(seconds: durationInSeconds),
   ));
 }

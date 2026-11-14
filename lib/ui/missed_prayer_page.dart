@@ -1,3 +1,4 @@
+import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/services/locale_service.dart';
 import 'package:alfajr/services/prayer_methods.dart';
 import 'package:flutter/material.dart';
@@ -231,46 +232,67 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
     );
   }
 
-  Widget _addDaysButton(int amount, String label) {
-    double width = MediaQuery.of(context).size.width;
-
-    return ElevatedButton(
-      onPressed: () {
-        setState(() {
-          for (int i = 0; i < prayers.length; i++) {
-            prayers[i] += amount;
-            setMissedPrayer(i, prayers[i]);
-          }
-        });
-      },
-      style: ElevatedButton.styleFrom(fixedSize: Size(width * 0.4, 40), padding: const EdgeInsets.all(10)),
-      child: Text(label, textAlign: TextAlign.center),
-    );
-  }
-
   Future<void> showAddMissedPrayersDialog(BuildContext context) async {
-    double height = MediaQuery.of(context).size.height;
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final iconColor = isDark ? Colors.white70 : color5;
+    final localeProvider = Provider.of<LocaleNotifier>(context, listen: false);
+    final textDirection = localeProvider.getTextDirection(localeProvider.locale);
 
-    AlertDialog alert = AlertDialog(
-        title: Text(AppLocalizations.of(context)!.addMissedPrayersTitle),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(AppLocalizations.of(context)!.closeString)),
-        ],
-        content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-          return SizedBox(
-            height: height * 0.2,
-            child: Column(children: [
-              _addDaysButton(7, AppLocalizations.of(context)!.addWeekString),
-              _addDaysButton(30, AppLocalizations.of(context)!.addMonthString),
-              _addDaysButton(365, AppLocalizations.of(context)!.addYearString),
-            ]),
-          );
-        }));
+    final options = [
+      (days: 7, label: l10n.addWeekString),
+      (days: 30, label: l10n.addMonthString),
+      (days: 365, label: l10n.addYearString),
+    ];
 
-    showDialog(
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext context) {
-        return alert;
+      showDragHandle: true,
+      backgroundColor: isDark ? appBarColor : color1,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) {
+        return Directionality(
+          textDirection: textDirection,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                      l10n.addMissedPrayersTitle,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                  for (final option in options)
+                    ListTile(
+                      leading: Icon(Icons.add_circle_outline, color: iconColor),
+                      title: Text(option.label, style: TextStyle(color: textColor)),
+                      onTap: () {
+                        setState(() {
+                          for (int i = 0; i < 5; i++) {
+                            prayers[i] += option.days;
+                            setMissedPrayer(i, prayers[i]);
+                          }
+                        });
+                        Navigator.pop(sheetContext);
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
@@ -292,7 +314,8 @@ class _MissedPrayerPageState extends State<MissedPrayerPage> {
         title: Text(clearAllString),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text(cancelString)),
-          ElevatedButton(
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: confirmMethod,
             child: Text(confirmString),
           ),
