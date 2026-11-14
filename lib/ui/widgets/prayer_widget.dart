@@ -35,6 +35,17 @@ class PrayerState extends State<PrayerWidget> {
   @override
   void initState() {
     super.initState();
+    PrayerAlarmService.alarmSettingsVersion.addListener(_onAlarmSettingsChanged);
+    _checkAlarmStatus();
+  }
+
+  @override
+  void dispose() {
+    PrayerAlarmService.alarmSettingsVersion.removeListener(_onAlarmSettingsChanged);
+    super.dispose();
+  }
+
+  void _onAlarmSettingsChanged() {
     _checkAlarmStatus();
   }
 
@@ -56,30 +67,12 @@ class PrayerState extends State<PrayerWidget> {
     }
   }
 
-  DateTime _resolvePrayerDateTime() {
-    if (widget.rawPrayerTime != null) {
-      return widget.rawPrayerTime!;
-    }
-    final now = DateTime.now();
-    try {
-      final parts = widget.time.split(':');
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
-      return DateTime(now.year, now.month, now.day, hour, minute);
-    } catch (_) {
-      return now;
-    }
-  }
-
   void _openAlarmDialog() {
     if (kIsWeb || !Platform.isAndroid) return;
-    showDialog(
-      context: context,
-      builder: (context) => AlarmDialog(
-        prayerName: widget.label,
-        prayerTime: _resolvePrayerDateTime(),
-        onSaved: _checkAlarmStatus,
-      ),
+    showAlarmBottomSheet(
+      context,
+      initialPrayerName: widget.label,
+      onSaved: _checkAlarmStatus,
     );
   }
 

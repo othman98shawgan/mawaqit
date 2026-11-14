@@ -120,6 +120,15 @@ class MainActivity : FlutterActivity() {
                         clearScreenWakeFlags()
                         result.success(true)
                     }
+                    "startPreviewAudio" -> {
+                        val soundName = call.argument<String>("soundName") ?: "alaqsa"
+                        AlarmController.startPreviewAudio(applicationContext, soundName)
+                        result.success(true)
+                    }
+                    "stopPreviewAudio" -> {
+                        AlarmController.stopPreviewAudio()
+                        result.success(true)
+                    }
                     "snoozeCurrentAlarm" -> {
                         val ok = AlarmController.snoozeCurrentAlarm(applicationContext)
                         clearScreenWakeFlags()

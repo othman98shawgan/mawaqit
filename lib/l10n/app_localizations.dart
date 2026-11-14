@@ -1567,6 +1567,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Using {city} coordinates while waiting for GPS'**
   String usingCityFallbackBanner(String city);
+
+  /// Short label for Adhan alarm mode card
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan'**
+  String get alarmModeAdhan;
+
+  /// Short label for system default alarm mode card
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get alarmModeDefault;
+
+  /// Short label for silent/off alarm mode card
+  ///
+  /// In en, this message translates to:
+  /// **'Silent'**
+  String get alarmModeSilent;
+
+  /// Section header above the pre-prayer offset stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-prayer alarm'**
+  String get alarmBeforePrayerSection;
+
+  /// Label on the left of the pre-prayer offset stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Alert before'**
+  String get alarmBeforeLabel;
+
+  /// Label when pre-prayer offset is 0 minutes
+  ///
+  /// In en, this message translates to:
+  /// **'At prayer time'**
+  String get alarmNoPreAlert;
+
+  /// Short minute value in stepper
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String alarmMinutesValue(int minutes);
+
+  /// Button to apply current prayer alarm settings to all prayers
+  ///
+  /// In en, this message translates to:
+  /// **'Apply this to all prayers'**
+  String get alarmApplyToAll;
+
+  /// Snackbar/feedback when alarm settings are applied to all prayers
+  ///
+  /// In en, this message translates to:
+  /// **'Applied to all prayers'**
+  String get alarmAppliedToAll;
+
+  /// Title of battery optimization troubleshooting card in alarm sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Alarms not ringing?'**
+  String get alarmsNotRingingTitle;
+
+  /// Subtitle of battery optimization troubleshooting card in alarm sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Some Android phones restrict background apps. Tap to exempt Mawaqit from battery optimization.'**
+  String get alarmsNotRingingDesc;
+
+  /// Chip/toggle label for vibrate-only mode under Default alarm
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate only'**
+  String get alarmVibrateOnly;
+
+  /// Shows calculated alarm ring time
+  ///
+  /// In en, this message translates to:
+  /// **'Rings at {time}'**
+  String alarmRingsAt(String time);
 }
 
 class _AppLocalizationsDelegate

@@ -869,4 +869,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String usingCityFallbackBanner(String city) {
     return 'Using $city coordinates while waiting for GPS';
   }
+
+  @override
+  String get alarmModeAdhan => 'Adhan';
+
+  @override
+  String get alarmModeDefault => 'Default';
+
+  @override
+  String get alarmModeSilent => 'Silent';
+
+  @override
+  String get alarmBeforePrayerSection => 'Pre-prayer alarm';
+
+  @override
+  String get alarmBeforeLabel => 'Alert before';
+
+  @override
+  String get alarmNoPreAlert => 'At prayer time';
+
+  @override
+  String alarmMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get alarmApplyToAll => 'Apply this to all prayers';
+
+  @override
+  String get alarmAppliedToAll => 'Applied to all prayers';
+
+  @override
+  String get alarmsNotRingingTitle => 'Alarms not ringing?';
+
+  @override
+  String get alarmsNotRingingDesc =>
+      'Some Android phones restrict background apps. Tap to exempt Mawaqit from battery optimization.';
+
+  @override
+  String get alarmVibrateOnly => 'Vibrate only';
+
+  @override
+  String alarmRingsAt(String time) {
+    return 'Rings at $time';
+  }
 }
