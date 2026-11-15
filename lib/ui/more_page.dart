@@ -73,6 +73,18 @@ Future<void> showMoreBottomSheet(
                       Navigator.pushNamed(context, '/missed_prayer');
                     },
                   ),
+                if (isAndroid || isWindows || isIOS)
+                  ListTile(
+                    leading: Icon(Icons.menu_book_outlined, color: iconColor),
+                    title: Text(
+                      l10n.mathuratTitle,
+                      style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                    ),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.pushNamed(context, '/mathurat');
+                    },
+                  ),
                 if (!isIOS)
                   ListTile(
                     leading: Icon(Icons.apps, color: iconColor),

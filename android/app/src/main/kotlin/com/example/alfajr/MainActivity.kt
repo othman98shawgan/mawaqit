@@ -3,9 +3,14 @@ package com.example.alfajr
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationAttributes
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.view.KeyEvent
 import android.view.WindowManager
@@ -223,6 +228,12 @@ class MainActivity : FlutterActivity() {
                         val alarms = AlarmController.getScheduledAlarms(applicationContext)
                         result.success(alarms)
                     }
+                    "vibrate" -> {
+                        val durationMs = (call.argument<Number>("durationMs")?.toLong() ?: 20L).coerceIn(5L, 500L)
+                        val amplitude = (call.argument<Number>("amplitude")?.toInt() ?: VibrationEffect.DEFAULT_AMPLITUDE)
+                        triggerHapticVibration(durationMs, amplitude)
+                        result.success(true)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -259,6 +270,49 @@ class MainActivity : FlutterActivity() {
             setTurnScreenOn(false)
         }
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    private fun triggerHapticVibration(durationMs: Long, amplitude: Int) {
+        try {
+            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                manager?.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            } ?: return
+
+            if (!vibrator.hasVibrator()) return
+
+            val effect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val resolvedAmplitude = if (amplitude in 1..255 && vibrator.hasAmplitudeControl()) {
+                    amplitude
+                } else {
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                }
+                VibrationEffect.createOneShot(durationMs, resolvedAmplitude)
+            } else {
+                null
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && effect != null) {
+                val attrs = VibrationAttributes.Builder()
+                    .setUsage(VibrationAttributes.USAGE_NOTIFICATION)
+                    .build()
+                vibrator.vibrate(effect, attrs)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && effect != null) {
+                val attrs = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(effect, attrs)
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(durationMs)
+            }
+        } catch (_: Exception) {
+        }
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {

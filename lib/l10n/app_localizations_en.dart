@@ -913,4 +913,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String alarmRingsAt(String time) {
     return 'Rings at $time';
   }
+
+  @override
+  String get mathuratTitle => 'Al-Ma\'thurat';
+
+  @override
+  String get mathuratMorning => 'Morning';
+
+  @override
+  String get mathuratEvening => 'Evening';
+
+  @override
+  String get mathuratReset => 'Reset';
+
+  @override
+  String get mathuratCompletedTitle => 'All Adhkar Completed';
+
+  @override
+  String get mathuratCompletedSubtitle => 'May Allah accept your remembrance';
+
+  @override
+  String mathuratRemainingCount(int count) {
+    return '$count remaining';
+  }
+
+  @override
+  String get mathuratHadithTitle => 'Hadith & Source';
+
+  @override
+  String get mathuratNoHadith => 'No hadith source added yet for this dhikr.';
+
+  @override
+  String get mathuratShareTooltip => 'Share';
+
+  @override
+  String get mathuratShareReward => 'Share the reward';
 }

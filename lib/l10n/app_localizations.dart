@@ -1645,6 +1645,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rings at {time}'**
   String alarmRingsAt(String time);
+
+  /// Title of the Al-Ma'thurat page
+  ///
+  /// In en, this message translates to:
+  /// **'Al-Ma\'thurat'**
+  String get mathuratTitle;
+
+  /// Morning tab label in Al-Ma'thurat page
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get mathuratMorning;
+
+  /// Evening tab label in Al-Ma'thurat page
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get mathuratEvening;
+
+  /// Tooltip/button to reset Al-Ma'thurat progress
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get mathuratReset;
+
+  /// Title shown when all adhkar in a tab are completed
+  ///
+  /// In en, this message translates to:
+  /// **'All Adhkar Completed'**
+  String get mathuratCompletedTitle;
+
+  /// Subtitle shown when all adhkar in a tab are completed
+  ///
+  /// In en, this message translates to:
+  /// **'May Allah accept your remembrance'**
+  String get mathuratCompletedSubtitle;
+
+  /// Remaining count label on an Al-Ma'thurat card
+  ///
+  /// In en, this message translates to:
+  /// **'{count} remaining'**
+  String mathuratRemainingCount(int count);
+
+  /// Title of the bottom sheet showing the hadith source for a dhikr
+  ///
+  /// In en, this message translates to:
+  /// **'Hadith & Source'**
+  String get mathuratHadithTitle;
+
+  /// Fallback message when no hadith source is available
+  ///
+  /// In en, this message translates to:
+  /// **'No hadith source added yet for this dhikr.'**
+  String get mathuratNoHadith;
+
+  /// Tooltip for share button on an Al-Ma'thurat card
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get mathuratShareTooltip;
+
+  /// Button label inside the dhikr hadith/reward modal bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Share the reward'**
+  String get mathuratShareReward;
 }
 
 class _AppLocalizationsDelegate
