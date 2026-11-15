@@ -1215,5 +1215,52 @@
       "placeholders": {
          "time": { "type": "String" }
       }
+   },
+   "mathuratTitle": "Al-Ma'thurat",
+   "@mathuratTitle": {
+      "description": "Title of the Al-Ma'thurat page"
+   },
+   "mathuratMorning": "Morning",
+   "@mathuratMorning": {
+      "description": "Morning tab label in Al-Ma'thurat page"
+   },
+   "mathuratEvening": "Evening",
+   "@mathuratEvening": {
+      "description": "Evening tab label in Al-Ma'thurat page"
+   },
+   "mathuratReset": "Reset",
+   "@mathuratReset": {
+      "description": "Tooltip/button to reset Al-Ma'thurat progress"
+   },
+   "mathuratCompletedTitle": "All Adhkar Completed",
+   "@mathuratCompletedTitle": {
+      "description": "Title shown when all adhkar in a tab are completed"
+   },
+   "mathuratCompletedSubtitle": "May Allah accept your remembrance",
+   "@mathuratCompletedSubtitle": {
+      "description": "Subtitle shown when all adhkar in a tab are completed"
+   },
+   "mathuratRemainingCount": "{count} remaining",
+   "@mathuratRemainingCount": {
+      "description": "Remaining count label on an Al-Ma'thurat card",
+      "placeholders": {
+         "count": { "type": "int" }
+      }
+   },
+   "mathuratHadithTitle": "Hadith & Source",
+   "@mathuratHadithTitle": {
+      "description": "Title of the bottom sheet showing the hadith source for a dhikr"
+   },
+   "mathuratNoHadith": "No hadith source added yet for this dhikr.",
+   "@mathuratNoHadith": {
+      "description": "Fallback message when no hadith source is available"
+   },
+   "mathuratShareTooltip": "Share",
+   "@mathuratShareTooltip": {
+      "description": "Tooltip for share button on an Al-Ma'thurat card"
+   },
+   "mathuratShareReward": "Share the reward",
+   "@mathuratShareReward": {
+      "description": "Button label inside the dhikr hadith/reward modal bottom sheet"
    }
 }

@@ -259,5 +259,16 @@
    "alarmsNotRingingTitle": "المنبهات لا تصل؟",
    "alarmsNotRingingDesc": "بعض هواتف أندرويد تغلق التطبيقات في الخلفية بشكل صارم. اضغط لاستثناء مواقيت.",
    "alarmVibrateOnly": "اهتزاز فقط",
-   "alarmRingsAt": "المنبه الساعة {time}"
+   "alarmRingsAt": "المنبه الساعة {time}",
+   "mathuratTitle": "المأثورات",
+   "mathuratMorning": "الصباح",
+   "mathuratEvening": "المساء",
+   "mathuratReset": "إعادة ضبط",
+   "mathuratCompletedTitle": "تم إتمام جميع الأذكار",
+   "mathuratCompletedSubtitle": "تقبل الله ذكركم",
+   "mathuratRemainingCount": "المتبقي {count}",
+   "mathuratHadithTitle": "الحديث والمصدر",
+   "mathuratNoHadith": "لم يُضف مصدر الحديث لهذا الذكر بعد.",
+   "mathuratShareTooltip": "مشاركة",
+   "mathuratShareReward": "شارك الفضل"
 }

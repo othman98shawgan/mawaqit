@@ -16,3 +16,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] feat: add in-app GPS Qibla finder with compass and distance to Makkah
 - [x] feat: refactor prayer alarm dialog into modal bottom sheet
 - [x] chore: migrate UI components and themes to Material 3 conventions
+- [x] feat: implement Al-Ma'thurat page with morning/evening adhkar, hadith modal, and haptic feedback
