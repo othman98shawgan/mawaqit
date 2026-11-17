@@ -1711,6 +1711,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share the reward'**
   String get mathuratShareReward;
+
+  /// Tooltip for vibration toggle button when vibration is enabled in Al-Ma'thurat page
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration on'**
+  String get mathuratVibrateOn;
+
+  /// Tooltip for vibration toggle button when vibration is disabled in Al-Ma'thurat page
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration off'**
+  String get mathuratVibrateOff;
 }
 
 class _AppLocalizationsDelegate

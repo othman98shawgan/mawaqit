@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 class HapticService {
   static const MethodChannel _channel = MethodChannel('com.othman.mawaqitquds/alarm');
 
+  @visibleForTesting
+  static void Function(String type)? debugOnVibrate;
+
   static Future<void> tap() => _vibrate(durationMs: 20, amplitude: 60, isHeavy: false);
 
   static Future<void> complete() => _vibrate(durationMs: 45, amplitude: 140, isHeavy: true);
@@ -15,6 +18,10 @@ class HapticService {
     required int amplitude,
     required bool isHeavy,
   }) async {
+    if (debugOnVibrate != null) {
+      debugOnVibrate!(isHeavy ? 'complete' : 'tap');
+      return;
+    }
     if (!kIsWeb && Platform.isAndroid) {
       try {
         await _channel.invokeMethod('vibrate', {

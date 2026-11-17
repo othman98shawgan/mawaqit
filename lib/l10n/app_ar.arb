@@ -270,5 +270,7 @@
    "mathuratHadithTitle": "الحديث والمصدر",
    "mathuratNoHadith": "لم يُضف مصدر الحديث لهذا الذكر بعد.",
    "mathuratShareTooltip": "مشاركة",
-   "mathuratShareReward": "شارك الفضل"
+   "mathuratShareReward": "شارك الفضل",
+   "mathuratVibrateOn": "الاهتزاز مفعّل",
+   "mathuratVibrateOff": "الاهتزاز متوقف"
 }
