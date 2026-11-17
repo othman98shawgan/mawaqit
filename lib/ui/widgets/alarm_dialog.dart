@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:alfajr/l10n/app_localizations.dart';
@@ -118,7 +117,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
         final dst = Provider.of<DaylightSavingNotifier>(context, listen: false).getSummerTime();
         final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
         final now = DateTime.now();
-        final data = json.decode(prayersJson) as List;
+        final data = cachedPrayersList;
         final idx = dayOfYear(now);
         if (idx >= 0 && idx < data.length) {
           final model = PrayersModel.fromJson(data[idx]);

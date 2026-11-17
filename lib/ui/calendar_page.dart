@@ -1,14 +1,12 @@
-import 'dart:convert';
-
 import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/ui/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 
+import '../data/prayer_times.dart';
 import '../models/prayers.dart';
 import '../services/day_of_year_service.dart';
 import '../services/daylight_time_service.dart';
@@ -92,17 +90,6 @@ class _CalendarPageState extends State<CalendarPage> {
         initialEntryMode: DatePickerEntryMode.calendarOnly,
         initialDatePickerMode: DatePickerMode.day,
       );
-
-  Future<void> readJson() async {
-    dayInYear = dayOfYear(pickedDate);
-
-    final String response = await rootBundle.loadString('lib/data/prayer-time.json');
-    final data = await json.decode(response);
-
-    setState(() {
-      prayersToday = PrayersModel.fromJson(data["prayers"][dayInYear]);
-    });
-  }
 
   @override
   void initState() {
@@ -195,147 +182,138 @@ class _CalendarPageState extends State<CalendarPage> {
               final double prayerCardHeight = height3 * 0.1 * scale;
               final double mainCardHeight = height3 * 0.3 * scale;
 
-              return FutureBuilder<List>(
-                future: Future.wait([
-                  readJson(),
-                ]),
-                builder: (buildContext, snapshot) {
-                  if (snapshot.hasData) {
-                    return Container(
-                      decoration: BoxDecoration(
-                          image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
-                      child: SafeArea(
-                        top: false,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                          Builder(builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            final cityName = getCitiesMap(l10n)[localeProvider.city] ?? localeProvider.city;
-                            final dstLabel = summerTime ? l10n.settingsSummerTime : l10n.settingsWinterTime;
-                            final fasting = _diffTimes(prayersToday.fajr, prayersToday.maghrib);
-                            final daylight = _diffTimes(prayersToday.shuruq, prayersToday.maghrib);
+              dayInYear = dayOfYear(pickedDate);
+              prayersToday = PrayersModel.fromJson(cachedPrayersList[dayInYear]);
 
-                            return MyCard(
-                                height: mainCardHeight,
-                                widget: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
+              return Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(image: AssetImage(theme.backgroundImage!), fit: BoxFit.cover)),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                    Builder(builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      final cityName = getCitiesMap(l10n)[localeProvider.city] ?? localeProvider.city;
+                      final dstLabel = summerTime ? l10n.settingsSummerTime : l10n.settingsWinterTime;
+                      final fasting = _diffTimes(prayersToday.fajr, prayersToday.maghrib);
+                      final daylight = _diffTimes(prayersToday.shuruq, prayersToday.maghrib);
+
+                      return MyCard(
+                          height: mainCardHeight,
+                          widget: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${DateFormat('EEEE', localeProvider.locale.toString()).format(pickedDate)}  -  ${HijriCalendar.fromDate(pickedDate).toFormat('dd MMMM yyyy')}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+                                ),
+                                const SizedBox(height: 2),
+                                Directionality(
+                                  textDirection: ui.TextDirection.ltr,
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        '${DateFormat('EEEE', localeProvider.locale.toString()).format(pickedDate)}  -  ${HijriCalendar.fromDate(pickedDate).toFormat('dd MMMM yyyy')}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+                                      IconButton(
+                                        padding: EdgeInsets.zero,
+                                        iconSize: 44,
+                                        icon: const Icon(Icons.navigate_before),
+                                        onPressed: () {
+                                          setState(() {
+                                            pickedDate = pickedDate.subtract(const Duration(days: 1));
+                                            summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
+                                          });
+                                        },
+                                        tooltip: l10n.prevoiusDayTooltip,
                                       ),
-                                      const SizedBox(height: 2),
-                                      Directionality(
-                                        textDirection: ui.TextDirection.ltr,
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              padding: EdgeInsets.zero,
-                                              iconSize: 44,
-                                              icon: const Icon(Icons.navigate_before),
-                                              onPressed: () {
-                                                setState(() {
-                                                  pickedDate = pickedDate.subtract(const Duration(days: 1));
-                                                  summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
-                                                });
-                                              },
-                                              tooltip: l10n.prevoiusDayTooltip,
-                                            ),
-                                            Expanded(
-                                              child: Center(
-                                                child: FittedBox(
-                                                  fit: BoxFit.scaleDown,
-                                                  child: dateTextButtonWidget,
-                                                ),
-                                              ),
-                                            ),
-                                            IconButton(
-                                              padding: EdgeInsets.zero,
-                                              iconSize: 44,
-                                              icon: const Icon(Icons.navigate_next),
-                                              onPressed: () {
-                                                setState(() {
-                                                  pickedDate = pickedDate.add(const Duration(days: 1));
-                                                  summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
-                                                });
-                                              },
-                                              tooltip: l10n.nextDayTooltip,
-                                            ),
-                                          ],
+                                      Expanded(
+                                        child: Center(
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: dateTextButtonWidget,
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '$cityName  •  $dstLabel',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 15, color: Colors.white70),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${l10n.fastingDuration(fasting.inHours, fasting.inMinutes.remainder(60))}  •  ${l10n.daylightDuration(daylight.inHours, daylight.inMinutes.remainder(60))}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                      IconButton(
+                                        padding: EdgeInsets.zero,
+                                        iconSize: 44,
+                                        icon: const Icon(Icons.navigate_next),
+                                        onPressed: () {
+                                          setState(() {
+                                            pickedDate = pickedDate.add(const Duration(days: 1));
+                                            summerTime = daylightSaving.getSummerTimeForDate(pickedDate);
+                                          });
+                                        },
+                                        tooltip: l10n.nextDayTooltip,
                                       ),
                                     ],
                                   ),
-                                ));
-                          }),
-                          PrayerWidget(
-                            label: "Fajr",
-                            time: adjustTime(prayersToday.fajr),
-                            height: prayerCardHeight,
-                            showAlarm: false,
-                          ),
-                          PrayerWidget(
-                            label: "Shuruq",
-                            time: adjustTime(prayersToday.shuruq),
-                            height: prayerCardHeight,
-                            showAlarm: false,
-                          ),
-                          PrayerWidget(
-                            label: "Duhr",
-                            time: adjustTime(prayersToday.duhr),
-                            height: prayerCardHeight,
-                            showAlarm: false,
-                          ),
-                          PrayerWidget(
-                            label: "Asr",
-                            time: adjustTime(prayersToday.asr),
-                            height: prayerCardHeight,
-                            showAlarm: false,
-                          ),
-                          PrayerWidget(
-                            label: "Maghrib",
-                            time: adjustTime(prayersToday.maghrib),
-                            height: prayerCardHeight,
-                            showAlarm: false,
-                          ),
-                          PrayerWidget(
-                            label: "Isha",
-                            time: adjustTime(prayersToday.isha),
-                            height: prayerCardHeight,
-                            showAlarm: false,
-                          ),
-                        ],
-                        ),
-                      ),
-                    );
-                  } else {
-                    // Return loading screen while reading preferences
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                },
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '$cityName  •  $dstLabel',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 15, color: Colors.white70),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${l10n.fastingDuration(fasting.inHours, fasting.inMinutes.remainder(60))}  •  ${l10n.daylightDuration(daylight.inHours, daylight.inMinutes.remainder(60))}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ));
+                    }),
+                    PrayerWidget(
+                      label: "Fajr",
+                      time: adjustTime(prayersToday.fajr),
+                      height: prayerCardHeight,
+                      showAlarm: false,
+                    ),
+                    PrayerWidget(
+                      label: "Shuruq",
+                      time: adjustTime(prayersToday.shuruq),
+                      height: prayerCardHeight,
+                      showAlarm: false,
+                    ),
+                    PrayerWidget(
+                      label: "Duhr",
+                      time: adjustTime(prayersToday.duhr),
+                      height: prayerCardHeight,
+                      showAlarm: false,
+                    ),
+                    PrayerWidget(
+                      label: "Asr",
+                      time: adjustTime(prayersToday.asr),
+                      height: prayerCardHeight,
+                      showAlarm: false,
+                    ),
+                    PrayerWidget(
+                      label: "Maghrib",
+                      time: adjustTime(prayersToday.maghrib),
+                      height: prayerCardHeight,
+                      showAlarm: false,
+                    ),
+                    PrayerWidget(
+                      label: "Isha",
+                      time: adjustTime(prayersToday.isha),
+                      height: prayerCardHeight,
+                      showAlarm: false,
+                    ),
+                  ],
+                  ),
+                ),
               );
             },
           ),

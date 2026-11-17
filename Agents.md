@@ -27,3 +27,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [ ] chore: restore Our Apps, Contact Us, and Share in More section
 - [ ] fix: update UI colors for visibility and consistency
 - [x] feat: add vibrate toggle icon in Al-Ma'thurat page to control haptic feedback
+- [x] fix: optimize app startup by lazy-loading tabs, caching prayer JSON, and removing duplicate audio assets

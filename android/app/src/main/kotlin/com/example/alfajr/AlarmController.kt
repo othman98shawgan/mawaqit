@@ -200,12 +200,11 @@ object AlarmController {
                 ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             player.setDataSource(appContext, alarmUri)
         } else {
-            val resId = appContext.resources.getIdentifier(rawResName, "raw", appContext.packageName)
-            if (resId != 0) {
-                val afd = appContext.resources.openRawResourceFd(resId)
-                player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                afd.close()
-            } else {
+            try {
+                appContext.assets.openFd("flutter_assets/assets/audio/$rawResName.mp3").use { afd ->
+                    player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                }
+            } catch (_: Exception) {
                 val defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 player.setDataSource(appContext, defaultUri)
             }
