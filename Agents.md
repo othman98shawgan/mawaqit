@@ -4,6 +4,11 @@ Always showcase and align on the complete scope, architecture, and edge cases of
 
 When preparing a Pull Request reminder, always format the PR Description inside a fenced markdown code block (```markdown ... ```) so it can be easily copied with one click into GitHub.
 
+## Terminal & Background Commands (Windows)
+- On Windows, Flutter/Dart CLI tools (`flutter analyze`, `flutter test`, `flutter gen-l10n`, etc.) hang silently with empty background logs when run inside the restricted terminal sandbox (`BypassSandbox: false`).
+- Always run those background/CLI verification commands as **standalone single commands** (do not chain multiple commands with `;` or `&&`) using **`BypassSandbox: true`** so output streams live and the command completes cleanly.
+- If you run `flutter analyze` and `flutter test`, invoke them as two separate `run_command` calls (`BypassSandbox: true`), not combined in one shell string.
+
 ## Tasks
 - [x] feat: add Windows support with notifications and scheduling
 - [x] fix: resolve Android release notifications and add dev indicator to app name
@@ -17,3 +22,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] feat: refactor prayer alarm dialog into modal bottom sheet
 - [x] chore: migrate UI components and themes to Material 3 conventions
 - [x] feat: implement Al-Ma'thurat page with morning/evening adhkar, hadith modal, and haptic feedback
+- [x] fix: prevent app from showing over lock screen unless prayer alarm is ringing
