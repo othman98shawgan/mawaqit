@@ -23,3 +23,6 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] chore: migrate UI components and themes to Material 3 conventions
 - [x] feat: implement Al-Ma'thurat page with morning/evening adhkar, hadith modal, and haptic feedback
 - [x] fix: prevent app from showing over lock screen unless prayer alarm is ringing
+- [x] chore: remove Our Apps/Contact/Share from More section and expand test suite
+- [ ] chore: restore Our Apps, Contact Us, and Share in More section
+- [ ] fix: update UI colors for visibility and consistency
