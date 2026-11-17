@@ -1,13 +1,11 @@
 import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
 import '../models/prayers.dart';
 import '../resources/colors.dart';
 import '../services/locale_service.dart';
-import '../services/prayer_methods.dart';
 import '../services/theme_service.dart';
 
 Future<void> showMoreBottomSheet(
@@ -85,50 +83,7 @@ Future<void> showMoreBottomSheet(
                       Navigator.pushNamed(context, '/mathurat');
                     },
                   ),
-                if (!isIOS)
-                  ListTile(
-                    leading: Icon(Icons.apps, color: iconColor),
-                    title: Text(
-                      l10n.ourAppsString,
-                      style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
-                    ),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      Navigator.pushNamed(context, '/apps');
-                    },
-                  ),
-                ListTile(
-                  leading: Icon(Icons.email, color: iconColor),
-                  title: Text(
-                    l10n.contactUsString,
-                    style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-                    final subject = Uri.encodeComponent(l10n.contactUsEmailSubject);
-                    final body = Uri.encodeComponent(l10n.contactUsEmailBody);
-                    final url = Uri.parse('mailto:oth1998@gmail.com?subject=$subject&body=$body');
-                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                      throw 'Could not launch $url';
-                    }
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.share, color: iconColor),
-                  title: Text(
-                    l10n.shareString,
-                    style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
-                  ),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    sharePrayerTimes(
-                      context,
-                      localeProvider,
-                      prayersToday,
-                      DateTime.now(),
-                    );
-                  },
-                ),
+                // TODO: Restore Our Apps, Contact Us, and Share items when ready.
               ],
             ),
           ),
