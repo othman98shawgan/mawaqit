@@ -948,4 +948,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mathuratShareReward => 'Share the reward';
+
+  @override
+  String get mathuratVibrateOn => 'Vibration on';
+
+  @override
+  String get mathuratVibrateOff => 'Vibration off';
 }

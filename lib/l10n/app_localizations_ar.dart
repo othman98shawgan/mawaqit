@@ -951,4 +951,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mathuratShareReward => 'شارك الفضل';
+
+  @override
+  String get mathuratVibrateOn => 'الاهتزاز مفعّل';
+
+  @override
+  String get mathuratVibrateOff => 'الاهتزاز متوقف';
 }

@@ -26,3 +26,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] chore: remove Our Apps/Contact/Share from More section and expand test suite
 - [ ] chore: restore Our Apps, Contact Us, and Share in More section
 - [ ] fix: update UI colors for visibility and consistency
+- [x] feat: add vibrate toggle icon in Al-Ma'thurat page to control haptic feedback

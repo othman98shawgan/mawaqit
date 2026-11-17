@@ -1262,5 +1262,13 @@
    "mathuratShareReward": "Share the reward",
    "@mathuratShareReward": {
       "description": "Button label inside the dhikr hadith/reward modal bottom sheet"
+   },
+   "mathuratVibrateOn": "Vibration on",
+   "@mathuratVibrateOn": {
+      "description": "Tooltip for vibration toggle button when vibration is enabled in Al-Ma'thurat page"
+   },
+   "mathuratVibrateOff": "Vibration off",
+   "@mathuratVibrateOff": {
+      "description": "Tooltip for vibration toggle button when vibration is disabled in Al-Ma'thurat page"
    }
 }

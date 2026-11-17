@@ -5,6 +5,7 @@ import 'package:alfajr/models/mathurat.dart';
 import 'package:alfajr/resources/colors.dart';
 import 'package:alfajr/services/haptic_service.dart';
 import 'package:alfajr/services/locale_service.dart';
+import 'package:alfajr/services/store_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,8 @@ class MathuratPage extends StatefulWidget {
 }
 
 class _MathuratPageState extends State<MathuratPage> with SingleTickerProviderStateMixin {
+  static const String _vibratePrefKey = 'MathuratVibrate';
+
   late final TabController _tabController;
   List<MathuratModel> _allItems = [];
   List<MathuratModel> _morningItems = [];
@@ -26,6 +29,7 @@ class _MathuratPageState extends State<MathuratPage> with SingleTickerProviderSt
   int _morningTotal = 0;
   int _eveningTotal = 0;
   bool _isLoading = true;
+  bool _vibrateEnabled = true;
 
   @override
   void initState() {
@@ -35,7 +39,29 @@ class _MathuratPageState extends State<MathuratPage> with SingleTickerProviderSt
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) setState(() {});
     });
+    _loadVibratePref();
     _loadData();
+  }
+
+  Future<void> _loadVibratePref() async {
+    final stored = await StorageManager.readData(_vibratePrefKey);
+    if (!mounted) return;
+    if (stored is bool) {
+      setState(() {
+        _vibrateEnabled = stored;
+      });
+    }
+  }
+
+  void _toggleVibrate() {
+    final next = !_vibrateEnabled;
+    setState(() {
+      _vibrateEnabled = next;
+    });
+    StorageManager.saveData(_vibratePrefKey, next);
+    if (next) {
+      HapticService.tap();
+    }
   }
 
   @override
@@ -102,6 +128,11 @@ class _MathuratPageState extends State<MathuratPage> with SingleTickerProviderSt
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           actions: [
+            IconButton(
+              icon: _VibrateToggleIcon(enabled: _vibrateEnabled),
+              tooltip: _vibrateEnabled ? l10n.mathuratVibrateOn : l10n.mathuratVibrateOff,
+              onPressed: _toggleVibrate,
+            ),
             IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: l10n.mathuratReset,
@@ -225,6 +256,7 @@ class _MathuratPageState extends State<MathuratPage> with SingleTickerProviderSt
                       isEnglish: Localizations.localeOf(context).languageCode == 'en',
                       isDark: isDark,
                       accentColor: accentColor,
+                      vibrateEnabled: _vibrateEnabled,
                       remainingLabel: (count) => l10n.mathuratRemainingCount(count),
                       onCompleted: () => _removeCompleted(period, item.id),
                     );
@@ -244,6 +276,7 @@ class MathuratCard extends StatefulWidget {
     required this.isEnglish,
     required this.isDark,
     required this.accentColor,
+    required this.vibrateEnabled,
     required this.remainingLabel,
     required this.onCompleted,
   });
@@ -253,6 +286,7 @@ class MathuratCard extends StatefulWidget {
   final bool isEnglish;
   final bool isDark;
   final Color accentColor;
+  final bool vibrateEnabled;
   final String Function(int count) remainingLabel;
   final VoidCallback onCompleted;
 
@@ -299,13 +333,15 @@ class _MathuratCardState extends State<MathuratCard> with SingleTickerProviderSt
       _count--;
     });
     if (_count == 0) {
-      HapticService.complete();
+      if (widget.vibrateEnabled) {
+        HapticService.complete();
+      }
       _removeController.reverse().then((_) {
         if (mounted) {
           widget.onCompleted();
         }
       });
-    } else {
+    } else if (widget.vibrateEnabled) {
       HapticService.tap();
     }
   }
@@ -477,4 +513,58 @@ class _MathuratCardState extends State<MathuratCard> with SingleTickerProviderSt
       ),
     );
   }
+}
+
+class _VibrateToggleIcon extends StatelessWidget {
+  const _VibrateToggleIcon({required this.enabled});
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    if (enabled) {
+      return const Icon(Icons.vibration);
+    }
+    final iconColor = IconTheme.of(context).color ?? Colors.white;
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Opacity(
+            opacity: 0.65,
+            child: Icon(Icons.vibration, color: iconColor),
+          ),
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _DiagonalSlashPainter(color: iconColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DiagonalSlashPainter extends CustomPainter {
+  const _DiagonalSlashPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(size.width * 0.16, size.height * 0.16),
+      Offset(size.width * 0.84, size.height * 0.84),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DiagonalSlashPainter oldDelegate) => oldDelegate.color != color;
 }
