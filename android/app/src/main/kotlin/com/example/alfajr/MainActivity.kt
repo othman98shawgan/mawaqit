@@ -25,15 +25,30 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        wakeScreen()
+        if (AlarmController.isAlarmRinging) {
+            wakeScreen()
+        } else {
+            clearScreenWakeFlags()
+        }
         handleIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        wakeScreen()
+        if (AlarmController.isAlarmRinging) {
+            wakeScreen()
+        }
         handleIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (AlarmController.isAlarmRinging) {
+            wakeScreen()
+        } else {
+            clearScreenWakeFlags()
+        }
     }
 
     private fun extractPayload(intent: Intent?): String? {
@@ -97,6 +112,11 @@ class MainActivity : FlutterActivity() {
             runOnUiThread {
                 clearScreenWakeFlags()
                 methodChannel?.invokeMethod("onAlarmSnoozed", prayerName)
+            }
+        }
+        AlarmController.onAlarmStoppedCallback = {
+            runOnUiThread {
+                clearScreenWakeFlags()
             }
         }
 
@@ -268,6 +288,12 @@ class MainActivity : FlutterActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(false)
             setTurnScreenOn(false)
+        } else {
+            @Suppress("DEPRECATION")
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
         }
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
@@ -339,6 +365,9 @@ class MainActivity : FlutterActivity() {
         }
         if (AlarmController.onAlarmSnoozedCallback != null) {
             AlarmController.onAlarmSnoozedCallback = null
+        }
+        if (AlarmController.onAlarmStoppedCallback != null) {
+            AlarmController.onAlarmStoppedCallback = null
         }
         super.onDestroy()
     }

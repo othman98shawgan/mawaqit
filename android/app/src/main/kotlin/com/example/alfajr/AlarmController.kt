@@ -50,6 +50,7 @@ object AlarmController {
     var pendingAlarmPayload: String? = null
     var onAlarmTriggeredCallback: ((String) -> Unit)? = null
     var onAlarmSnoozedCallback: ((String) -> Unit)? = null
+    var onAlarmStoppedCallback: (() -> Unit)? = null
 
     fun startAlarm(
         context: Context,
@@ -327,6 +328,7 @@ object AlarmController {
         currentActiveAlarm = null
         isSnoozing = false
         unregisterScreenOffReceiver(appContext)
+        onAlarmStoppedCallback?.invoke()
         val nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         if (id != null) {
             nm?.cancel(id)
