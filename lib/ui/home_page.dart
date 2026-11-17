@@ -57,7 +57,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool _isAlarmRingingOpen = false;
   Timer? _midnightTimer;
   int _currentTabIndex = 0;
-  final Set<int> _loadedTabs = {0};
 
   void _openAlarmRingingPage(String payload) {
     if (_isAlarmRingingOpen || !mounted) return;
@@ -562,7 +561,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
     setState(() {
       _currentTabIndex = index;
-      _loadedTabs.add(index);
     });
   }
 
@@ -728,17 +726,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 index: _currentTabIndex,
                 children: [
                   _buildPrayersTab(context, theme, daylightSaving, reminder, localeProvider, title),
-                  _loadedTabs.contains(1) ? const CalendarPage() : const SizedBox.shrink(),
-                  _loadedTabs.contains(2)
-                      ? QiblaPage(isActive: _currentTabIndex == 2)
-                      : const SizedBox.shrink(),
-                  _loadedTabs.contains(3)
-                      ? SettingsPage(
-                          updatePrayers: updatePrayers,
-                          updateReminder: updateReminder,
-                          cancelNotifications: cancelAllPrayers,
-                        )
-                      : const SizedBox.shrink(),
+                  const CalendarPage(),
+                  QiblaPage(isActive: _currentTabIndex == 2),
+                  SettingsPage(
+                    updatePrayers: updatePrayers,
+                    updateReminder: updateReminder,
+                    cancelNotifications: cancelAllPrayers,
+                  ),
                   const SizedBox.shrink(),
                 ],
               ),
