@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:alfajr/resources/colors.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:alfajr/services/day_of_year_service.dart';
@@ -313,7 +312,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void readJson() {
     dayInYear = dayOfYear(DateTime.now());
 
-    final data = _prayerList.isNotEmpty ? _prayerList : (json.decode(prayersJson) as List);
+    final data = _prayerList.isNotEmpty ? _prayerList : cachedPrayersList;
 
     setState(() {
       _prayerList = data;
@@ -352,10 +351,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void didChangeDependencies() {
-    // Adjust the provider based on the image type
-    precacheImage(const AssetImage('images/bg.png'), context);
-    precacheImage(const AssetImage('images/bgGreen.png'), context);
     super.didChangeDependencies();
+    final activeBg = Provider.of<ThemeNotifier>(context, listen: false).backgroundImage ?? 'images/bg.png';
+    final otherBg = activeBg == 'images/bg.png' ? 'images/bgGreen.png' : 'images/bg.png';
+    precacheImage(AssetImage(activeBg), context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        precacheImage(AssetImage(otherBg), context);
+      }
+    });
   }
 
   @override
@@ -377,12 +381,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       setScheduledPrayers([]);
     }
 
-    NotificationsService.ensureInitialized();
     readJson();
     listenNotifications();
     _setupMidnightTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        NotificationsService.ensureInitialized();
         scheduleNextPrayers(DateTime.now());
       }
     });

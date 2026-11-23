@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 String prayersJson = '''[
         {
             "Date": "01.01",
@@ -3295,3 +3297,8 @@ String prayersJson = '''[
         }
     ]
 ''';
+
+List<dynamic>? _cachedPrayersList;
+
+List<dynamic> get cachedPrayersList =>
+    _cachedPrayersList ??= json.decode(prayersJson) as List<dynamic>;

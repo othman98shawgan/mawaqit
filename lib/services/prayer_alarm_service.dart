@@ -309,7 +309,7 @@ class PrayerAlarmService {
     List prayersData = prayerList ?? [];
     if (prayersData.isEmpty) {
       try {
-        prayersData = json.decode(prayersJson) as List;
+        prayersData = cachedPrayersList;
       } catch (e) {
         debugPrint('Error loading prayersJson for alarms: $e');
         return;

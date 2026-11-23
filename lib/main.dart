@@ -36,12 +36,14 @@ bool isWeb = false;
 bool isAndroid = false;
 bool isWindows = false;
 bool isIOS = false;
+bool _arDateFormattingInitialized = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
     await initializeDateFormatting('ar', null);
+    _arDateFormattingInitialized = true;
   } catch (_) {}
 
   if (kIsWeb) {
@@ -125,7 +127,10 @@ class SundayStartLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
   @override
   Future<MaterialLocalizations> load(Locale locale) async {
     try {
-      await initializeDateFormatting('ar', null);
+      if (!_arDateFormattingInitialized) {
+        await initializeDateFormatting('ar', null);
+        _arDateFormattingInitialized = true;
+      }
       await GlobalMaterialLocalizations.delegate.load(locale);
       const String localeName = 'ar';
       return SundayMaterialLocalizationAr(
