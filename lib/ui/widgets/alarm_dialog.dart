@@ -98,10 +98,19 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    final hadPendingReschedule = _rescheduleDebounce?.isActive ?? false;
     _rescheduleDebounce?.cancel();
     _appliedBannerTimer?.cancel();
     if (_previewingSound != null) {
       PrayerAlarmService.stopPreviewAudio();
+    }
+    if (hadPendingReschedule) {
+      final rescheduleCallback = widget.onRescheduleNotifications ?? PrayerAlarmService.onRescheduleNotifications;
+      if (rescheduleCallback != null) {
+        rescheduleCallback();
+      } else if (_isAndroid) {
+        PrayerAlarmService.scheduleUpcomingAlarms();
+      }
     }
     super.dispose();
   }

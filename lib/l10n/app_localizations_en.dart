@@ -968,7 +968,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prePrayerReminderLabel => 'Pre-prayer reminder';
 
   @override
-  String get alertsMasterDisabledBanner => 'All prayer alerts are paused';
+  String get alertsMasterDisabledBanner => 'Notifications are paused';
 
   @override
   String get alertsMasterEnableAction => 'Enable';

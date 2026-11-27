@@ -1287,7 +1287,7 @@
    "@prePrayerReminderLabel": {
       "description": "Stepper label for optional pre-prayer reminder notification"
    },
-   "alertsMasterDisabledBanner": "All prayer alerts are paused",
+   "alertsMasterDisabledBanner": "Notifications are paused",
    "@alertsMasterDisabledBanner": {
       "description": "Banner shown inside prayer alerts modal when master alerts switch is off"
    },

@@ -277,7 +277,7 @@
    "alertModeNotification": "إشعار",
    "alertModeOff": "إيقاف",
    "prePrayerReminderLabel": "تذكير قبل الصلاة",
-   "alertsMasterDisabledBanner": "جميع تنبيهات الصلاة متوقفة مؤقتاً",
+   "alertsMasterDisabledBanner": "الإشعارات متوقفة مؤقتاً",
    "alertsMasterEnableAction": "تفعيل",
    "alertNotifiesAt": "إشعار الساعة {time}"
 }

@@ -1751,7 +1751,7 @@ abstract class AppLocalizations {
   /// Banner shown inside prayer alerts modal when master alerts switch is off
   ///
   /// In en, this message translates to:
-  /// **'All prayer alerts are paused'**
+  /// **'Notifications are paused'**
   String get alertsMasterDisabledBanner;
 
   /// Action label to re-enable master prayer alerts switch

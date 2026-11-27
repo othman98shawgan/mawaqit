@@ -971,7 +971,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prePrayerReminderLabel => 'تذكير قبل الصلاة';
 
   @override
-  String get alertsMasterDisabledBanner => 'جميع تنبيهات الصلاة متوقفة مؤقتاً';
+  String get alertsMasterDisabledBanner => 'الإشعارات متوقفة مؤقتاً';
 
   @override
   String get alertsMasterEnableAction => 'تفعيل';

@@ -118,8 +118,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (!isAndroid && !isWindows && !isIOS) {
       return;
     }
-    Future.delayed(Duration.zero, () {
-      cancelAllPrayers().whenComplete(() => scheduleNextPrayers(DateTime.now()).whenComplete(() => setState(() {})));
+    Future.delayed(Duration.zero, () async {
+      await cancelAllPrayers();
+      if (!mounted) return;
+      await scheduleNextPrayers(DateTime.now());
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -263,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               prayerTitle = l10n.notificationsPrayerTimeTitle(localizedLabel);
             }
 
-            NotificationsService.scheduleNotifications(
+            await NotificationsService.scheduleNotifications(
               id: int.parse(id.substring(6)),
               channelId: id,
               title: prayerTitle,
@@ -300,7 +305,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             }
           }
 
-          NotificationsService.scheduleNotifications(
+          await NotificationsService.scheduleNotifications(
             id: int.parse(reminderId.substring(6)),
             channelId: reminderId,
             title: reminderTitle,
