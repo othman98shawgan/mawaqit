@@ -2,6 +2,8 @@ For all Git, branching, and release operations, strictly follow the rules in ./G
 
 Always showcase and align on the complete scope, architecture, and edge cases of any feature or fix before writing any code, especially for big features.
 
+Always explicitly inform the user if a change, fix, or workaround only applies to debug mode or might behave differently / not work in release mode (e.g., R8/ProGuard, signing, `kDebugMode` guards, or release-only lifecycle behavior).
+
 When preparing a Pull Request reminder, always format the PR Description inside a fenced markdown code block (```markdown ... ```) so it can be easily copied with one click into GitHub.
 
 ## Terminal & Background Commands (Windows)
@@ -30,3 +32,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] fix: optimize app startup by caching prayer JSON and removing duplicate audio assets
 - [x] feat: add swipe navigation between days in Calendar view using PageController
 - [x] fix: auto-stop unstopped prayer alarms after 5 minutes and prevent re-ringing on app launch (#220)
+- [x] feat: merge prayer notifications, reminders, and alarms into unified alerts modal

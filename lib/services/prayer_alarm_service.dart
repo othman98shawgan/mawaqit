@@ -38,6 +38,8 @@ class PrayerAlarmService {
   static final BehaviorSubject<String?> onNativeAlarmSnoozed = BehaviorSubject<String?>();
   static final PublishSubject<String?> onNativeAlarmAutoStopped = PublishSubject<String?>();
   static final ValueNotifier<int> alarmSettingsVersion = ValueNotifier<int>(0);
+  static VoidCallback? onRescheduleNotifications;
+  static const String _mergedAlertsMigratedKey = 'alertsMergedMigrated_v1';
   static bool _channelInitialized = false;
 
   static void initPlatformChannel() {
@@ -229,7 +231,80 @@ class PrayerAlarmService {
         debugPrint('Error decoding alarm settings for $prayerName: $e');
       }
     }
-    return PrayerAlarmSettings(prayerName: prayerName, isEnabled: false);
+    return PrayerAlarmSettings(
+      prayerName: prayerName,
+      alertMode: PrayerAlarmSettings.modeNotification,
+    );
+  }
+
+  /// One-time migration from separate global notifications/reminders + per-prayer alarms
+  /// to unified per-prayer alert modes (`alarm`, `notification`, `off`) and reminders.
+  static Future<void> migrateLegacyAlertsIfNeeded() async {
+    final migrated = await StorageManager.readData(_mergedAlertsMigratedKey);
+    if (migrated == true) return;
+
+    final legacyNotifRaw = await StorageManager.readData('NotificationsStatus');
+    final legacyNotificationsOn = legacyNotifRaw is bool ? legacyNotifRaw : true;
+    final legacyReminderStatusRaw = await StorageManager.readData('ReminderStatus');
+    final legacyReminderOn = legacyReminderStatusRaw is bool ? legacyReminderStatusRaw : false;
+    final legacyReminderMinRaw = await StorageManager.readData('Reminder');
+    final legacyReminderMinutes = (legacyReminderMinRaw is int && legacyReminderMinRaw > 0)
+        ? legacyReminderMinRaw.clamp(5, 60)
+        : 10;
+
+    for (final prayer in _alarmIds.keys) {
+      final key = '$_prefsPrefix$prayer';
+      final raw = await StorageManager.readData(key);
+      PrayerAlarmSettings migratedSettings;
+
+      if (raw != null && raw is String && raw.isNotEmpty) {
+        try {
+          final decoded = json.decode(raw) as Map<String, dynamic>;
+          final existing = PrayerAlarmSettings.fromJson(decoded);
+          final hasExplicitMode = decoded.containsKey('alertMode');
+          final targetMode = hasExplicitMode
+              ? existing.alertMode
+              : (existing.isEnabled
+                  ? PrayerAlarmSettings.modeAlarm
+                  : (legacyNotificationsOn
+                      ? PrayerAlarmSettings.modeNotification
+                      : PrayerAlarmSettings.modeOff));
+          migratedSettings = existing.copyWith(
+            alertMode: targetMode,
+            reminderEnabled: decoded.containsKey('reminderEnabled')
+                ? existing.reminderEnabled
+                : legacyReminderOn,
+            reminderMinutes: decoded.containsKey('reminderMinutes')
+                ? existing.reminderMinutes
+                : legacyReminderMinutes,
+          );
+        } catch (e) {
+          debugPrint('Error migrating alarm settings for $prayer: $e');
+          migratedSettings = PrayerAlarmSettings(
+            prayerName: prayer,
+            alertMode: legacyNotificationsOn
+                ? PrayerAlarmSettings.modeNotification
+                : PrayerAlarmSettings.modeOff,
+            reminderEnabled: legacyReminderOn,
+            reminderMinutes: legacyReminderMinutes,
+          );
+        }
+      } else {
+        migratedSettings = PrayerAlarmSettings(
+          prayerName: prayer,
+          alertMode: legacyNotificationsOn
+              ? PrayerAlarmSettings.modeNotification
+              : PrayerAlarmSettings.modeOff,
+          reminderEnabled: legacyReminderOn,
+          reminderMinutes: legacyReminderMinutes,
+        );
+      }
+
+      await StorageManager.saveData(key, json.encode(migratedSettings.toJson()));
+    }
+
+    await StorageManager.saveData(_mergedAlertsMigratedKey, true);
+    alarmSettingsVersion.value++;
   }
 
   static Future<void> saveAlarmSettings(PrayerAlarmSettings settings) async {
@@ -245,6 +320,13 @@ class PrayerAlarmService {
       all[prayer] = await loadAlarmSettings(prayer);
     }
     return all;
+  }
+
+  static Future<void> cancelAllAlarms() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    for (final prayer in _alarmIds.keys) {
+      await cancelAlarm(prayer);
+    }
   }
 
   static Future<bool> isBatteryOptimizationIgnored() async {

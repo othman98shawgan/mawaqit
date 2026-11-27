@@ -1270,5 +1270,36 @@
    "mathuratVibrateOff": "Vibration off",
    "@mathuratVibrateOff": {
       "description": "Tooltip for vibration toggle button when vibration is disabled in Al-Ma'thurat page"
+   },
+   "prayerAlertsTitle": "Prayer Alerts",
+   "@prayerAlertsTitle": {
+      "description": "Unified title for prayer notifications and alarms"
+   },
+   "alertModeNotification": "Notification",
+   "@alertModeNotification": {
+      "description": "Short label for standard OS notification mode card"
+   },
+   "alertModeOff": "Off",
+   "@alertModeOff": {
+      "description": "Short label for disabled prayer alert mode card"
+   },
+   "prePrayerReminderLabel": "Pre-prayer reminder",
+   "@prePrayerReminderLabel": {
+      "description": "Stepper label for optional pre-prayer reminder notification"
+   },
+   "alertsMasterDisabledBanner": "Notifications are paused",
+   "@alertsMasterDisabledBanner": {
+      "description": "Banner shown inside prayer alerts modal when master alerts switch is off"
+   },
+   "alertsMasterEnableAction": "Enable",
+   "@alertsMasterEnableAction": {
+      "description": "Action label to re-enable master prayer alerts switch"
+   },
+   "alertNotifiesAt": "Notifies at {time}",
+   "@alertNotifiesAt": {
+      "description": "Shows prayer notification time in the modal preview",
+      "placeholders": {
+         "time": { "type": "String" }
+      }
    }
 }

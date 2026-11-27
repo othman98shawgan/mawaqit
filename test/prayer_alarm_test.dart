@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:alfajr/models/prayer_alarm.dart';
 import 'package:alfajr/services/prayer_alarm_service.dart';
@@ -161,6 +164,79 @@ void main() {
 
       expect(find.byType(AlarmRingingPage), findsNothing);
       expect(find.text('Open Alarm'), findsOneWidget);
+    });
+
+    test('alertMode and per-prayer reminder serialization + legacy compatibility', () {
+      final legacyAlarm = PrayerAlarmSettings.fromJson({
+        'prayerName': 'Fajr',
+        'isEnabled': true,
+        'offsetMinutes': -15,
+        'soundType': 'makkah',
+      });
+      expect(legacyAlarm.alertMode, PrayerAlarmSettings.modeAlarm);
+      expect(legacyAlarm.isAlarm, true);
+      expect(legacyAlarm.isEnabled, true);
+      expect(legacyAlarm.reminderEnabled, false);
+
+      final legacyOff = PrayerAlarmSettings.fromJson({
+        'prayerName': 'Duhr',
+        'isEnabled': false,
+      });
+      expect(legacyOff.alertMode, PrayerAlarmSettings.modeOff);
+      expect(legacyOff.isOff, true);
+      expect(legacyOff.isEnabled, false);
+
+      const notifWithReminder = PrayerAlarmSettings(
+        prayerName: 'Asr',
+        alertMode: PrayerAlarmSettings.modeNotification,
+        reminderEnabled: true,
+        reminderMinutes: 15,
+      );
+      expect(notifWithReminder.isNotification, true);
+      expect(notifWithReminder.isEnabled, false);
+      expect(notifWithReminder.isAlertActive, true);
+
+      final roundTripped = PrayerAlarmSettings.fromJson(notifWithReminder.toJson());
+      expect(roundTripped.alertMode, PrayerAlarmSettings.modeNotification);
+      expect(roundTripped.reminderEnabled, true);
+      expect(roundTripped.reminderMinutes, 15);
+    });
+
+    test('migrateLegacyAlertsIfNeeded preserves alarms, migrates notifications and reminders', () async {
+      SharedPreferences.setMockInitialValues({
+        'NotificationsStatus': true,
+        'ReminderStatus': true,
+        'Reminder': 15,
+        'PrayerAlarm_Fajr': json.encode({
+          'prayerName': 'Fajr',
+          'isEnabled': true,
+          'offsetMinutes': -10,
+          'soundType': 'makkah',
+          'snoozeMinutes': 5,
+          'vibrate': true,
+        }),
+      });
+
+      await PrayerAlarmService.migrateLegacyAlertsIfNeeded();
+      final all = await PrayerAlarmService.loadAllAlarmSettings();
+
+      expect(all['Fajr']!.alertMode, PrayerAlarmSettings.modeAlarm);
+      expect(all['Fajr']!.soundType, 'makkah');
+      expect(all['Fajr']!.offsetMinutes, -10);
+      expect(all['Fajr']!.reminderEnabled, true);
+      expect(all['Fajr']!.reminderMinutes, 15);
+
+      expect(all['Duhr']!.alertMode, PrayerAlarmSettings.modeNotification);
+      expect(all['Duhr']!.reminderEnabled, true);
+      expect(all['Duhr']!.reminderMinutes, 15);
+
+      // Idempotent on subsequent call even if user later changes a prayer to off
+      await PrayerAlarmService.saveAlarmSettings(
+        all['Duhr']!.copyWith(alertMode: PrayerAlarmSettings.modeOff),
+      );
+      await PrayerAlarmService.migrateLegacyAlertsIfNeeded();
+      final duhrAfter = await PrayerAlarmService.loadAlarmSettings('Duhr');
+      expect(duhrAfter.alertMode, PrayerAlarmSettings.modeOff);
     });
   });
 }

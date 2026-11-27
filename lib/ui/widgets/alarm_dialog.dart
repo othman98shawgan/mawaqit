@@ -14,6 +14,7 @@ import '../../resources/colors.dart';
 import '../../services/day_of_year_service.dart';
 import '../../services/daylight_time_service.dart';
 import '../../services/locale_service.dart';
+import '../../services/notifications_service.dart';
 import '../../services/prayer_alarm_service.dart';
 import '../../services/prayer_methods.dart';
 import '../../services/store_manager.dart';
@@ -22,6 +23,7 @@ Future<void> showAlarmBottomSheet(
   BuildContext context, {
   required String initialPrayerName,
   VoidCallback? onSaved,
+  VoidCallback? onRescheduleNotifications,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -30,6 +32,7 @@ Future<void> showAlarmBottomSheet(
     builder: (sheetContext) => AlarmBottomSheet(
       initialPrayerName: initialPrayerName,
       onSaved: onSaved,
+      onRescheduleNotifications: onRescheduleNotifications,
     ),
   );
 }
@@ -37,11 +40,13 @@ Future<void> showAlarmBottomSheet(
 class AlarmBottomSheet extends StatefulWidget {
   final String initialPrayerName;
   final VoidCallback? onSaved;
+  final VoidCallback? onRescheduleNotifications;
 
   const AlarmBottomSheet({
     super.key,
     required this.initialPrayerName,
     this.onSaved,
+    this.onRescheduleNotifications,
   });
 
   @override
@@ -50,7 +55,7 @@ class AlarmBottomSheet extends StatefulWidget {
 
 class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBindingObserver {
   static const List<String> _prayers = ['Fajr', 'Shuruq', 'Duhr', 'Asr', 'Maghrib', 'Isha'];
-  static const List<String> _adhanOptions = [
+  static const List<String> _alarmSoundOptions = [
     'alaqsa',
     'makkah',
     'madina',
@@ -58,8 +63,12 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
     'minshawi',
     'hussary',
     'nafees',
+    'system',
+    'silent',
   ];
   static const List<int> _snoozeOptions = [0, 5, 10, 15];
+
+  bool get _isAndroid => !kIsWeb && Platform.isAndroid;
 
   late String _selectedPrayer;
   Map<String, PrayerAlarmSettings> _allSettings = {};
@@ -89,10 +98,19 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    final hadPendingReschedule = _rescheduleDebounce?.isActive ?? false;
     _rescheduleDebounce?.cancel();
     _appliedBannerTimer?.cancel();
     if (_previewingSound != null) {
       PrayerAlarmService.stopPreviewAudio();
+    }
+    if (hadPendingReschedule) {
+      final rescheduleCallback = widget.onRescheduleNotifications ?? PrayerAlarmService.onRescheduleNotifications;
+      if (rescheduleCallback != null) {
+        rescheduleCallback();
+      } else if (_isAndroid) {
+        PrayerAlarmService.scheduleUpcomingAlarms();
+      }
     }
     super.dispose();
   }
@@ -105,6 +123,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
   }
 
   Future<void> _loadAll() async {
+    await PrayerAlarmService.migrateLegacyAlertsIfNeeded();
     final loaded = await PrayerAlarmService.loadAllAlarmSettings();
     final ignored = await PrayerAlarmService.isBatteryOptimizationIgnored();
     final fullScreen = await PrayerAlarmService.canUseFullScreenIntent();
@@ -130,7 +149,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
 
     if (!mounted) return;
     for (final entry in loaded.entries) {
-      if (_adhanOptions.contains(entry.value.soundType)) {
+      if (_alarmSoundOptions.contains(entry.value.soundType)) {
         _lastAdhanByPrayer[entry.key] = entry.value.soundType;
       }
     }
@@ -169,12 +188,26 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
   }
 
   PrayerAlarmSettings get _current =>
-      _allSettings[_selectedPrayer] ?? PrayerAlarmSettings(prayerName: _selectedPrayer);
+      _allSettings[_selectedPrayer] ??
+      PrayerAlarmSettings(
+        prayerName: _selectedPrayer,
+        alertMode: PrayerAlarmSettings.modeNotification,
+      );
 
-  bool _isAdhanMode(PrayerAlarmSettings s) => s.isEnabled && _adhanOptions.contains(s.soundType);
+  bool _isAlarmMode(PrayerAlarmSettings s) => _isAndroid && s.isAlarm;
 
-  bool _isDefaultMode(PrayerAlarmSettings s) =>
-      s.isEnabled && (s.soundType == 'system' || s.soundType == 'silent');
+  bool _isNotificationMode(PrayerAlarmSettings s) =>
+      s.isNotification || (!_isAndroid && s.isAlarm);
+
+  bool _isOffMode(PrayerAlarmSettings s) => s.isOff;
+
+  NotificationsStatusNotifier? _maybeNotificationsNotifier(BuildContext context, {bool listen = false}) {
+    try {
+      return Provider.of<NotificationsStatusNotifier>(context, listen: listen);
+    } catch (_) {
+      return null;
+    }
+  }
 
   String _getSoundTitle(String soundKey, AppLocalizations l10n) {
     switch (soundKey) {
@@ -202,22 +235,35 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
   }
 
   Future<void> _updateCurrent(PrayerAlarmSettings updated, {bool checkPermissions = false}) async {
-    if (_adhanOptions.contains(updated.soundType)) {
+    if (_alarmSoundOptions.contains(updated.soundType)) {
       _lastAdhanByPrayer[_selectedPrayer] = updated.soundType;
     }
-    if (_previewingSound != null && (!updated.isEnabled || !_adhanOptions.contains(updated.soundType))) {
+    if (_previewingSound != null && (!updated.isAlarm || updated.soundType == 'silent')) {
       await _stopPreviewAudio();
     }
+    if (!mounted) return;
     setState(() {
       _allSettings[_selectedPrayer] = updated;
     });
 
+    final needsMasterNotifications =
+        _isNotificationMode(updated) || (updated.isAlertActive && updated.reminderEnabled);
+    if (needsMasterNotifications) {
+      final notifNotifier = _maybeNotificationsNotifier(context);
+      if (notifNotifier != null && !notifNotifier.getNotificationsStatus()) {
+        notifNotifier.setNotificationsOn();
+      }
+      if (checkPermissions && notifNotifier != null && _isNotificationMode(updated)) {
+        notifNotifier.requestNotification();
+      }
+    }
+
     await PrayerAlarmService.saveAlarmSettings(updated);
-    if (!kIsWeb && Platform.isAndroid && !updated.isEnabled) {
+    if (_isAndroid && !updated.isAlarm) {
       await PrayerAlarmService.cancelAlarm(_selectedPrayer);
     }
 
-    if (checkPermissions && updated.isEnabled && !kIsWeb && Platform.isAndroid) {
+    if (checkPermissions && updated.isAlarm && _isAndroid) {
       await _promptPermissionsIfNeeded();
     }
 
@@ -281,7 +327,13 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
   }
 
   Future<void> _rescheduleAllAlarms() async {
-    if (!mounted || kIsWeb || !Platform.isAndroid) return;
+    if (!mounted) return;
+    final rescheduleCallback = widget.onRescheduleNotifications ?? PrayerAlarmService.onRescheduleNotifications;
+    if (rescheduleCallback != null) {
+      rescheduleCallback();
+      return;
+    }
+    if (!_isAndroid) return;
     final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
     final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
     final localizedTitles = getLocalizedPrayerAlarmTitles(context);
@@ -308,6 +360,13 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
       _showAppliedBanner = true;
     });
 
+    if (_isNotificationMode(template) || (template.isAlertActive && template.reminderEnabled)) {
+      final notifNotifier = _maybeNotificationsNotifier(context);
+      if (notifNotifier != null && !notifNotifier.getNotificationsStatus()) {
+        notifNotifier.setNotificationsOn();
+      }
+    }
+
     _appliedBannerTimer?.cancel();
     _appliedBannerTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _showAppliedBanner = false);
@@ -317,11 +376,11 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
       await PrayerAlarmService.saveAlarmSettings(settings);
     }
 
-    if (!kIsWeb && Platform.isAndroid && !template.isEnabled) {
+    if (_isAndroid && !template.isAlarm) {
       for (final prayer in _prayers) {
         await PrayerAlarmService.cancelAlarm(prayer);
       }
-    } else if (template.isEnabled && !kIsWeb && Platform.isAndroid) {
+    } else if (template.isAlarm && _isAndroid) {
       await _promptPermissionsIfNeeded();
     }
 
@@ -343,6 +402,16 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
     _updateCurrent(_current.copyWith(snoozeMinutes: _snoozeOptions[nextIdx]));
   }
 
+  void _stepReminder(int deltaMinutes) {
+    final currentMinutes = _current.reminderEnabled ? _current.reminderMinutes : 0;
+    final nextMinutes = (currentMinutes + deltaMinutes).clamp(0, 60);
+    if (nextMinutes == 0) {
+      _updateCurrent(_current.copyWith(reminderEnabled: false));
+    } else {
+      _updateCurrent(_current.copyWith(reminderEnabled: true, reminderMinutes: nextMinutes));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -350,6 +419,8 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
     final isDark = theme.brightness == Brightness.dark;
     final localeNotifier = Provider.of<LocaleNotifier>(context, listen: false);
     final textDirection = localeNotifier.getTextDirection(localeNotifier.locale);
+    final notifNotifier = _maybeNotificationsNotifier(context, listen: true);
+    final masterEnabled = notifNotifier?.getNotificationsStatus() ?? true;
 
     final sheetBg = isDark ? const Color(0xFF1A2026) : const Color(0xFFFDFCF9);
     final cardBg = isDark ? const Color(0xFF242B33) : const Color(0xFFF3F1EC);
@@ -393,7 +464,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                     const SizedBox(width: 36),
                     Expanded(
                       child: Text(
-                        l10n.alarmSection,
+                        l10n.prayerAlertsTitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -425,6 +496,53 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                     child: Center(child: CircularProgressIndicator()),
                   )
                 else ...[
+                  // Master notifications paused banner (shown when notification or reminder is selected)
+                  if (!masterEnabled &&
+                      notifNotifier != null &&
+                      (_isNotificationMode(_current) || (_current.isAlertActive && _current.reminderEnabled))) ...[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: isDark ? 0.18 : 0.15),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.notifications_off_outlined, size: 18, color: Colors.amber.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.alertsMasterDisabledBanner,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: textPrimary,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: primaryAccent,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              notifNotifier.setNotificationsOn();
+                              notifNotifier.requestNotification();
+                              _scheduleDebouncedReschedule();
+                            },
+                            child: Text(
+                              l10n.alertsMasterEnableAction,
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
                   // Horizontal Prayer Tabs
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -432,7 +550,9 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                       children: _prayers.map((prayer) {
                         final isSelected = prayer == _selectedPrayer;
                         final prayerSettings = _allSettings[prayer];
-                        final hasAlarm = prayerSettings?.isEnabled ?? false;
+                        final isActive = prayerSettings != null &&
+                            (_isAlarmMode(prayerSettings) ||
+                                (masterEnabled && _isNotificationMode(prayerSettings)));
 
                         return Padding(
                           key: _tabKeys[prayer],
@@ -460,7 +580,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                                       color: isSelected ? Colors.white : textSecondary,
                                     ),
                                   ),
-                                  if (hasAlarm && !isSelected) ...[
+                                  if (isActive && !isSelected) ...[
                                     const SizedBox(width: 5),
                                     Container(
                                       width: 6,
@@ -481,13 +601,25 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                   ),
                   const SizedBox(height: 10),
 
-                  // Exact prayer & alarm ring time preview
+                  // Exact prayer & alert time preview
                   if (_todayPrayerTimes.containsKey(_selectedPrayer)) ...[
                     Builder(builder: (context) {
                       final prayerDt = _todayPrayerTimes[_selectedPrayer]!;
                       final prayerTimeStr = DateFormat('HH:mm').format(prayerDt);
                       final ringDt = prayerDt.add(Duration(minutes: _current.offsetMinutes));
                       final ringTimeStr = DateFormat('HH:mm').format(ringDt);
+                      final String previewText;
+                      if (_isAlarmMode(_current)) {
+                        previewText =
+                            '${getPrayerTranslation(_selectedPrayer, context)} $prayerTimeStr  •  ${l10n.alarmRingsAt(ringTimeStr)}';
+                      } else if (masterEnabled && _isNotificationMode(_current)) {
+                        previewText =
+                            '${getPrayerTranslation(_selectedPrayer, context)} $prayerTimeStr  •  ${l10n.alertNotifiesAt(prayerTimeStr)}';
+                      } else {
+                        previewText = '${getPrayerTranslation(_selectedPrayer, context)} $prayerTimeStr';
+                      }
+                      final isHighlighted =
+                          _isAlarmMode(_current) || (masterEnabled && _isNotificationMode(_current));
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Row(
@@ -496,13 +628,11 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                             Icon(Icons.access_time, size: 14, color: textSecondary),
                             const SizedBox(width: 5),
                             Text(
-                              _current.isEnabled
-                                  ? '${getPrayerTranslation(_selectedPrayer, context)} $prayerTimeStr  •  ${l10n.alarmRingsAt(ringTimeStr)}'
-                                  : '${getPrayerTranslation(_selectedPrayer, context)} $prayerTimeStr',
+                              previewText,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: _current.isEnabled ? primaryAccent : textSecondary,
+                                color: isHighlighted ? primaryAccent : textSecondary,
                               ),
                             ),
                           ],
@@ -512,8 +642,8 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                   ] else
                     const SizedBox(height: 4),
 
-                  // Full-screen intent permission card (Android 14+ when not granted)
-                  if (!kIsWeb && Platform.isAndroid && !_fullScreenIntentGranted) ...[
+                  // Full-screen intent permission card (Android 14+ when not granted & Adhan alarm mode)
+                  if (_isAndroid && !_fullScreenIntentGranted && _isAlarmMode(_current)) ...[
                     _buildInfoBannerCard(
                       cardBg: cardBg,
                       icon: Icons.screen_lock_portrait,
@@ -530,7 +660,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                     const SizedBox(height: 12),
                   ],
 
-                  // 3-Card Mode Selector Container
+                  // Mode Selector Container (Adhan / Notification / Off on Android; Notification / Off on iOS & Windows)
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -541,37 +671,42 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                       children: [
                         Row(
                           children: [
-                            Expanded(
-                              child: _buildModeCard(
-                                label: l10n.alarmModeAdhan,
-                                icon: Icons.mosque_outlined,
-                                isSelected: _isAdhanMode(_current),
-                                primaryAccent: primaryAccent,
-                                inactiveBg: innerTileBg,
-                                textPrimary: textPrimary,
-                                textSecondary: textSecondary,
-                                onTap: () {
-                                  final lastAdhan = _lastAdhanByPrayer[_selectedPrayer] ?? 'alaqsa';
-                                  _updateCurrent(
-                                    _current.copyWith(isEnabled: true, soundType: lastAdhan),
-                                    checkPermissions: true,
-                                  );
-                                },
+                            if (_isAndroid) ...[
+                              Expanded(
+                                child: _buildModeCard(
+                                  label: l10n.alarmModeAdhan,
+                                  icon: Icons.mosque_outlined,
+                                  isSelected: _isAlarmMode(_current),
+                                  primaryAccent: primaryAccent,
+                                  inactiveBg: innerTileBg,
+                                  textPrimary: textPrimary,
+                                  textSecondary: textSecondary,
+                                  onTap: () {
+                                    final lastAdhan = _lastAdhanByPrayer[_selectedPrayer] ?? 'alaqsa';
+                                    _updateCurrent(
+                                      _current.copyWith(
+                                        alertMode: PrayerAlarmSettings.modeAlarm,
+                                        soundType: lastAdhan,
+                                      ),
+                                      checkPermissions: true,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
+                              const SizedBox(width: 8),
+                            ],
                             Expanded(
                               child: _buildModeCard(
-                                label: l10n.alarmModeDefault,
+                                label: l10n.alertModeNotification,
                                 icon: Icons.notifications_none,
-                                isSelected: _isDefaultMode(_current),
+                                isSelected: _isNotificationMode(_current),
                                 primaryAccent: primaryAccent,
                                 inactiveBg: innerTileBg,
                                 textPrimary: textPrimary,
                                 textSecondary: textSecondary,
                                 onTap: () {
                                   _updateCurrent(
-                                    _current.copyWith(isEnabled: true, soundType: 'system'),
+                                    _current.copyWith(alertMode: PrayerAlarmSettings.modeNotification),
                                     checkPermissions: true,
                                   );
                                 },
@@ -580,29 +715,31 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                             const SizedBox(width: 8),
                             Expanded(
                               child: _buildModeCard(
-                                label: l10n.alarmModeSilent,
+                                label: l10n.alertModeOff,
                                 icon: Icons.notifications_off_outlined,
-                                isSelected: !_current.isEnabled,
+                                isSelected: _isOffMode(_current),
                                 primaryAccent: primaryAccent,
                                 inactiveBg: innerTileBg,
                                 textPrimary: textPrimary,
                                 textSecondary: textSecondary,
                                 onTap: () {
-                                  _updateCurrent(_current.copyWith(isEnabled: false));
+                                  _updateCurrent(
+                                    _current.copyWith(alertMode: PrayerAlarmSettings.modeOff),
+                                  );
                                 },
                               ),
                             ),
                           ],
                         ),
 
-                        // Muezzin selector + audio preview when Adhan mode is active
-                        if (_isAdhanMode(_current)) ...[
+                        // Muezzin / alarm sound selector + audio preview when Adhan (Alarm) mode is active
+                        if (_isAlarmMode(_current)) ...[
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
                                 child: DropdownMenu<String>(
-                                  initialSelection: _adhanOptions.contains(_current.soundType)
+                                  initialSelection: _alarmSoundOptions.contains(_current.soundType)
                                       ? _current.soundType
                                       : 'alaqsa',
                                   expandedInsets: EdgeInsets.zero,
@@ -628,7 +765,7 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                                       isDark ? const Color(0xFF2B343E) : Colors.white,
                                     ),
                                   ),
-                                  dropdownMenuEntries: _adhanOptions.map((sound) {
+                                  dropdownMenuEntries: _alarmSoundOptions.map((sound) {
                                     return DropdownMenuEntry<String>(
                                       value: sound,
                                       label: _getSoundTitle(sound, l10n),
@@ -637,78 +774,42 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                                   onSelected: (val) async {
                                     if (val != null) {
                                       final wasPreviewing = _previewingSound != null;
-                                      await _updateCurrent(_current.copyWith(isEnabled: true, soundType: val));
-                                      if (wasPreviewing) {
+                                      await _updateCurrent(
+                                        _current.copyWith(
+                                          alertMode: PrayerAlarmSettings.modeAlarm,
+                                          soundType: val,
+                                        ),
+                                      );
+                                      if (wasPreviewing && val != 'silent') {
                                         await _togglePreviewAudio(val);
                                       }
                                     }
                                   },
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Material(
-                                color: _previewingSound == _current.soundType ? primaryAccent : innerTileBg,
-                                borderRadius: BorderRadius.circular(14),
-                                child: InkWell(
+                              if (_current.soundType != 'silent') ...[
+                                const SizedBox(width: 8),
+                                Material(
+                                  color: _previewingSound == _current.soundType ? primaryAccent : innerTileBg,
                                   borderRadius: BorderRadius.circular(14),
-                                  onTap: () => _togglePreviewAudio(_current.soundType),
-                                  child: SizedBox(
-                                    width: 48,
-                                    height: 48,
-                                    child: Icon(
-                                      _previewingSound == _current.soundType
-                                          ? Icons.stop_rounded
-                                          : Icons.play_arrow_rounded,
-                                      color: _previewingSound == _current.soundType ? Colors.white : primaryAccent,
-                                      size: 26,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(14),
+                                    onTap: () => _togglePreviewAudio(_current.soundType),
+                                    child: SizedBox(
+                                      width: 48,
+                                      height: 48,
+                                      child: Icon(
+                                        _previewingSound == _current.soundType
+                                            ? Icons.stop_rounded
+                                            : Icons.play_arrow_rounded,
+                                        color: _previewingSound == _current.soundType ? Colors.white : primaryAccent,
+                                        size: 26,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-
-                        // Vibrate-only toggle when Default mode is active
-                        if (_isDefaultMode(_current)) ...[
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: innerTileBg,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.vibration, size: 18, color: textSecondary),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      l10n.alarmVibrateOnly,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Switch.adaptive(
-                                  value: _current.soundType == 'silent',
-                                  activeTrackColor: primaryAccent,
-                                  onChanged: (vibrateOnly) {
-                                    _updateCurrent(
-                                      _current.copyWith(
-                                        isEnabled: true,
-                                        soundType: vibrateOnly ? 'silent' : 'system',
-                                      ),
-                                    );
-                                  },
-                                ),
                               ],
-                            ),
+                            ],
                           ),
                         ],
                       ],
@@ -716,52 +817,69 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                   ),
                   const SizedBox(height: 16),
 
-                  // Pre-prayer offset & Snooze steppers
+                  // Timing, Snooze & Pre-prayer Reminder steppers
                   Opacity(
-                    opacity: _current.isEnabled ? 1.0 : 0.45,
+                    opacity: !_isOffMode(_current) ? 1.0 : 0.45,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
-                          child: Text(
-                            l10n.alarmBeforePrayerSection,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: textSecondary,
+                        if (_isAlarmMode(_current)) ...[
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
+                            child: Text(
+                              l10n.alarmBeforePrayerSection,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: textSecondary,
+                              ),
                             ),
                           ),
-                        ),
+                          _buildStepperRow(
+                            cardBg: cardBg,
+                            softAccent: softAccent,
+                            primaryAccent: primaryAccent,
+                            textPrimary: textPrimary,
+                            label: l10n.alarmBeforeLabel,
+                            valueText: _current.offsetMinutes == 0
+                                ? l10n.alarmNoPreAlert
+                                : l10n.alarmMinutesValue(_current.offsetMinutes.abs()),
+                            canDecrement: _current.offsetMinutes.abs() > 0,
+                            canIncrement: _current.offsetMinutes.abs() < 60,
+                            onDecrement: () => _stepOffset(-5),
+                            onIncrement: () => _stepOffset(5),
+                          ),
+                          const SizedBox(height: 10),
+                          _buildStepperRow(
+                            cardBg: cardBg,
+                            softAccent: softAccent,
+                            primaryAccent: primaryAccent,
+                            textPrimary: textPrimary,
+                            label: l10n.alarmSnoozeDuration,
+                            valueText: _current.snoozeMinutes <= 0
+                                ? l10n.alarmSnoozeOff
+                                : l10n.alarmMinutesValue(_current.snoozeMinutes),
+                            canDecrement: _snoozeOptions.indexOf(_current.snoozeMinutes) > 0,
+                            canIncrement: _snoozeOptions.indexOf(_current.snoozeMinutes) < _snoozeOptions.length - 1,
+                            onDecrement: () => _stepSnooze(-1),
+                            onIncrement: () => _stepSnooze(1),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
                         _buildStepperRow(
                           cardBg: cardBg,
                           softAccent: softAccent,
                           primaryAccent: primaryAccent,
                           textPrimary: textPrimary,
-                          label: l10n.alarmBeforeLabel,
-                          valueText: _current.offsetMinutes == 0
-                              ? l10n.alarmNoPreAlert
-                              : l10n.alarmMinutesValue(_current.offsetMinutes.abs()),
-                          canDecrement: _current.isEnabled && _current.offsetMinutes.abs() > 0,
-                          canIncrement: _current.isEnabled && _current.offsetMinutes.abs() < 60,
-                          onDecrement: () => _stepOffset(-5),
-                          onIncrement: () => _stepOffset(5),
-                        ),
-                        const SizedBox(height: 10),
-                        _buildStepperRow(
-                          cardBg: cardBg,
-                          softAccent: softAccent,
-                          primaryAccent: primaryAccent,
-                          textPrimary: textPrimary,
-                          label: l10n.alarmSnoozeDuration,
-                          valueText: _current.snoozeMinutes <= 0
+                          label: l10n.prePrayerReminderLabel,
+                          valueText: !_current.reminderEnabled || _current.reminderMinutes <= 0
                               ? l10n.alarmSnoozeOff
-                              : l10n.alarmMinutesValue(_current.snoozeMinutes),
-                          canDecrement: _current.isEnabled && _snoozeOptions.indexOf(_current.snoozeMinutes) > 0,
-                          canIncrement: _current.isEnabled &&
-                              _snoozeOptions.indexOf(_current.snoozeMinutes) < _snoozeOptions.length - 1,
-                          onDecrement: () => _stepSnooze(-1),
-                          onIncrement: () => _stepSnooze(1),
+                              : l10n.alarmMinutesValue(_current.reminderMinutes),
+                          canDecrement: !_isOffMode(_current) && _current.reminderEnabled && _current.reminderMinutes > 0,
+                          canIncrement: !_isOffMode(_current) &&
+                              (!_current.reminderEnabled || _current.reminderMinutes < 60),
+                          onDecrement: () => _stepReminder(-5),
+                          onIncrement: () => _stepReminder(5),
                         ),
                       ],
                     ),
@@ -783,9 +901,9 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                             Icon(
                               _showAppliedBanner
                                   ? Icons.check_circle_outline
-                                  : (!_current.isEnabled
+                                  : (_isOffMode(_current)
                                       ? Icons.notifications_off_outlined
-                                      : (_isAdhanMode(_current)
+                                      : (_isAlarmMode(_current)
                                           ? Icons.mosque_outlined
                                           : Icons.notifications_none)),
                               size: 20,
@@ -806,8 +924,8 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                     ),
                   ),
 
-                  // Dev-mode quick test button
-                  if (_isDevMode && _current.isEnabled && !kIsWeb && Platform.isAndroid) ...[
+                  // Dev-mode quick test button (Android Adhan alarm mode)
+                  if (_isDevMode && _isAlarmMode(_current) && _isAndroid) ...[
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
@@ -825,8 +943,8 @@ class _AlarmBottomSheetState extends State<AlarmBottomSheet> with WidgetsBinding
                     ),
                   ],
 
-                  // Battery optimization troubleshooting card (Android only when not exempted)
-                  if (!kIsWeb && Platform.isAndroid && !_batteryOptimizationIgnored) ...[
+                  // Battery optimization troubleshooting card (Android only when not exempted & Adhan mode)
+                  if (_isAndroid && !_batteryOptimizationIgnored && _isAlarmMode(_current)) ...[
                     const SizedBox(height: 14),
                     _buildInfoBannerCard(
                       cardBg: cardBg,
