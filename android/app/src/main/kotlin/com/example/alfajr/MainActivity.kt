@@ -129,6 +129,12 @@ class MainActivity : FlutterActivity() {
                 methodChannel?.invokeMethod("onAlarmSnoozed", prayerName)
             }
         }
+        AlarmController.onAlarmAutoStoppedCallback = { prayerName ->
+            runOnUiThread {
+                clearScreenWakeFlags()
+                methodChannel?.invokeMethod("onAlarmAutoStopped", prayerName)
+            }
+        }
         AlarmController.onAlarmStoppedCallback = {
             runOnUiThread {
                 clearScreenWakeFlags()
@@ -380,6 +386,9 @@ class MainActivity : FlutterActivity() {
         }
         if (AlarmController.onAlarmSnoozedCallback != null) {
             AlarmController.onAlarmSnoozedCallback = null
+        }
+        if (AlarmController.onAlarmAutoStoppedCallback != null) {
+            AlarmController.onAlarmAutoStoppedCallback = null
         }
         if (AlarmController.onAlarmStoppedCallback != null) {
             AlarmController.onAlarmStoppedCallback = null

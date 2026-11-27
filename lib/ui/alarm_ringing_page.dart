@@ -32,9 +32,11 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   bool _isDismissed = false;
+  bool _wasAutoStopped = false;
   String? _soundType;
   int? _offsetMinutes;
   StreamSubscription<String?>? _snoozeSub;
+  StreamSubscription<String?>? _autoStopSub;
 
   @override
   void initState() {
@@ -50,6 +52,15 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
         Navigator.of(context).pop();
       }
     });
+
+    if (!widget.isAutoStopped) {
+      _autoStopSub = PrayerAlarmService.onNativeAlarmAutoStopped.listen((prayer) {
+        if (mounted) {
+          _wasAutoStopped = true;
+          Navigator.of(context).pop();
+        }
+      });
+    }
 
     if (widget.isAutoStopped) {
       // Auto-stopped alarm reopened from notification bar: never play audio.
@@ -84,7 +95,10 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   @override
   void dispose() {
     _snoozeSub?.cancel();
-    PrayerAlarmService.stopAlarmAudio();
+    _autoStopSub?.cancel();
+    if (!_wasAutoStopped && !widget.isAutoStopped) {
+      PrayerAlarmService.stopAlarmAudio();
+    }
     _pulseController.dispose();
     super.dispose();
   }

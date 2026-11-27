@@ -56,6 +56,7 @@ object AlarmController {
     var pendingAlarmPayload: String? = null
     var onAlarmTriggeredCallback: ((String) -> Unit)? = null
     var onAlarmSnoozedCallback: ((String) -> Unit)? = null
+    var onAlarmAutoStoppedCallback: ((String) -> Unit)? = null
     var onAlarmStoppedCallback: (() -> Unit)? = null
 
     fun startAlarm(
@@ -164,7 +165,9 @@ object AlarmController {
         currentActiveAlarm = null
         isSnoozing = false
         unregisterScreenOffReceiver(appContext)
+        removeAlarmFromPrefs(appContext, active.id)
         onAlarmStoppedCallback?.invoke()
+        onAlarmAutoStoppedCallback?.invoke(active.prayerName)
 
         // Keep a dismissible silent notification in the notification bar;
         // tapping it reopens the alarm UI silently without playing sound.

@@ -120,5 +120,47 @@ void main() {
       expect(find.text(l10n.alarmSnooze), findsOneWidget);
       expect(find.text(l10n.alarmDismiss), findsOneWidget);
     });
+
+    testWidgets('AlarmRingingPage pops automatically when onNativeAlarmAutoStopped emits',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AlarmRingingPage(
+                        prayerName: 'Fajr',
+                        soundType: 'alaqsa',
+                        snoozeMinutes: 10,
+                        offsetMinutes: 0,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Open Alarm'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Alarm'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byType(AlarmRingingPage), findsOneWidget);
+
+      PrayerAlarmService.onNativeAlarmAutoStopped.add('Fajr');
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlarmRingingPage), findsNothing);
+      expect(find.text('Open Alarm'), findsOneWidget);
+    });
   });
 }
