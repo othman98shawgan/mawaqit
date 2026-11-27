@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:alfajr/l10n/app_localizations.dart';
 import 'package:alfajr/models/prayer_alarm.dart';
 import 'package:alfajr/services/prayer_alarm_service.dart';
+import 'package:alfajr/ui/alarm_ringing_page.dart';
 
 void main() {
   group('PrayerAlarmSettings tests', () {
@@ -92,6 +95,30 @@ void main() {
         final target = prayerTime.add(Duration(minutes: settings.offsetMinutes));
         expect(target, equals(prayerTime.subtract(Duration(minutes: minutes))));
       }
+    });
+
+    testWidgets('AlarmRingingPage renders in silent mode when isAutoStopped is true', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
+          home: AlarmRingingPage(
+            prayerName: 'Fajr',
+            soundType: 'alaqsa',
+            snoozeMinutes: 10,
+            offsetMinutes: 0,
+            isAutoStopped: true,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final l10n = AppLocalizations.of(tester.element(find.byType(AlarmRingingPage)))!;
+      expect(find.text(l10n.soundSilent), findsOneWidget);
+      expect(find.byIcon(Icons.vibration), findsWidgets);
+      expect(find.text(l10n.alarmSnooze), findsOneWidget);
+      expect(find.text(l10n.alarmDismiss), findsOneWidget);
     });
   });
 }

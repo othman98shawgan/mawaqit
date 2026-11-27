@@ -13,6 +13,8 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -34,6 +36,10 @@ data class ActiveAlarmInfo(
 )
 
 object AlarmController {
+    private const val AUTO_STOP_TIMEOUT_MS = 5 * 60 * 1000L // 5 minutes
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var autoStopRunnable: Runnable? = null
+
     private var mediaPlayer: MediaPlayer? = null
     private var previewPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
@@ -127,6 +133,56 @@ object AlarmController {
 
         // 5. Notify Flutter if engine is already alive
         onAlarmTriggeredCallback?.invoke(payload)
+
+        // 6. Auto-stop alarm after timeout if never dismissed or snoozed
+        scheduleAutoStopTimer(appContext, id)
+    }
+
+    private fun scheduleAutoStopTimer(context: Context, alarmId: Int) {
+        cancelAutoStopTimer()
+        val appContext = context.applicationContext
+        val runnable = Runnable {
+            autoStopAlarm(appContext, expectedId = alarmId)
+        }
+        autoStopRunnable = runnable
+        mainHandler.postDelayed(runnable, AUTO_STOP_TIMEOUT_MS)
+    }
+
+    private fun cancelAutoStopTimer() {
+        autoStopRunnable?.let { mainHandler.removeCallbacks(it) }
+        autoStopRunnable = null
+    }
+
+    fun autoStopAlarm(context: Context, expectedId: Int? = null) {
+        val active = currentActiveAlarm ?: return
+        if (expectedId != null && active.id != expectedId) return
+
+        val appContext = context.applicationContext
+        cancelAutoStopTimer()
+        stopAudioOnly(appContext)
+        pendingAlarmPayload = null
+        currentActiveAlarm = null
+        isSnoozing = false
+        unregisterScreenOffReceiver(appContext)
+        onAlarmStoppedCallback?.invoke()
+
+        // Keep a dismissible silent notification in the notification bar;
+        // tapping it reopens the alarm UI silently without playing sound.
+        val silentPayload = "alarm|${active.prayerName}|silent|${active.snoozeMinutes}|${active.offsetMinutes}|auto_stopped"
+        showAlarmNotification(
+            context = appContext,
+            id = active.id,
+            prayerName = active.prayerName,
+            soundName = "silent",
+            title = active.title,
+            body = active.body,
+            dismissLabel = active.dismissLabel,
+            snoozeLabel = active.snoozeLabel,
+            snoozeMinutes = active.snoozeMinutes,
+            payload = silentPayload,
+            ongoing = false,
+            fullScreen = false
+        )
     }
 
     private fun acquireWakeLock(context: Context) {
@@ -322,6 +378,7 @@ object AlarmController {
 
     fun stopAlarm(context: Context, id: Int? = null) {
         val appContext = context.applicationContext
+        cancelAutoStopTimer()
         stopAudioOnly(appContext)
         pendingAlarmPayload = null
         currentActiveAlarm = null
@@ -460,7 +517,9 @@ object AlarmController {
         dismissLabel: String,
         snoozeLabel: String,
         snoozeMinutes: Int,
-        payload: String
+        payload: String,
+        ongoing: Boolean = true,
+        fullScreen: Boolean = true
     ) {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "mawaqit_native_alarm_silent_v3"
@@ -487,6 +546,7 @@ object AlarmController {
                     Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("payload", payload)
             putExtra("alarm_id", id)
+            putExtra("silent_reopen", !ongoing)
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
             context,
@@ -517,12 +577,15 @@ object AlarmController {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setOngoing(true)
-            .setAutoCancel(false)
+            .setOngoing(ongoing)
+            .setAutoCancel(!ongoing)
             .setSilent(true)
             .setContentIntent(fullScreenPendingIntent)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
             .addAction(0, dismissLabel, dismissPendingIntent)
+
+        if (fullScreen) {
+            builder.setFullScreenIntent(fullScreenPendingIntent, true)
+        }
 
         if (snoozeMinutes > 0) {
             val snoozeIntent = Intent(context, MawaqitAlarmReceiver::class.java).apply {

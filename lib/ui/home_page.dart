@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     final sound = parts.length >= 3 ? parts[2] : null;
     final snoozeMinutes = parts.length >= 4 ? int.tryParse(parts[3]) : null;
     final offsetMinutes = parts.length >= 5 ? int.tryParse(parts[4]) : null;
+    final isAutoStopped = parts.length >= 6 && parts[5] == 'auto_stopped';
 
     _isAlarmRingingOpen = true;
     Navigator.of(context)
@@ -78,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           soundType: sound,
           snoozeMinutes: snoozeMinutes,
           offsetMinutes: offsetMinutes,
+          isAutoStopped: isAutoStopped,
         ),
         fullscreenDialog: true,
       ),

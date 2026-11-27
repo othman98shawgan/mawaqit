@@ -29,3 +29,4 @@ When preparing a Pull Request reminder, always format the PR Description inside 
 - [x] feat: add vibrate toggle icon in Al-Ma'thurat page to control haptic feedback
 - [x] fix: optimize app startup by caching prayer JSON and removing duplicate audio assets
 - [x] feat: add swipe navigation between days in Calendar view using PageController
+- [x] fix: auto-stop unstopped prayer alarms after 5 minutes and prevent re-ringing on app launch (#220)
