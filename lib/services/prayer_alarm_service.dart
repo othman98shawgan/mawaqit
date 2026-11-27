@@ -36,6 +36,7 @@ class PrayerAlarmService {
   static const MethodChannel _alarmChannel = MethodChannel('com.othman.mawaqitquds/alarm');
   static final BehaviorSubject<String?> onNativeAlarmTriggered = BehaviorSubject<String?>();
   static final BehaviorSubject<String?> onNativeAlarmSnoozed = BehaviorSubject<String?>();
+  static final PublishSubject<String?> onNativeAlarmAutoStopped = PublishSubject<String?>();
   static final ValueNotifier<int> alarmSettingsVersion = ValueNotifier<int>(0);
   static bool _channelInitialized = false;
 
@@ -52,6 +53,11 @@ class PrayerAlarmService {
         final prayer = call.arguments as String?;
         if (prayer != null) {
           onNativeAlarmSnoozed.add(prayer);
+        }
+      } else if (call.method == 'onAlarmAutoStopped') {
+        final prayer = call.arguments as String?;
+        if (prayer != null) {
+          onNativeAlarmAutoStopped.add(prayer);
         }
       }
     });

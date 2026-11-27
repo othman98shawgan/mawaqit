@@ -13,6 +13,7 @@ class AlarmRingingPage extends StatefulWidget {
   final String? soundType;
   final int? snoozeMinutes;
   final int? offsetMinutes;
+  final bool isAutoStopped;
 
   const AlarmRingingPage({
     super.key,
@@ -20,6 +21,7 @@ class AlarmRingingPage extends StatefulWidget {
     this.soundType,
     this.snoozeMinutes,
     this.offsetMinutes,
+    this.isAutoStopped = false,
   });
 
   @override
@@ -30,16 +32,20 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   bool _isDismissed = false;
+  bool _wasAutoStopped = false;
   String? _soundType;
   int? _offsetMinutes;
   StreamSubscription<String?>? _snoozeSub;
+  StreamSubscription<String?>? _autoStopSub;
 
   @override
   void initState() {
     super.initState();
-    _soundType = widget.soundType;
+    _soundType = widget.isAutoStopped ? 'silent' : widget.soundType;
     _offsetMinutes = widget.offsetMinutes;
-    PrayerAlarmService.wakeScreen();
+    if (!widget.isAutoStopped) {
+      PrayerAlarmService.wakeScreen();
+    }
 
     _snoozeSub = PrayerAlarmService.onNativeAlarmSnoozed.listen((prayer) {
       if (mounted) {
@@ -47,7 +53,18 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
       }
     });
 
-    if (widget.soundType != null) {
+    if (!widget.isAutoStopped) {
+      _autoStopSub = PrayerAlarmService.onNativeAlarmAutoStopped.listen((prayer) {
+        if (mounted) {
+          _wasAutoStopped = true;
+          Navigator.of(context).pop();
+        }
+      });
+    }
+
+    if (widget.isAutoStopped) {
+      // Auto-stopped alarm reopened from notification bar: never play audio.
+    } else if (widget.soundType != null) {
       if (widget.soundType != 'silent') {
         PrayerAlarmService.startAlarmAudio(widget.soundType!);
       }
@@ -78,7 +95,10 @@ class _AlarmRingingPageState extends State<AlarmRingingPage> with SingleTickerPr
   @override
   void dispose() {
     _snoozeSub?.cancel();
-    PrayerAlarmService.stopAlarmAudio();
+    _autoStopSub?.cancel();
+    if (!_wasAutoStopped && !widget.isAutoStopped) {
+      PrayerAlarmService.stopAlarmAudio();
+    }
     _pulseController.dispose();
     super.dispose();
   }

@@ -72,29 +72,44 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+        // Never replay an old alarm intent when Android relaunches the app from Recents
+        if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
+            return
+        }
         val payload = extractPayload(intent)
         if (payload != null && payload.contains("alarm|")) {
-            wakeScreen()
+            val isSilentReopen = intent.getBooleanExtra("silent_reopen", false) ||
+                payload.contains("|auto_stopped")
+            // Consume extras so activity recreation cannot replay the same alarm
+            intent.removeExtra("payload")
+            intent.removeExtra("silent_reopen")
+
             val clean = payload.substring(payload.indexOf("alarm|"))
             val parts = clean.split("|")
             val prayerName = if (parts.size >= 2) parts[1] else "Fajr"
-            val soundName = if (parts.size >= 3) parts[2] else "alaqsa"
+            val soundName = if (isSilentReopen) "silent" else (if (parts.size >= 3) parts[2] else "alaqsa")
             val snoozeMinutes = if (parts.size >= 4) parts[3].toIntOrNull() ?: 10 else 10
             val offsetMinutes = if (parts.size >= 5) parts[4].toIntOrNull() ?: 0 else 0
-            if (soundName != "silent") {
-                AlarmController.startAudio(applicationContext, soundName)
+
+            if (!isSilentReopen) {
+                wakeScreen()
+                if (soundName != "silent") {
+                    AlarmController.startAudio(applicationContext, soundName)
+                }
+                if (!AlarmController.isAlarmRinging) {
+                    val alarmId = intent.getIntExtra("alarm_id", 810999)
+                    AlarmController.setActiveAlarm(
+                        context = applicationContext,
+                        id = alarmId,
+                        prayerName = prayerName,
+                        soundName = soundName,
+                        snoozeMinutes = snoozeMinutes,
+                        offsetMinutes = offsetMinutes
+                    )
+                }
             }
-            if (!AlarmController.isAlarmRinging) {
-                val alarmId = intent?.getIntExtra("alarm_id", 810999) ?: 810999
-                AlarmController.setActiveAlarm(
-                    context = applicationContext,
-                    id = alarmId,
-                    prayerName = prayerName,
-                    soundName = soundName,
-                    snoozeMinutes = snoozeMinutes,
-                    offsetMinutes = offsetMinutes
-                )
-            }
+
             AlarmController.pendingAlarmPayload = clean
             methodChannel?.invokeMethod("onAlarmTriggered", clean)
         }
@@ -112,6 +127,12 @@ class MainActivity : FlutterActivity() {
             runOnUiThread {
                 clearScreenWakeFlags()
                 methodChannel?.invokeMethod("onAlarmSnoozed", prayerName)
+            }
+        }
+        AlarmController.onAlarmAutoStoppedCallback = { prayerName ->
+            runOnUiThread {
+                clearScreenWakeFlags()
+                methodChannel?.invokeMethod("onAlarmAutoStopped", prayerName)
             }
         }
         AlarmController.onAlarmStoppedCallback = {
@@ -365,6 +386,9 @@ class MainActivity : FlutterActivity() {
         }
         if (AlarmController.onAlarmSnoozedCallback != null) {
             AlarmController.onAlarmSnoozedCallback = null
+        }
+        if (AlarmController.onAlarmAutoStoppedCallback != null) {
+            AlarmController.onAlarmAutoStoppedCallback = null
         }
         if (AlarmController.onAlarmStoppedCallback != null) {
             AlarmController.onAlarmStoppedCallback = null
