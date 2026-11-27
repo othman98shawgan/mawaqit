@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
+import '../../models/prayer_alarm.dart';
+import '../../services/notifications_service.dart';
 import '../../services/prayer_alarm_service.dart';
 import '../../services/prayer_methods.dart';
 import 'alarm_dialog.dart';
@@ -30,7 +33,12 @@ class PrayerWidget extends StatefulWidget {
 }
 
 class PrayerState extends State<PrayerWidget> {
-  bool _hasAlarm = false;
+  String _alertMode = PrayerAlarmSettings.modeNotification;
+
+  bool get _supportsAlerts =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isWindows);
+
+  bool get _canShowAlert => widget.showAlarm && _supportsAlerts;
 
   @override
   void initState() {
@@ -58,22 +66,43 @@ class PrayerState extends State<PrayerWidget> {
   }
 
   Future<void> _checkAlarmStatus() async {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (!_supportsAlerts) return;
     final settings = await PrayerAlarmService.loadAlarmSettings(widget.label);
     if (mounted) {
       setState(() {
-        _hasAlarm = settings.isEnabled;
+        _alertMode = settings.alertMode;
       });
     }
   }
 
   void _openAlarmDialog() {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (!_supportsAlerts) return;
     showAlarmBottomSheet(
       context,
       initialPrayerName: widget.label,
       onSaved: _checkAlarmStatus,
     );
+  }
+
+  bool _isAlertEffectivelyActive(bool masterNotificationsEnabled) {
+    if (!kIsWeb && Platform.isAndroid && _alertMode == PrayerAlarmSettings.modeAlarm) {
+      return true;
+    }
+    return masterNotificationsEnabled && _alertMode != PrayerAlarmSettings.modeOff;
+  }
+
+  IconData _resolveAlertIcon(bool masterNotificationsEnabled) {
+    if (!kIsWeb && Platform.isAndroid && _alertMode == PrayerAlarmSettings.modeAlarm) {
+      return Icons.notifications_active;
+    }
+    if (!masterNotificationsEnabled || _alertMode == PrayerAlarmSettings.modeOff) {
+      return Icons.notifications_off_outlined;
+    }
+    return Icons.notifications_outlined;
+  }
+
+  Color _resolveAlertColor(bool masterNotificationsEnabled) {
+    return _isAlertEffectivelyActive(masterNotificationsEnabled) ? Colors.white : Colors.white38;
   }
 
   @override
@@ -89,12 +118,25 @@ class PrayerState extends State<PrayerWidget> {
       color: Colors.white,
     );
 
+    bool masterEnabled = true;
+    if (_canShowAlert) {
+      try {
+        masterEnabled = Provider.of<NotificationsStatusNotifier>(context).getNotificationsStatus();
+      } catch (_) {
+        masterEnabled = true;
+      }
+    }
+
     return MyCard(
       height: widget.height,
       widget: ListTile(
+        contentPadding: EdgeInsetsDirectional.only(
+          start: 16,
+          end: _canShowAlert ? 10 : 16,
+        ),
         textColor: Colors.white,
         iconColor: Colors.white,
-        onTap: (widget.showAlarm && !kIsWeb && Platform.isAndroid) ? _openAlarmDialog : null,
+        onTap: _canShowAlert ? _openAlarmDialog : null,
         leading: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
@@ -108,24 +150,30 @@ class PrayerState extends State<PrayerWidget> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.showAlarm && !kIsWeb && Platform.isAndroid)
-                IconButton(
-                  tooltip: _hasAlarm ? 'Alarm active' : 'Set alarm',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: Icon(
-                    _hasAlarm ? Icons.alarm_on : Icons.alarm_add_outlined,
-                    color: _hasAlarm ? Colors.amberAccent : Colors.white54,
-                    size: 24,
-                  ),
-                  onPressed: _openAlarmDialog,
-                ),
-              if (widget.showAlarm && !kIsWeb && Platform.isAndroid) const SizedBox(width: 8),
               Text(
                 widget.time,
                 style: timeStyle,
                 textAlign: TextAlign.center,
               ),
+              if (_canShowAlert) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: _isAlertEffectivelyActive(masterEnabled)
+                      ? 'Notifications on'
+                      : 'Notifications off',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  style: IconButton.styleFrom(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: Icon(
+                    _resolveAlertIcon(masterEnabled),
+                    color: _resolveAlertColor(masterEnabled),
+                    size: 24,
+                  ),
+                  onPressed: _openAlarmDialog,
+                ),
+              ],
             ],
           ),
         ),

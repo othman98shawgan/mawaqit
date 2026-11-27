@@ -15,7 +15,7 @@ import '../services/prayer_alarm_service.dart';
 
 import '../services/store_manager.dart';
 import '../services/theme_service.dart';
-import 'widgets/reminder_dialog.dart';
+import 'widgets/alarm_dialog.dart';
 
 var localeMap = {'ar': "العربية", 'en': "English"};
 
@@ -156,8 +156,6 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
     var winterTimeString = AppLocalizations.of(context)!.settingsWinterTime;
     var notificationsSection = AppLocalizations.of(context)!.settingsNotificationsSection;
     var sendNotificationsString = AppLocalizations.of(context)!.settingsSendNotifications;
-    var prayerReminderString = AppLocalizations.of(context)!.settingsPrayerReminder;
-    var prayerReminderOffString = AppLocalizations.of(context)!.settingsPrayerReminderDescriptionOff;
     var helpSection = AppLocalizations.of(context)!.settingsHelpSection;
     var resetNotificationsString = AppLocalizations.of(context)!.settingsResetNotifications;
     var citySlecetionString = AppLocalizations.of(context)!.citySelect;
@@ -321,50 +319,29 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
                               if (value) {
                                 notifications.setNotificationsOn();
                                 notifications.requestNotification();
-                                widget.updatePrayers!();
+                                widget.updatePrayers?.call();
                               } else {
                                 notifications.setNotificationsOff();
-                                reminder.setReminderStatus(false);
-                                widget.cancelNotifications!();
+                                widget.cancelNotifications?.call();
                               }
                             },
                           ),
                           SettingsTile.navigation(
-                            title: Text(prayerReminderString,
-                                strutStyle: const StrutStyle(forceStrutHeight: true),
-                                style: TextStyle(fontFamily: fontFamily)),
-                            leading: const Icon(Icons.notification_important_sharp),
-                            value: reminder.getReminderStatus()
-                                ? Text(
-                                    AppLocalizations.of(context)!
-                                        .settingsPrayerReminderDescription(reminder.getReminderTime()),
-                                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                                    style: TextStyle(fontFamily: fontFamily))
-                                : Text(prayerReminderOffString,
-                                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                                    style: TextStyle(fontFamily: fontFamily)),
+                            title: Text(
+                              AppLocalizations.of(context)!.prayerAlertsTitle,
+                              strutStyle: const StrutStyle(forceStrutHeight: true),
+                              style: TextStyle(fontFamily: fontFamily),
+                            ),
+                            leading: const Icon(Icons.notifications_active_outlined),
                             onPressed: (context) async {
-                              await showReminderDialog(
+                              await showAlarmBottomSheet(
                                 context,
-                                reminder.getReminderStatus(),
-                                reminder.getReminderTime(),
-                                widget.updateReminder!,
+                                initialPrayerName: 'Fajr',
+                                onRescheduleNotifications: () => widget.updatePrayers?.call(),
                               );
+                              _loadBatteryOpt();
                             },
                           ),
-                          if (isAndroid)
-                            SettingsTile.navigation(
-                              title: Text(
-                                AppLocalizations.of(context)!.alarmSection,
-                                strutStyle: const StrutStyle(forceStrutHeight: true),
-                                style: TextStyle(fontFamily: fontFamily),
-                              ),
-                              leading: const Icon(Icons.alarm),
-                              onPressed: (context) async {
-                                await Navigator.pushNamed(context, '/alarms_settings');
-                                _loadBatteryOpt();
-                              },
-                            ),
                           if (isAndroid && !_isBatteryOptIgnored)
                             SettingsTile.navigation(
                               title: Text(

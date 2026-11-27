@@ -954,4 +954,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mathuratVibrateOff => 'Vibration off';
+
+  @override
+  String get prayerAlertsTitle => 'Prayer Alerts';
+
+  @override
+  String get alertModeNotification => 'Notification';
+
+  @override
+  String get alertModeOff => 'Off';
+
+  @override
+  String get prePrayerReminderLabel => 'Pre-prayer reminder';
+
+  @override
+  String get alertsMasterDisabledBanner => 'All prayer alerts are paused';
+
+  @override
+  String get alertsMasterEnableAction => 'Enable';
+
+  @override
+  String alertNotifiesAt(String time) {
+    return 'Notifies at $time';
+  }
 }

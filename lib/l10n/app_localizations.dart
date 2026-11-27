@@ -1723,6 +1723,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vibration off'**
   String get mathuratVibrateOff;
+
+  /// Unified title for prayer notifications and alarms
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Alerts'**
+  String get prayerAlertsTitle;
+
+  /// Short label for standard OS notification mode card
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get alertModeNotification;
+
+  /// Short label for disabled prayer alert mode card
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get alertModeOff;
+
+  /// Stepper label for optional pre-prayer reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-prayer reminder'**
+  String get prePrayerReminderLabel;
+
+  /// Banner shown inside prayer alerts modal when master alerts switch is off
+  ///
+  /// In en, this message translates to:
+  /// **'All prayer alerts are paused'**
+  String get alertsMasterDisabledBanner;
+
+  /// Action label to re-enable master prayer alerts switch
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get alertsMasterEnableAction;
+
+  /// Shows prayer notification time in the modal preview
+  ///
+  /// In en, this message translates to:
+  /// **'Notifies at {time}'**
+  String alertNotifiesAt(String time);
 }
 
 class _AppLocalizationsDelegate

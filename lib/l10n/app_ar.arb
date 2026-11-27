@@ -272,5 +272,12 @@
    "mathuratShareTooltip": "مشاركة",
    "mathuratShareReward": "شارك الفضل",
    "mathuratVibrateOn": "الاهتزاز مفعّل",
-   "mathuratVibrateOff": "الاهتزاز متوقف"
+   "mathuratVibrateOff": "الاهتزاز متوقف",
+   "prayerAlertsTitle": "تنبيهات الصلاة",
+   "alertModeNotification": "إشعار",
+   "alertModeOff": "إيقاف",
+   "prePrayerReminderLabel": "تذكير قبل الصلاة",
+   "alertsMasterDisabledBanner": "جميع تنبيهات الصلاة متوقفة مؤقتاً",
+   "alertsMasterEnableAction": "تفعيل",
+   "alertNotifiesAt": "إشعار الساعة {time}"
 }

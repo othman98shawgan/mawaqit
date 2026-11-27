@@ -957,4 +957,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mathuratVibrateOff => 'الاهتزاز متوقف';
+
+  @override
+  String get prayerAlertsTitle => 'تنبيهات الصلاة';
+
+  @override
+  String get alertModeNotification => 'إشعار';
+
+  @override
+  String get alertModeOff => 'إيقاف';
+
+  @override
+  String get prePrayerReminderLabel => 'تذكير قبل الصلاة';
+
+  @override
+  String get alertsMasterDisabledBanner => 'جميع تنبيهات الصلاة متوقفة مؤقتاً';
+
+  @override
+  String get alertsMasterEnableAction => 'تفعيل';
+
+  @override
+  String alertNotifiesAt(String time) {
+    return 'إشعار الساعة $time';
+  }
 }

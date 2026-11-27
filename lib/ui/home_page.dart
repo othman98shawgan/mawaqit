@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future<void> cancelAllPrayers() async {
-    NotificationsService.cancelAll();
+    await NotificationsService.cancelAll();
     setScheduledPrayers([]);
   }
 
@@ -170,18 +170,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         StorageManager.saveData('autoDstScheduleMigrated_v1', true);
       }
 
+      await PrayerAlarmService.migrateLegacyAlertsIfNeeded();
+
       _scheduledPrayers = await getScheduledPrayers();
       if (removePassedPrayers(_scheduledPrayers)) {
         setScheduledPrayers(_scheduledPrayers);
       }
       if (!mounted) return; //Make sure widget is mounted
 
+      final alarmSettingsMap = await PrayerAlarmService.loadAllAlarmSettings();
+      if (!mounted) return;
+
       if (isAndroid) {
         final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
         final diff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
         final titles = getLocalizedPrayerAlarmTitles(context);
-        final alarmSettingsMap = await PrayerAlarmService.loadAllAlarmSettings();
-        if (!mounted) return;
         final offsets = alarmSettingsMap.map((k, v) => MapEntry(k, v.offsetMinutes));
         final localizedBodies = getLocalizedPrayerAlarmMessages(context, offsets);
         await PrayerAlarmService.scheduleUpcomingAlarms(
@@ -194,28 +197,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       }
       if (!mounted) return;
 
-      var notifiactionsStatus =
+      var notificationsStatus =
           Provider.of<NotificationsStatusNotifier>(context, listen: false).getNotificationsStatus();
-      var reminderStatus = Provider.of<ReminderNotifier>(context, listen: false).getReminderStatus();
-
-      if (!notifiactionsStatus) {
+      if (!notificationsStatus) {
         return;
       }
 
       await _scheduleDstTransitionNotification();
       if (!mounted) return;
 
-      final earlyReturnLimit = reminderStatus ? (isIOS ? 45 : 71) : (isIOS ? 30 : 35);
+      final anyReminderEnabled = alarmSettingsMap.values.any(
+        (s) => s.isAlertActive && s.reminderEnabled && s.reminderMinutes > 0,
+      );
+      final earlyReturnLimit = anyReminderEnabled ? (isIOS ? 45 : 71) : (isIOS ? 30 : 35);
       if (_scheduledPrayers.length > earlyReturnLimit) {
         return;
       }
       List<Prayer> prayersToSchedule = [];
-      reminderValue = Provider.of<ReminderNotifier>(context, listen: false).getReminderTime();
       final dstNotifier = Provider.of<DaylightSavingNotifier>(context, listen: false);
       summerTime = dstNotifier.getSummerTime();
       timeDiff = Provider.of<LocaleNotifier>(context, listen: false).timeDiff;
 
-      final int maxDays = (isIOS && reminderStatus) ? 4 : 6;
+      final int maxDays = (isIOS && anyReminderEnabled) ? 4 : 6;
       prayersToSchedule.addAll(getTodayPrayers(prayersToday, summerTime, timeDiff));
       prayersToSchedule.addAll(getNextWeekPrayers(
         prayersToday,
@@ -238,46 +241,62 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       };
 
       for (final prayer in prayersToSchedule) {
-        var id = getPrayerNotificationId(prayer.time);
-        if (_scheduledPrayers.contains(id)) {
+        final settings = alarmSettingsMap[prayer.label];
+        if (settings != null && settings.isOff) {
           continue;
         }
-        var prayerBody = '';
-        var pryaerTitle = '';
+
         final localizedLabel = prayerLabels[prayer.label] ?? prayer.label;
-        if (prayer.label == 'Shuruq') {
-          prayerBody = l10n.notificationsShuruqBody;
-          pryaerTitle = l10n.notificationsShuruqPrayerTimeTitle;
-        } else {
-          pryaerTitle = l10n.notificationsPrayerTimeTitle(localizedLabel);
+
+        // Schedule standard prayer-time notification unless handled by native Android alarm
+        final shouldSchedulePrayerNotification =
+            settings == null || settings.isNotification || (!isAndroid && settings.isAlarm);
+        if (shouldSchedulePrayerNotification) {
+          var id = getPrayerNotificationId(prayer.time);
+          if (!_scheduledPrayers.contains(id)) {
+            var prayerBody = '';
+            var prayerTitle = '';
+            if (prayer.label == 'Shuruq') {
+              prayerBody = l10n.notificationsShuruqBody;
+              prayerTitle = l10n.notificationsShuruqPrayerTimeTitle;
+            } else {
+              prayerTitle = l10n.notificationsPrayerTimeTitle(localizedLabel);
+            }
+
+            NotificationsService.scheduleNotifications(
+              id: int.parse(id.substring(6)),
+              channelId: id,
+              title: prayerTitle,
+              body: prayerBody,
+              payload: 'alfajr',
+              sheduledDate: prayer.time,
+            );
+
+            _scheduledPrayers.add(id);
+          }
         }
 
-        NotificationsService.scheduleNotifications(
-            id: int.parse(id.substring(6)),
-            channelId: id,
-            title: pryaerTitle,
-            body: prayerBody,
-            payload: 'alfajr',
-            sheduledDate: prayer.time);
-
-        _scheduledPrayers.add(id);
-        //Set reminder
-        if (reminderStatus) {
-          var reminderTime = prayer.time.subtract(Duration(minutes: reminderValue));
+        // Schedule per-prayer pre-prayer reminder notification if enabled
+        if (settings != null && settings.reminderEnabled && settings.reminderMinutes > 0) {
+          final reminderMins = settings.reminderMinutes;
+          var reminderTime = prayer.time.subtract(Duration(minutes: reminderMins));
           if (reminderTime.isBefore(DateTime.now())) {
             continue;
           }
           var reminderId = getPrayerNotificationId(reminderTime);
+          if (_scheduledPrayers.contains(reminderId)) {
+            continue;
+          }
           var reminderTitle = '';
           if (prayer.label == 'Shuruq') {
-            reminderTitle = l10n.notificationsShuruqReminderTitle(reminderValue);
-            if (reminderValue <= 10) {
-              reminderTitle = l10n.notificationsShuruqReminderTitleMinutes(reminderValue);
+            reminderTitle = l10n.notificationsShuruqReminderTitle(reminderMins);
+            if (reminderMins <= 10) {
+              reminderTitle = l10n.notificationsShuruqReminderTitleMinutes(reminderMins);
             }
           } else {
-            reminderTitle = l10n.notificationsReminderTitle(localizedLabel, reminderValue);
-            if (reminderValue <= 10) {
-              reminderTitle = l10n.notificationsReminderTitleMinutes(localizedLabel, reminderValue);
+            reminderTitle = l10n.notificationsReminderTitle(localizedLabel, reminderMins);
+            if (reminderMins <= 10) {
+              reminderTitle = l10n.notificationsReminderTitleMinutes(localizedLabel, reminderMins);
             }
           }
 
@@ -368,6 +387,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    PrayerAlarmService.onRescheduleNotifications = updatePrayers;
     PrayerAlarmService.initPlatformChannel();
     PrayerAlarmService.getPendingAlarmPayload().then((payload) {
       if (payload != null && mounted) {
@@ -427,6 +447,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (PrayerAlarmService.onRescheduleNotifications == updatePrayers) {
+      PrayerAlarmService.onRescheduleNotifications = null;
+    }
     if (isWindows) {
       DesktopService.windowRestoredNotifier.removeListener(_onWindowRestored);
     }
